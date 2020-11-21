@@ -1,5 +1,5 @@
 MODE="pygame"
-
+from Point import Point
 def centerpoint(points):
     mx = 0
     my = 0
@@ -33,8 +33,8 @@ if(MODE=="pygame"):
         pygame.draw.polygon(s, color_alpha, [(p.x, p.y) for p in points])
         if(outline):
             pygame.draw.lines(s, (0,0,0), True, [(p.x, p.y) for p in points])
-        ppoint = centerpoint(points+4*(points[0],))
-        pygame.draw.circle(s, (0,0,0),ppoint,2)
+        ppoint = centerpoint(list(points)+4*[points[0]])
+        #pygame.draw.circle(s, (0,0,0),ppoint,2)
         shapes.blit(s, (0, 0))
 
     def polygon_cursor(points, color, alpha=1, outline=False):
@@ -48,6 +48,7 @@ if(MODE=="pygame"):
             pygame.draw.lines(s, (0,0,0), True, [(p.x, p.y) for p in points])
         curs.blit(s, (0, 0))
 
+
     def empty_cursor():
         curs.fill((0,0,0,0))
 
@@ -57,7 +58,6 @@ if(MODE=="pygame"):
     def text_center(text,x,y,color,size):
         if(isinstance(color,int)):
             color=colors[color%len(colors)]
-        s.fill((0,0,0,0))
         text = pygame.font.SysFont(None, size).render(text, True, color)
         shapes.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
 
@@ -88,5 +88,9 @@ if(MODE=="pygame"):
                 if e.type == pygame.QUIT:
                     running = False
                     print("Quit!",flush=True)
+
+
+    def save_screen(filename):
+        pygame.image.save(screen, filename)
 if(MODE=="tkinter"):
     pass

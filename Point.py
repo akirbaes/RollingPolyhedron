@@ -29,15 +29,22 @@ class Point:
     """
 
     def __init__(self, x=0.0, y=0.0):
-        self.x = x
-        self.y = y
+        if(isinstance(x,tuple)):
+            self.x,self.y=x
+        else:
+            self.x = x
+            self.y = y
 
     def __add__(self, p):
         """Point(x1+x2, y1+y2)"""
+        if not(isinstance(p,Point)):
+            p=Point(*p)
         return Point(self.x + p.x, self.y + p.y)
 
     def __sub__(self, p):
         """Point(x1-x2, y1-y2)"""
+        if not(isinstance(p,Point)):
+            p=Point(*p)
         return Point(self.x - p.x, self.y - p.y)
 
     def __mul__(self, scalar):
