@@ -48,6 +48,40 @@ if(MODE=="pygame"):
             pygame.draw.lines(s, (0,0,0), True, [(p.x, p.y) for p in points])
         curs.blit(s, (0, 0))
 
+    def create_orientation_data(previous_face,face_id,poly):
+        #return face's order in the list of similar shaped faces
+        #and the number of similar shaped faces
+
+        shape = len(poly[face_id])
+        count=0
+        max_count=0
+        for key in poly:
+            if(len(poly[key])==shape):
+                max_count+=1
+        for key in sorted(poly.keys):
+            if(key==face_id):
+                return count, max_count
+            elif(len(poly[id])==shape):
+                count+=1
+
+
+    def polygon_orientation(points,orientation,face_count,max_count):
+        #Draw a little triangles to show the reached orientation on the face.
+        line = points+points[orientation:orientation+2]
+        perpendicular = Point(centerpoint(points))-centerpoint(line)
+        tangent=(line[1]-line[0])/max_count
+        perpendicular=perpendicular/perpendicular.length()*tangent.length()
+        #Match the border angle
+        if(len(points)==4):
+            perpendicular/=2 #/(tan(45)/2)
+        elif(len(points)==3):
+            perpendicular/=(3**0.5)*2 #/(tan(30)/2)
+        elif(len(points)==6):
+            perpendicular/=2/(3**0.5) #/(tan(60)/2)
+        triangle = line[0]+tangent*face_count,line[0]+tangent*(face_count+1)
+        triangle += Point(centerpoint(triangle))+perpendicular
+        pygame.draw.polygon(s, (0,0,0), [(p.x, p.y) for p in triangle])
+
 
     def empty_cursor():
         curs.fill((0,0,0,0))
