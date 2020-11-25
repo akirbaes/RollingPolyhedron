@@ -25,7 +25,7 @@ import DrawingFunctions as Draw
 setrecursionlimit(10 ** 4)
 WIDTH = 600
 HEIGHT = 600
-EDGESIZE = 20
+EDGESIZE = 50
 p1 = Point(300, 300)
 p2 = Point(300+EDGESIZE, 300)  # 350 300
 textsize = int(round((EDGESIZE)/2))
@@ -421,6 +421,20 @@ def exploreA(p1, p2, case, face, previouscase=None, previousface=None):
 
         # print(currentCaseNeighbours,currentFaceNeighbours)
         orientation = currentFaceNeighbours
+
+        case_count,max_count=Draw.create_orientation_data(case,net)
+        face_count,max_count=Draw.create_orientation_data(face,roll)
+        outline=0
+        if(face==case):
+            if(faceOrientation==caseOrientation):
+                outline=1
+                #white outline
+            else:
+                outline=2
+                #black outline
+        print(len(points))
+        Draw.polygon_orientation(points, (0-caseOrientation+faceOrientation-caseOrientation)%len(points), face_count, max_count,outline,case_count)
+
         # previouscase == previousface marche aussi
         # caseOrientation==faceOrientation ne marche que si les orientations par défaut sont les mêmes
         if (face == case and caseOrientation == faceOrientation and centerpoint(points) not in starting_area):
@@ -437,7 +451,8 @@ def exploreA(p1, p2, case, face, previouscase=None, previousface=None):
                 # so those orientations are a special case
                 return False
             return False
-    # print("My orientation is",orientation)
+        # print("My orientation is",orientation)
+
     cent = centerpoint(points)
     if (cent in big_orientation or (cent, tuple(orientation)) in small_orientation):
         # already visited this
@@ -484,7 +499,7 @@ if __name__ == "__main__":
     global shape_name
     #for shape_name in missing:
     #for shape_name in shapes_names:
-    for shape_name in ["hexagonal_antiprism"]:
+    for shape_name in ["j8"]:
         global order
         global shape
         global shapes
@@ -503,16 +518,16 @@ if __name__ == "__main__":
         Draw.empty_shapes()
         Draw.empty_cursor()
         Draw.refresh()
-        visualise(p1, p2, 0, net[0][0], 2)
+        #visualise(p1, p2, 0, net[0][0], 2)
         Draw.refresh()
         print("EXTEND")
         #sleep(2) ;
-        extend(p1,p2,order[0])
+        #extend(p1,p2,order[0])
         #Draw.save_screen("net_%s.png" % shape_name)
         Draw.refresh()
         Draw.empty_shapes()
         #sleep(2) ;
-        fill_screen(p1,p2,order[0],color=None) ;
+        #fill_screen(p1,p2,order[0],color=None) ;
         #sleep(2)
     
         #Commented to gain time
