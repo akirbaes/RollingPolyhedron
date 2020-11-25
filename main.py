@@ -21,36 +21,34 @@ from sys import setrecursionlimit
 import sys
 import DrawingFunctions as Draw
 
-
 setrecursionlimit(10 ** 4)
 WIDTH = 600
 HEIGHT = 600
 EDGESIZE = 50
 p1 = Point(300, 300)
-p2 = Point(300+EDGESIZE, 300)  # 350 300
-textsize = int(round((EDGESIZE)/2))
+p2 = Point(300 + EDGESIZE, 300)  # 350 300
+textsize = int(round((EDGESIZE) / 2))
 
-Draw.initialise_drawing(WIDTH,HEIGHT)
+Draw.initialise_drawing(WIDTH, HEIGHT)
 from PolyAndNets import shapes_names, nets, polys, missing
 
 
-
-
-
-
-def make_shape(points,color,filling=0):
-    Draw.polygon_shape(points,color,filling)
-    Draw.polygon_shape(points,(0,0,0),0,outline=1)
+def make_shape(points, color, filling=0):
+    Draw.polygon_shape(points, color, filling)
+    Draw.polygon_shape(points, (0, 0, 0), 0, outline=1)
     return points
 
-def make_cursor(points,color=5,filling=0.1):
-    Draw.polygon_cursor(points,color,filling)
-    Draw.polygon_cursor(points,color,0,outline=1)
+
+def make_cursor(points, color=5, filling=0.1):
+    Draw.polygon_cursor(points, color, filling)
+    Draw.polygon_cursor(points, color, 0, outline=1)
     return points
+
 
 def number(id, point):
-    #graph.create_text((point.x, point.y), text=str(id))
-    Draw.text_center(str(id),point.x,point.y,(0,0,0),textsize)
+    # graph.create_text((point.x, point.y), text=str(id))
+    Draw.text_center(str(id), point.x, point.y, (0, 0, 0), textsize)
+
 
 def numcenter(id, points):
     number(id, sum(points, Point(0, 0)) / len(points))
@@ -71,15 +69,15 @@ class Poly:
         self.n = []
         self.id = id
         self.points = points
-        self.color=color
+        self.color = color
         realid = id % len(order)
         if (full):
-            self.pid = make_shape(points, color,1)
+            self.pid = make_shape(points, color, 1)
         elif (color == None):
-            #self.pid = make_shape(points, (int((id - realid) / len(order))) ,0.7)
-            self.pid = make_shape(points, (0,0,0) ,0)
+            # self.pid = make_shape(points, (int((id - realid) / len(order))) ,0.7)
+            self.pid = make_shape(points, (0, 0, 0), 0)
         else:
-            self.pid = make_shape(points, color ,1)
+            self.pid = make_shape(points, color, 1)
         # print(points)
 
         number(realid, sum(points, Point(0, 0)) / len(points))
@@ -98,14 +96,14 @@ class Poly:
         # print(sorted(self.points),sorted(pts),sorted(self.points)==sorted(pts))
         return sorted(round(x) for x in self.points) == sorted(round(x) for x in pts)
 
-    def remplis(self, color=(255,0,0)):
+    def remplis(self, color=(255, 0, 0)):
         return
-        make_shape(self.points, (255,0,0), 0.1)
+        make_shape(self.points, (255, 0, 0), 0.1)
 
     def __repr__(self):
         return str(self.points)
 
-    def center(self):
+    def center(self) -> tuple:
         return centerpoint(self.points)
 
 
@@ -123,12 +121,12 @@ def get_face_points(p1, p2, face, noisy=True):
     return points
 
 
-def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True):
+def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True) -> list[Poly]:
     # Copy of extend, but fills the whole space
     realshape = newshape % len(order)
     if (drawnshapes == None):
         drawnshapes = list()
-    print("Visualise---------",newshape,oldshape,"(%s)"%realshape,shape[realshape])
+    print("Visualise---------", newshape, oldshape, "(%s)" % realshape, shape[realshape])
     if (shapespoly == None):
         shapespoly = list()
     points = get_face_points(p1, p2, newshape, False)
@@ -138,9 +136,9 @@ def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=
     try:
         index = current.index(oldshape)
     except:
-        #Maybe the -P +P formula is not respected
-        index = current.index(-oldshape+2*(oldshape%len(order)))
-        print("Exception matching",oldshape%len(order),"+%dP"%(oldshape//len(order)))
+        # Maybe the -P +P formula is not respected
+        index = current.index(-oldshape + 2 * (oldshape % len(order)))
+        print("Exception matching", oldshape % len(order), "+%dP" % (oldshape // len(order)))
 
     current = current[index:] + current[:index]
     shapespoly[-1].fill(current)
@@ -166,7 +164,6 @@ def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=
     return shapespoly
 
 
-
 def extend(p1, p2, newshape, oldshape=None, drawnshapes=None, shapespoly=None):
     # Visualize one tile and the neighbouring infos
     if (drawnshapes == None):
@@ -177,18 +174,18 @@ def extend(p1, p2, newshape, oldshape=None, drawnshapes=None, shapespoly=None):
     realshape = newshape % len(order)
     if (len(shape[realshape])) == 3:
         points = triangle(p1, p2)
-        print(" triangle ", newshape, "(%d)"%realshape)
+        print(" triangle ", newshape, "(%d)" % realshape)
     elif (len(shape[realshape])) == 4:
         points = square(p1, p2)
-        print(" square ", newshape, "(%d)"%realshape)
+        print(" square ", newshape, "(%d)" % realshape)
     else:
         points = hexagon(p1, p2)
-        print(" hexagon ", newshape, "(%d)"%realshape)
+        print(" hexagon ", newshape, "(%d)" % realshape)
 
     shapespoly.append(Poly(newshape, points, 1))
     current = shape[realshape]
     if (oldshape != None and newshape == realshape):
-        print(oldshape,"in",current,newshape,realshape)
+        print(oldshape, "in", current, newshape, realshape)
         index = current.index(oldshape)
         current = current[index:] + current[:index]
         print("Previous:", oldshape, "Next:", current)
@@ -211,6 +208,7 @@ def extend(p1, p2, newshape, oldshape=None, drawnshapes=None, shapespoly=None):
                 extend(p2, p1, p, newshape, drawnshapes, shapespoly)
 
     Draw.refresh()
+
 
 def point_outside(point):
     x, y = point.x, point.y
@@ -265,24 +263,24 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
 
     exploredpoints.append(centerpoint(points))
     current = shape[realshape]
-    print("Oldshape:",oldshape)
+    print("Oldshape:", oldshape)
     if (oldshape == None):
-        #Turns a n+P number into n-P (find pair)
+        # Turns a n+P number into n-P (find pair)
         oldshape = -current[0] + 2 * (current[0] % len(order))
         # n%P - (n-n%P) = -n + 2*(n%P)
 
     # if(oldshape!=None and newshape==realshape): #on explore même quand on est dehors
     # print(oldshape,"in",current,newshape,realshape)
-    print(current, "of shape", realshape, "coming from", oldshape,flush=True)
+    print(current, "of shape", realshape, "coming from", oldshape, flush=True)
     try:
         index = current.index(oldshape)
     except:
-        #Maybe the -P +P formula is not respected
-        index = current.index(-oldshape+2*(oldshape%len(order)))
-        print("Exception matching",oldshape%len(order),"+%dP"%(oldshape//len(order)))
+        # Maybe the -P +P formula is not respected
+        index = current.index(-oldshape + 2 * (oldshape % len(order)))
+        print("Exception matching", oldshape % len(order), "+%dP" % (oldshape // len(order)))
     current = current[index:] + current[:index]
     # print("Previous:",oldshape,"Next:",current)
-    #screen.fill((255,255,255))
+    # screen.fill((255,255,255))
     # sleep(0.5)
     # print("I have",len(points),"points")
     # if(newshape==realshape):
@@ -295,7 +293,7 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
         # print(drawnpoly)
         if (color == None):
             c = randint(0, 100)
-            c=-1
+            c = -1
             drawnpoly += visualise(p1, p2, newshape, oldshape, c, fill=False)
         else:
             visualise(p1, p2, newshape, oldshape, color, fill=False)
@@ -318,8 +316,8 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
         if ((p % len(order) != p) or p % len(order) == realshape):
             # sleep(0.5)
             # color+=1
-            #print(newshape,p,rest(p))
-            #print(newshape + rest(p))
+            # print(newshape,p,rest(p))
+            # print(newshape + rest(p))
             fill_screen(p2, p1, real(p), newshape - rest(p), exploredpoints, drawnpoly, color)
 
 
@@ -346,7 +344,6 @@ else:
 """
 
 
-
 def big_explore(p1, p2, case, face):
     global big_orientation
     global starting_area
@@ -358,26 +355,28 @@ def big_explore(p1, p2, case, face):
     big_orientation = set()
     small_orientation = set()
     all_points = set()
-    print(case,face,net[case])
-    polys = visualise(p1, p2, case, net[case][0], color=3,fill=True)
+    print(case, face, net[case])
+    polys = visualise(p1, p2, case, net[case][0], color=3, fill=True)
     for poly in polys:
-        starting_area.add(poly.center())
+        starting_area.add(poly.center)
     while (exploreA(p1, p2, case, face)):
         small_orientation = set()
     print("Finished exploring the area")
 
+
 screenshot_counter = 0
+
 
 def exploreA(p1, p2, case, face, previouscase=None, previousface=None):
     global screenshot_counter
-    #Draw.save_screen("scrsh/%s%d.png"%(shape_name,screenshot_counter))
-    screenshot_counter+=1
+    # Draw.save_screen("scrsh/%s%d.png"%(shape_name,screenshot_counter))
+    screenshot_counter += 1
     # copy of explore, try to fill in whole shapes
     # print("Exploring",previouscase,"to",case,"with face",previousface,"to",face)
     if (previouscase not in net[case] and previouscase != None):
         if (previouscase % len(net) - (previouscase - (previouscase % len(net))) in net[case]):
             previouscase = previouscase % len(net) - (previouscase - (previouscase % len(net)))
-            #print("Had to fix this part for J8...")
+            # print("Had to fix this part for J8...")
     # else same shape
     if (len(roll[face]) == 3):
         points = triangle(p1, p2)
@@ -394,9 +393,9 @@ def exploreA(p1, p2, case, face, previouscase=None, previousface=None):
 
     if (len(net[case]) != len(roll[face])):
         # print(current_cursor,points)
-        current_cursor.extend(make_cursor(points, -3,0.7))
+        current_cursor.extend(make_cursor(points, -3, 0.7))
 
-        #current_cursor.append(make_cursor(points, color=-3,fill=True))
+        # current_cursor.append(make_cursor(points, color=-3,fill=True))
         # different shapes: incompatible
         return False
 
@@ -422,28 +421,29 @@ def exploreA(p1, p2, case, face, previouscase=None, previousface=None):
         # print(currentCaseNeighbours,currentFaceNeighbours)
         orientation = currentFaceNeighbours
 
-        case_count,max_count=Draw.create_orientation_data(case,net)
-        face_count,max_count=Draw.create_orientation_data(face,roll)
-        outline=0
-        if(face==case):
-            if(faceOrientation==caseOrientation):
-                outline=1
-                #white outline
+        case_count, max_count = Draw.create_orientation_data(case, net)
+        face_count, max_count = Draw.create_orientation_data(face, roll)
+        outline = 0
+        if (face == case):
+            if (faceOrientation == caseOrientation):
+                outline = 1
+                # white outline
             else:
-                outline=2
-                #black outline
+                outline = 2
+                # black outline
         print(len(points))
-        Draw.polygon_orientation(points, (0-caseOrientation+faceOrientation-caseOrientation)%len(points), face_count, max_count,outline,case_count)
+        Draw.polygon_orientation(points, (0 - caseOrientation + faceOrientation - caseOrientation) % len(points),
+                                 face_count, max_count, outline, case_count)
 
         # previouscase == previousface marche aussi
         # caseOrientation==faceOrientation ne marche que si les orientations par défaut sont les mêmes
         if (face == case and caseOrientation == faceOrientation and centerpoint(points) not in starting_area):
             if (centerpoint(points) not in big_orientation):
 
-                polys = visualise(p1, p2, case, previouscase, color=1,fill=True)
+                polys = visualise(p1, p2, case, previouscase, color=1, fill=True)
                 ct = None
                 for poly in polys:
-                    ct = poly.center()
+                    ct = poly.center
                     big_orientation.add(ct)
                     all_points.add(ct)
                 # small_orientation.add(ct,currentFaceNeighbours)
@@ -462,16 +462,16 @@ def exploreA(p1, p2, case, face, previouscase=None, previousface=None):
     else:
         Draw.empty_cursor()
 
-        current_cursor[:] = make_cursor(points,-2,filling=0.1)
+        current_cursor[:] = make_cursor(points, -2, filling=0.1)
         for pti in range(len(points)):
             pp1, pp2 = points[pti], points[(pti + 1) % len(points)]
             facesize = len(roll[currentFaceNeighbours[pti]])
             if (facesize == 3):
-                current_cursor.extend(make_cursor(triangle(pp2, pp1), -2,filling=0.1))
+                current_cursor.extend(make_cursor(triangle(pp2, pp1), -2, filling=0.1))
             elif (facesize == 4):
-                current_cursor.extend(make_cursor(square(pp2, pp1), -2,filling=0.1))
+                current_cursor.extend(make_cursor(square(pp2, pp1), -2, filling=0.1))
             elif (facesize == 6):
-                current_cursor.extend(make_cursor(hexagon(pp2, pp1), -2,filling=0.1))
+                current_cursor.extend(make_cursor(hexagon(pp2, pp1), -2, filling=0.1))
 
         if (centerpoint(points) not in all_points):
             make_shape(points, 1, filling=0.5)
@@ -487,18 +487,17 @@ def exploreA(p1, p2, case, face, previouscase=None, previousface=None):
             nextcase = nextcasereal % len(order)
             difference = nextcasereal - nextcase
             if (nextface != previousface):
-                #root.update()
+                # root.update()
                 # sleep(0.75)
                 # input()
                 if (exploreA(p2, p1, nextcase, nextface, case - difference, face)):
                     return True
 
 
-
 if __name__ == "__main__":
     global shape_name
-    #for shape_name in missing:
-    #for shape_name in shapes_names:
+    # for shape_name in missing:
+    # for shape_name in shapes_names:
     for shape_name in ["j8"]:
         global order
         global shape
@@ -507,7 +506,7 @@ if __name__ == "__main__":
         global roll
         global net
         roll = polys[shape_name]
-        if(roll==None):
+        if (roll == None):
             continue
         net = nets[shape_name]
 
@@ -518,37 +517,35 @@ if __name__ == "__main__":
         Draw.empty_shapes()
         Draw.empty_cursor()
         Draw.refresh()
-        #visualise(p1, p2, 0, net[0][0], 2)
+        # visualise(p1, p2, 0, net[0][0], 2)
         Draw.refresh()
         print("EXTEND")
-        #sleep(2) ;
-        #extend(p1,p2,order[0])
-        #Draw.save_screen("net_%s.png" % shape_name)
+        # sleep(2) ;
+        # extend(p1,p2,order[0])
+        # Draw.save_screen("net_%s.png" % shape_name)
         Draw.refresh()
         Draw.empty_shapes()
-        #sleep(2) ;
-        #fill_screen(p1,p2,order[0],color=None) ;
-        #sleep(2)
-    
-        #Commented to gain time
+        # sleep(2) ;
+        # fill_screen(p1,p2,order[0],color=None) ;
+        # sleep(2)
 
-        #Draw.empty_shapes()
+        # Commented to gain time
+
+        # Draw.empty_shapes()
         print("#" * 30)
-
-
 
         # p2 = Point(330,300) #350 300
         big_explore(p1, p2, 0, 0)
 
-        #Draw.save_screen("tess_%s.png" % shape_name)
+        # Draw.save_screen("tess_%s.png" % shape_name)
         Draw.refresh()
 
-        #for c in current_cursor:
+        # for c in current_cursor:
         #    graph.delete(c)
         Draw.empty_cursor()
         current_cursor[:] = []
         Draw.refresh()
-        #input("Finished")
+        # input("Finished")
     print("Done!", flush=True)
     Draw.loop()
     # sleep(2)
@@ -565,4 +562,4 @@ if __name__ == "__main__":
         print("orientations found for face",face,":", len(orientations[face]))
         print(orientations[face])
     """
-    #Draw.refresh()
+    # Draw.refresh()

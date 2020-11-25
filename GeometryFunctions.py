@@ -1,22 +1,28 @@
 from math import pi
 from Point import Point
+
+
 def pointAngle(a, b, c):
     # Course formula: [AB]x[BC] product
     return ((b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x))
-def psign(number):
-    return (number>=0)*2-1
 
-def is_inside(point,points):
-    initial_sign = psign(pointAngle(point,points[-1],points[0]))
-    for i in range(len(points)-1):
-        p1=points[i]
-        p2=points[i+1]
-        angle=pointAngle(point,p1,p2)
-        if(psign(angle)!=initial_sign):
+
+def psign(number):
+    return (number >= 0) * 2 - 1
+
+
+def is_inside(point, points):
+    initial_sign = psign(pointAngle(point, points[-1], points[0]))
+    for i in range(len(points) - 1):
+        p1 = points[i]
+        p2 = points[i + 1]
+        angle = pointAngle(point, p1, p2)
+        if (psign(angle) != initial_sign):
             return False
     return True
 
-def centerpoint(points):
+
+def centerpoint(points: list[Point]) -> tuple[int, int]:
     mx = 0
     my = 0
     for x, y in points:
@@ -63,4 +69,3 @@ def hexagon(p1, p2):
 	ph = 
 	dist = (p2-p1)"""
     return sol
-
