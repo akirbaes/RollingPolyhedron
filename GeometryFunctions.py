@@ -22,7 +22,7 @@ def is_inside(point, points):
     return True
 
 
-def centerpoint(points: list[Point]) -> tuple[int, int]:
+def centerpoint(points):
     mx = 0
     my = 0
     for x, y in points:

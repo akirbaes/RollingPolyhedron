@@ -121,7 +121,7 @@ def get_face_points(p1, p2, face, noisy=True):
     return points
 
 
-def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True) -> list[Poly]:
+def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, ord=None):
     # Copy of extend, but fills the whole space
     realshape = newshape % len(order)
     if (drawnshapes == None):
@@ -502,7 +502,7 @@ if __name__ == "__main__":
         global order
         global shape
         global shapes
-        global shapespoly
+        global tilecases
         global roll
         global net
         roll = polys[shape_name]
@@ -513,7 +513,7 @@ if __name__ == "__main__":
         shape = net
         order = sorted(shape)
         shapes = []
-        shapespoly = []
+        tilecases = []
         Draw.empty_shapes()
         Draw.empty_cursor()
         Draw.refresh()
