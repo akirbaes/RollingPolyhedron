@@ -6,7 +6,8 @@ from time import sleep
 ext=10
 P1=Point(300,300)
 P2=Point(300,300+ext)
-DEBUG1=True
+DEBUG1=False
+DEBUG2=True
 def get_face_points(p1, p2, sides):
     if(sides==3):
         points = triangle(p1, p2)
@@ -24,6 +25,32 @@ def centeroftilestarting(p1, p2, prev, current, tile):
 
     return centerpoint([Point(centerpoint(shape)) for shape in listofshapes])
 
+def find_match(previous, current, tile):
+    """Paires a b
+
+    Priorité matching (parce que je n'ai pas été constant dans mes notations):
+    (a kp) et b -kp
+    (a kp) et b kp
+    (a kp) et b np (includes n=0)
+    pas de paire trouvée (mauvais input)"""
+    p = len(tile)
+    match = None
+    try:
+        match = tile[current].index(-previous + 2 * (previous % p))
+    except:
+        try:
+            match = tile[current].index(previous)
+        except:
+            try:
+                for index,case in enumerate(tile[current]):
+                    if(case%p==current%p):
+                        match = index
+                        break;
+            except:
+                pass
+    return match
+
+
 def find_matching(previous, current, tile):
     # previous: old
     # current: outside
@@ -37,7 +64,7 @@ def find_matching(previous, current, tile):
     for symetrical in symetrical_side:
         symetrical_real = symetrical % len(tile)
         symetrical_p = int((symetrical - symetrical_real) // len(tile))
-        print(previous,current,current_p,symetrical_p)
+        if(DEBUG1):print(previous,current,current_p,symetrical_p)
         if (symetrical_real == previous_real):  # go to back same case
             if (symetrical_p == -current_p):  # matching p paired signs
                 possible_matches = [(current_real, symetrical)]  # end it there
@@ -48,7 +75,11 @@ def find_matching(previous, current, tile):
             else:  # not matching, but maybe I made a mistake
                 possible_matches.append((current_real, symetrical))  # put it last
     return possible_matches[0]
+
 def find_matching_offset(previous,current,tile):
+    #Previously a simple:
+    # index = current.index(-oldcase + 2 * (oldcase % len(order)))
+    #But now I want to be sure
     current,sym = find_matching(previous,current,tile)
     return tile[current].index(sym)
 
@@ -128,16 +159,8 @@ def create_neighbour_coordinates(tile):
     del explored
 
     ####PART 2 : look up how the neighbouring tiles connect with the main tile
-    """
-    Paires a b
-
-    Priorité matching (parce que je n'ai pas été constant dans mes notations):
-    (a kp) et b -kp
-    (a kp) et b kp
-    (a kp) et b np (includes n=0)
-    pas de paire trouvée (mauvais input)"""
-    print(neighbours_coords)
-    print("How many neighbours? :",len(neighbours_coords))
+    if(DEBUG2):print("Neighbour coords:",neighbours_coords)
+    if(DEBUG2):print("How many neighbours? :",len(neighbours_coords))
     neighbours_matches = dict()
     for neighbour in neighbours_coords:
         initials = list()
@@ -149,39 +172,51 @@ def create_neighbour_coordinates(tile):
         for case_initial, outside in neighbours_coords[neighbour]:
             initials.append((case_initial,outside))
             possible_match = find_matching(case_initial,outside,tile)
+            #if(DEBUG2):print((case_initial,outside),possible_match)
             matches.append(possible_match) #if no match, this is bad       initials.sort()
+        initials.sort()
         matches.sort()
         neighbours_matches[neighbour]=(initials,matches)
 
     ####PART 3 : create a coordinates system based on how they connect
     # conway criterion for isohedral tiling
-
+    if(DEBUG2):print("Neighbours matches:",neighbours_matches)
     pair_axis = dict()
     #pair_axis[current_case,next_case] = axis, sign, inverter
 
     dimension = 0
     known_matches = list()
     known_dimensions = list()
+    print("Max dimensions:",len(neighbours_matches))
     for n,neighbour in enumerate(neighbours_matches):
+        if(DEBUG2):print("------Neighbour %d------"%n)
         initials, matches = neighbours_matches[neighbour]
-        print(initials,matches)
-        print(known_dimensions,known_matches)
+        if(DEBUG2):print("Comparing",initials,"and",matches)
+        #if(DEBUG2):print(known_dimensions,known_matches)
         if(initials==matches):
+            if(DEBUG2):print("Identical, adding a central symmetry dimension (%d)"%dimension)
             #paired neighbour is same neighbour: central symetry
+            known_dimensions.append(dimension)
+            known_matches.append(matches)
             for pair in initials:
                 #axis, sign, invert
                 pair_axis[pair]=dimension,+1,True
             dimension+=1
         else:
+            if(DEBUG2):print("Different")
+            if(DEBUG2):print("Looking for",initials,"in",known_matches)
             if(initials in known_matches):
+                if(DEBUG2):print("Found")
                 #the starting point matches another's ending point
                 #paired eighbour is opposite direction
                 dim = known_dimensions[known_matches.index(initials)]
                 for pair in initials:
                     #axis, sign, invert
                     pair_axis[pair]=dim,-1,False
+                if(DEBUG2):print("Found an existing dimension (%d)"%(dim))
             else:
                 #A new dimension
+                if(DEBUG2):print("Not found, new dimension (%d)" % dimension)
                 known_matches.append(matches)
                 known_dimensions.append(dimension)
                 for pair in initials:
@@ -201,8 +236,9 @@ def explore_rotations(tile,poly):
     case_ori = 0
     #extend_tile(Point(300,300),Point(300,310),0,tile[0][0],tile)
     axis,dim = create_neighbour_coordinates(tile)
-    print(axis)
-    print(dim)
+    if(DEBUG2):print("-"*20)
+    if(DEBUG2):print("Coordinate infos:",axis)
+    if(DEBUG2):print("Number of axis:",dim)
     if(DEBUG1):Draw.loop()
 
 if __name__ == "__main__":
