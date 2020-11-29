@@ -3,11 +3,12 @@ import DrawingFunctions as Draw
 from GeometryFunctions import *
 from PolyAndNets import *
 from time import sleep
-ext=10
+ext=30
 P1=Point(300,300)
 P2=Point(300,300+ext)
 DEBUG1=False
-DEBUG2=True
+DEBUG2=False
+DEBUG3=True
 def get_face_points(p1, p2, sides):
     if(sides==3):
         points = triangle(p1, p2)
@@ -125,7 +126,7 @@ def create_neighbour_coordinates(tile):
     while(to_explore):
         initial_p1,initial_p2,case = to_explore.pop() #the initial shape from which the exploration starts
         initial_points=get_face_points(initial_p1,initial_p2,len(tile[case]))
-        Draw.polygon_shape(initial_points, (0,255,0), alpha=1, outline=1)
+        if(DEBUG1):Draw.polygon_shape(initial_points, (0,255,0), alpha=1, outline=1)
         initial_points=initial_points+initial_points
         if(DEBUG1):Draw.text_center(str(case),*centerpoint(initial_points),(0,0,255),12)
         if(DEBUG1):Draw.refresh()
@@ -226,20 +227,125 @@ def create_neighbour_coordinates(tile):
 
     return pair_axis, dimension
 
+import numpy as np
+def is_known(cfo,tilecoord,positions, known_symmetries):
+    #Solve linear equation with known symetries and return true if integer solution
+    #If not integer,
+    print("Entering is_known")
+    known = positions[cfo] #tilecoords of same case, face, orientation reached
+    for knowncoord in known:
+        a = np.array(known_symmetries)
+        b = np.array([tilecoord[i]-knowncoord[i] for i in range(len(tilecoord))])
+        print(a)
+        print(b)
+        if(len(a)==len(b)):
+            x = np.linalg.solve(a, b)
+        else:
+            x = np.linalg.lstsq(a, b, rcond=1)
+        print(x)
+        for c in x:
+            if(int(c)!=c):
+                print("Not a solution:",x)
+                continue
+        print(x,"is an integer solution! Known")
+        return True
+
+    return False
+
+def add_new_symmetry(cfo,tilecoord,positions,known_symmetries):
+    for existing_position in positions[cfo]:
+        possible_symmetry = [tilecoord[i]-existing_position[i] for i in range(len(tilecoord))]
+        known_symmetries.append(possible_symmetry)
+    known_symmetries.append(tilecoord)
+    positions[cfo].append(tilecoord)
+
+
+
 def explore_rotations(tile,poly):
-    Draw.initialise_drawing(640,640)
-    Draw.empty_shapes()
+    if(DEBUG1 or DEBUG2 or DEBUG3):Draw.initialise_drawing(640,640)
+    if(DEBUG1 or DEBUG2 or DEBUG3):Draw.empty_shapes()
     #Draw.polygon_shape((Point(0,0),Point(150,0),Point(150,150)), (255,0,0), alpha=1, outline=1)
     startcase = 0
     startface = 0
     face_ori = 0
     case_ori = 0
     #extend_tile(Point(300,300),Point(300,310),0,tile[0][0],tile)
-    axis,dim = create_neighbour_coordinates(tile)
+    neighbour_coord,dim = create_neighbour_coordinates(tile)
     if(DEBUG2):print("-"*20)
-    if(DEBUG2):print("Coordinate infos:",axis)
-    if(DEBUG2):print("Number of axis:",dim)
+    if(DEBUG2):print("Coordinate infos:",neighbour_coord)
+    if(DEBUG2):print("Number of axes:",dim)
+    for coord in sorted(neighbour_coord):
+        print(coord,":",neighbour_coord[coord])
+    print(flush=True)
+    positions = dict()
+    symmetry_axis = list()
+    for case in tile:
+        for face in poly:
+            for orientation in range(len(poly[face])):
+                positions[(case,face,orientation)]=list()
+    print("Possible combinations: %d"%len(positions))
+
+    pos = (P1,P2,0,0,0,[0 for x in range(dim)],1)
+    to_explore = [pos]
+    while(to_explore):
+        p1,p2,case,face,orientation,tilecoord, tilecoordsign = to_explore.pop()
+        #if(case%len(tile)!=case):
+        #    continue
+        #print("exploring",p1,p2,"case",case,"face",face,orientation,tilecoord, tilecoordsign )
+        if(len(tile[case%len(tile)])!=len(poly[face])):
+            continue
+        #caseorientation = 0
+        #orientation is tileorientation
+        #print("Known positions for",case%len(tile),face,orientation)
+        #print(positions[(case%len(tile),face,orientation)])
+        if(tilecoord in positions[(case%len(tile),face,orientation)]):
+            continue
+        #if(not is_known((case,face,orientation),tilecoord,positions,symmetry_axis)):
+        startpoints = get_face_points(p1,p2,len(poly[face]))
+        color=Draw.colors[sum([abs(x*(n+1)) for n,x in enumerate(tilecoord)])%len(Draw.colors)]
+        Draw.polygon_shape(startpoints,color,0.75,1)
+        #Draw.text_center("%d/%d+%d"%(face,case%len(tile),(case-(case%len(tile)))//len(tile)),*centerpoint(startpoints),(255,255,255),int(ext/2))
+        Draw.text_center("%d(%d)"%(case,(case-(case%len(tile)))//len(tile)),*centerpoint(startpoints),(255,255,255),int(ext/2))
+        Draw.refresh()
+        input()
+        if(len(positions[(case%len(tile),face,orientation)])==0):
+            #add_new_symmetry((case,face,orientation),tilecoord,positions,symmetry_axis)
+            #input()
+            newcases = tile[case%len(tile)]
+            faceshift = len(poly)-orientation
+            newfaces = poly[face][orientation:]+poly[face][:orientation]
+            print(case%len(tile),newcases)
+            #print(face%len(poly),newfaces)
+            for i in range(len(newcases)):
+                newface = newfaces[i]
+                newcase = newcases[i]
+                #if(newcase%len(tile)!=newcase):
+                #    continue
+                print("index",i,"going to",newcase)
+                if(len(tile[newcase%len(tile)])!=len(poly[newface])):
+                    continue
+                pa,pb=(startpoints*2)[i:i+2] #where to start to draw the new case
+                branchpoints=get_face_points(pb,pa,len(poly[newface]))*2
+                branchoffset = len(tile[newcase%len(tile)])-find_matching_offset(case,newcase,tile)
+                p1p,p2p=branchpoints[branchoffset:branchoffset+2] #where to start the caseorientation=0
+                newface_orientation = poly[newface].index(face)
+                newtilecoord = tilecoord.copy()
+                newtilecoordsign=tilecoordsign
+                if(newcase!=newcase%len(tile) or newcase==case):
+                    #print("Neighbour moving",(case%len(tile),newcase),newcase%len(tile))
+                    dim,increment,invertsign = neighbour_coord[(case%len(tile),newcase)]
+                    newtilecoord[dim]+=increment*tilecoordsign
+                    if(invertsign):
+                        newtilecoordsign=-newtilecoordsign
+                    #print(dim,increment,invertsign)
+                    #print(tilecoord,tilecoordsign,"->",newtilecoord,newtilecoordsign)
+
+                to_explore.append((p1p,p2p,newcase,newface,newface_orientation,newtilecoord,newtilecoordsign))
+        positions[(case%len(tile),face,orientation)].append(tilecoord)
+    print(positions)
+    print("Done exploring everything!")
     if(DEBUG1):Draw.loop()
+    #Next: explore the space!
 
 if __name__ == "__main__":
     explore_rotations(nets["cube"],polys["cube"])

@@ -32,10 +32,12 @@ if(MODE=="pygame"):
         #print(color + (int(round(256*alpha)),))
         color_alpha = color + (int(alpha*255),)
         pygame.draw.polygon(s, color_alpha, [(p.x, p.y) for p in points])
+
         if(outline):
             pygame.draw.lines(s, (0,0,0), True, [(p.x, p.y) for p in points])
-        ppoint = centerpoint(list(points)+4*[points[0]])
-        #pygame.draw.circle(s, (0,0,0),ppoint,2)
+        ppoint = centerpoint(points[:2]*20+points)
+        pygame.draw.circle(s, (255,255,255),ppoint,1)
+        #pygame.draw.line(s,(255,128,128),points[0].as_tuple(),points[1].as_tuple(),2)
         shapes.blit(s, (0, 0))
 
     def polygon_cursor(points, color, alpha=1, outline=False):

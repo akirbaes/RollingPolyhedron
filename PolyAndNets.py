@@ -65,7 +65,7 @@ nets[cube] = {
     1: [0, 2 + p, 5, 5 + p],
     2: [0, 5 + p, 1 - p, 3 + p],
     3: [0, 4 + p, 4 + 2 * p, 2 - p],
-    4: [0, 3 - 2 * p, 3 - p, 4],
+    4: [0, 3 - 2 * p, 3 - p, 4+p],
     5: [5, 2 - p, 1 - p, 1]
 }
 # Here, an exception, 5 goes to 5 symmetrically and 6 goes to 6 symmetrically
