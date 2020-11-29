@@ -3,9 +3,11 @@ import DrawingFunctions as Draw
 from GeometryFunctions import *
 from PolyAndNets import *
 from time import sleep
-ext=30
-P1=Point(300,300)
-P2=Point(300,300+ext)
+ext=50
+P1=Point(300,150)
+P2=Point(300,150+ext)
+WIDTH=800
+HEIGHT=1000
 DEBUG1=False
 DEBUG2=False
 DEBUG3=True
@@ -262,7 +264,7 @@ def add_new_symmetry(cfo,tilecoord,positions,known_symmetries):
 
 
 def explore_rotations(tile,poly):
-    if(DEBUG1 or DEBUG2 or DEBUG3):Draw.initialise_drawing(640,640)
+    if(DEBUG1 or DEBUG2 or DEBUG3):Draw.initialise_drawing(WIDTH,HEIGHT)
     if(DEBUG1 or DEBUG2 or DEBUG3):Draw.empty_shapes()
     #Draw.polygon_shape((Point(0,0),Point(150,0),Point(150,150)), (255,0,0), alpha=1, outline=1)
     startcase = 0
@@ -305,9 +307,10 @@ def explore_rotations(tile,poly):
         color=Draw.colors[sum([abs(x*(n+1)) for n,x in enumerate(tilecoord)])%len(Draw.colors)]
         Draw.polygon_shape(startpoints,color,0.75,1)
         #Draw.text_center("%d/%d+%d"%(face,case%len(tile),(case-(case%len(tile)))//len(tile)),*centerpoint(startpoints),(255,255,255),int(ext/2))
-        Draw.text_center("%d(%d)"%(case,(case-(case%len(tile)))//len(tile)),*centerpoint(startpoints),(255,255,255),int(ext/2))
+        Draw.text_center(str(tilecoord)+str(tilecoordsign),*centerpoint(startpoints),(255,255,255),int(ext/4))
+        #Draw.text_center("%d(%d)"%(case,(case-(case%len(tile)))//len(tile)),*centerpoint(startpoints),(255,255,255),int(ext/2))
         Draw.refresh()
-        input()
+        #input()
         if(len(positions[(case%len(tile),face,orientation)])==0):
             #add_new_symmetry((case,face,orientation),tilecoord,positions,symmetry_axis)
             #input()
@@ -315,7 +318,7 @@ def explore_rotations(tile,poly):
             faceshift = len(poly)-orientation
             newfaces = poly[face][orientation:]+poly[face][:orientation]
             print(case%len(tile),newcases)
-            #print(face%len(poly),newfaces)
+            print(face%len(poly),newfaces)
             for i in range(len(newcases)):
                 newface = newfaces[i]
                 newcase = newcases[i]
@@ -328,7 +331,7 @@ def explore_rotations(tile,poly):
                 branchpoints=get_face_points(pb,pa,len(poly[newface]))*2
                 branchoffset = len(tile[newcase%len(tile)])-find_matching_offset(case,newcase,tile)
                 p1p,p2p=branchpoints[branchoffset:branchoffset+2] #where to start the caseorientation=0
-                newface_orientation = poly[newface].index(face)
+                newface_orientation = (poly[newface].index(face)+branchoffset)%len(poly[newface])
                 newtilecoord = tilecoord.copy()
                 newtilecoordsign=tilecoordsign
                 if(newcase!=newcase%len(tile) or newcase==case):
@@ -344,7 +347,7 @@ def explore_rotations(tile,poly):
         positions[(case%len(tile),face,orientation)].append(tilecoord)
     print(positions)
     print("Done exploring everything!")
-    if(DEBUG1):Draw.loop()
+    if(DEBUG1 or DEBUG3):Draw.loop()
     #Next: explore the space!
 
 if __name__ == "__main__":
