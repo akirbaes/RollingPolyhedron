@@ -22,13 +22,21 @@ def is_inside(point, points):
     return True
 
 
-def centerpoint(points):
+def floatcenterpoint(points):
     mx = 0
     my = 0
     for x, y in points:
         mx += x
         my += y
-    return (int(round(mx / len(points))), int(round(my / len(points))))
+    return (((mx / len(points))), ((my / len(points))))
+
+"""def centerpoint(points):
+    mx = 0
+    my = 0
+    for x, y in points:
+        mx += x
+        my += y
+    return (int(round(mx / len(points))), int(round(my / len(points))))"""
 
 
 def square(p1, p2):
