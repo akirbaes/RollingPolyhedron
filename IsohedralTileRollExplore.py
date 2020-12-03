@@ -13,7 +13,7 @@ HEIGHT=1000
 DEBUG1=False
 DEBUG2=False
 DEBUG3=False
-DEBUG4=True
+DEBUG4=False
 
 def get_face_points(p1, p2, sides):
     if(sides==3):
@@ -34,11 +34,11 @@ def centeroftilestarting(p1, p2, prev, current, tile,draw=0):
         #    print("Centeroftiles using shape:",sorted([(p.x,p.y) for p in shape]))
         #    print(floatcenterpoint(shape))
         #    Draw.text_center("o",*floatcenterpoint(shape),(0,0,255),20)
-        print("Shapes received from extend:",len(listofshapes))
-        print("Coordinates of shapes used:")
-        print(sorted(floatcenterpoint(shape) for shape in listofshapes))
-        print("big average:")
-        print(floatcenterpoint([Point(floatcenterpoint(shape)) for shape in listofshapes]))
+        if(DEBUG4):print("Shapes received from extend:",len(listofshapes))
+        if(DEBUG4):print("Coordinates of shapes used:")
+        if(DEBUG4):print(sorted(floatcenterpoint(shape) for shape in listofshapes))
+        if(DEBUG4):print("big average:")
+        if(DEBUG4):print(floatcenterpoint([Point(floatcenterpoint(shape)) for shape in listofshapes]))
     return floatcenterpoint([Point(floatcenterpoint(shape)) for shape in listofshapes])
 
 def find_match(previous, current, tile):
@@ -110,8 +110,8 @@ def extend_tile(p1, p2, currentcase, oldcase, tile):
         #visitedcases.append(realcurrent) #too late! if two cases go to the same case that doesn't get explored until after
         points = get_face_points(p1, p2, len(tile[realcurrent]))
         if(DEBUG1):Draw.polygon_shape(points, (255,0,0), alpha=0.1, outline=1)
-        if(DEBUG1):print("Extend",currentcase)
-        if(DEBUG1):print(visitedcases)
+        if(DEBUG4):print("Extend",currentcase)
+        if(DEBUG4):print(visitedcases)
         if(DEBUG1):Draw.text_center(str(realcurrent),*floatcenterpoint(points),(0,0,0),12)
         if(DEBUG1):Draw.refresh()
         #sleep(0.01)
@@ -130,7 +130,7 @@ def extend_tile(p1, p2, currentcase, oldcase, tile):
                 to_visit.append([p2,p1,nextcase, currentcase])
                 visitedcases.append(nextcase)
                 #if(DEBUG1):print("De %d, index %d next %d"%(realcurrent, index,nextcase))
-        if(DEBUG1):input()
+        if(DEBUG1 or DEBUG4):input()
     return tilepoints
 
 
@@ -147,8 +147,9 @@ def get_neighbours_positions(tile,p1=P1,p2=P2,startcase=0,recurse=0):
         initial_p1,initial_p2,case = to_explore.pop() #the initial shape from which the exploration starts
         if(recurse):
             c=centeroftilestarting(initial_p1,initial_p2,tile[case%len(tile)][0],case,tile,1)
-            print("Center received",c)
-            Draw.text_center("_0_",*c,(128,0,0),30)
+            if(DEBUG4):
+                print("Center received",c)
+                Draw.text_center("_0_",*c,(128,0,0),30)
         initial_points=get_face_points(initial_p1,initial_p2,len(tile[case]))
         if(DEBUG1):Draw.polygon_shape(initial_points, (0,255*recurse,0), alpha=.5, outline=1)
         initial_points=initial_points+initial_points
@@ -214,6 +215,7 @@ def create_neighbour_coordinates(tile):
     center_coord=centeroftilestarting(P1,P2,tile[0][0],0,tile)
     print("Center:",center_coord)
     neighbours_matches = dict()
+
     for n in neighbours_neighbours:
         pp.pprint(n)
         pp.pprint(neighbours_neighbours[n])
