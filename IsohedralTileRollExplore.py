@@ -3,6 +3,8 @@ import DrawingFunctions as Draw
 from GeometryFunctions import *
 from PolyAndNets import *
 from time import sleep
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 ext=50
 P1=Point(300,150)
 P2=Point(300,150+ext)
@@ -10,7 +12,9 @@ WIDTH=800
 HEIGHT=1000
 DEBUG1=False
 DEBUG2=False
-DEBUG3=True
+DEBUG3=False
+DEBUG4=True
+
 def get_face_points(p1, p2, sides):
     if(sides==3):
         points = triangle(p1, p2)
@@ -98,16 +102,16 @@ def extend_tile(p1, p2, currentcase, oldcase, tile):
         realcurrent = currentcase % len(tile)
         visitedcases.append(realcurrent)
         points = get_face_points(p1, p2, len(tile[realcurrent]))
-        if(DEBUG1):Draw.polygon_shape(points, (255,0,0), alpha=0.1, outline=1)
-        if(DEBUG1):Draw.text_center(str(realcurrent),*centerpoint(points),(0,0,0),12)
-        if(DEBUG1):Draw.refresh()
+        #if(DEBUG1):Draw.polygon_shape(points, (255,0,0), alpha=0.1, outline=1)
+        #if(DEBUG1):Draw.text_center(str(realcurrent),*centerpoint(points),(0,0,0),12)
+        #if(DEBUG1):Draw.refresh()
         #sleep(0.01)
         tilepoints.append(points)
         currentborder = tile[realcurrent] #print(currentborder, 'of shape', realcurrent, ', coming from', oldcase)
         base,match = find_matching(oldcase,currentcase,tile)
-        if(DEBUG1):print(match)
+        #if(DEBUG1):print(match)
         shift=currentborder.index(match) #index = current.index(-oldcase + 2 * (oldcase % len(order)))
-        if(DEBUG1):print("Aligned on %d index %d"%(oldcase,shift))
+        #if(DEBUG1):print("Aligned on %d index %d"%(oldcase,shift))
         #print(index)
         currentborder = currentborder[shift:] + currentborder[:shift+1]
         for index, nextcase in enumerate(currentborder):
@@ -115,38 +119,42 @@ def extend_tile(p1, p2, currentcase, oldcase, tile):
             p2 = points[(index + 1) % len(points)]
             if (nextcase not in visitedcases) and (nextcase % len(tile) == nextcase):
                 to_visit.append([p2,p1,nextcase, currentcase])
-                if(DEBUG1):print("De %d, index %d next %d"%(realcurrent, index,nextcase))
-        if(DEBUG1):input()
+                #if(DEBUG1):print("De %d, index %d next %d"%(realcurrent, index,nextcase))
+        #if(DEBUG1):input()
     return tilepoints
 
 
-def create_neighbour_coordinates(tile):
+def get_neighbours_positions(tile,p1=P1,p2=P2,startcase=0,recurse=0):
     neighbours_coords = dict()
+    if(recurse):
+        neighbours_neighbours = dict()
+        if(DEBUG4):
+            nn_debug=dict()
     explored = list()
     ####PART 1 : explore and list all neighbouring tiles
-    to_explore = [list((P1,P2,0))]
+    to_explore = [list((p1,p2,startcase))]
     while(to_explore):
         initial_p1,initial_p2,case = to_explore.pop() #the initial shape from which the exploration starts
         initial_points=get_face_points(initial_p1,initial_p2,len(tile[case]))
-        if(DEBUG1):Draw.polygon_shape(initial_points, (0,255,0), alpha=1, outline=1)
+        if(DEBUG1):Draw.polygon_shape(initial_points, (0,255*recurse,0), alpha=.5, outline=1)
         initial_points=initial_points+initial_points
         if(DEBUG1):Draw.text_center(str(case),*centerpoint(initial_points),(0,0,255),12)
         if(DEBUG1):Draw.refresh()
         explored.append(case)
         if(DEBUG1):input()
         for index,next in enumerate(tile[case]):
+            branch_p1=initial_points[index]
+            branch_p2=initial_points[index+1]
+            branch_points = 2*get_face_points(branch_p2, branch_p1, len(tile[case])) #the direction of the segment has to be reversed
+            #branch_points triangle starts at [case] as its origin
+            #but next triangle loop considers starts at 0 (forgets previous)
+            #rotate the triangle so that the origin side is 0
             if(next%len(tile)==next and next!=case):
+                side_offset = len(tile[next])-tile[next].index(case)
+                next_p1, next_p2 = branch_points[side_offset:side_offset+2]
                 #inside the net (excluding self-ref which are outside)
                 if(next not in explored):
                     #Branch out inside
-                    branch_p1=initial_points[index]
-                    branch_p2=initial_points[index+1]
-                    branch_points = 2*get_face_points(branch_p2, branch_p1, len(tile[case])) #the direction of the segment has to be reversed
-                    side_offset = len(tile[next])-tile[next].index(case) #inside net so no p offset
-                    #branch_points triangle starts at [case] as its origin
-                    #but next triangle loop considers starts at 0 (forgets previous)
-                    #rotate the triangle so that the origin side is 0
-                    next_p1, next_p2 = branch_points[side_offset:side_offset+2]
                     to_explore.append([next_p1,next_p2,next])
             else:
                 #outside the net= neighbour data
@@ -156,15 +164,48 @@ def create_neighbour_coordinates(tile):
                 #side_offset = len(tile[next%len(tile)])-index#len(tile[next%len(tile)])-find_matching_offset(case,next,tile)
                 #next_p1, next_p2 = branch_points[side_offset:side_offset+2]
                 if(DEBUG1):print("Going outside: %d to %d index %d"%(case,next%len(tile),index))
-                neighbour = centeroftilestarting(branch_p2,branch_p1,case,next,tile)
+                neighbour = centeroftilestarting(branch_p2,branch_p1,case,next,tile) #this takes prev tile so no shift
                 neighbours_coords.setdefault(neighbour,[])
                 neighbours_coords[neighbour].append((case,next))
-    del explored
 
+                if(recurse):
+                    #current, sym = find_matching(case,next,tile)
+                    side_offset = len(tile[next%len(tile)])-find_matching_offset(case,next,tile)
+                    next_p1, next_p2 = branch_points[side_offset:side_offset+2]
+                    nn = get_neighbours_positions(tile,next_p1,next_p2,next%len(tile),recurse=False)
+                    for n in nn:
+                        nn[n].sort()
+                    if DEBUG4:
+                        debug_data = (next_p1,next_p2,next%len(tile))
+                        if(neighbour in neighbours_neighbours):
+                            if(neighbours_neighbours[neighbour]!=nn):
+                                print("Not matching when reading neighbour",neighbour,"'s neighbours from two different sides:\nOriginal:")
+                                print(nn_debug[neighbour])
+                                pp.pprint(neighbours_neighbours[neighbour])
+                                print("New: (coming from %d to %d)"%(case,next))
+                                print(debug_data)
+                                pp.pprint(nn)
+                        nn_debug.setdefault(neighbour,debug_data)
+                    neighbours_neighbours.setdefault(neighbour, nn)
+    del explored
+    if(recurse):
+        return neighbours_coords,neighbours_neighbours
+    return neighbours_coords
+def create_neighbour_coordinates(tile):
+    neighbours_coords,neighbours_neighbours=get_neighbours_positions(tile,P1,P2,0,recurse=1)
     ####PART 2 : look up how the neighbouring tiles connect with the main tile
     if(DEBUG2):print("Neighbour coords:",neighbours_coords)
     if(DEBUG2):print("How many neighbours? :",len(neighbours_coords))
+
+    center_coord=centeroftilestarting(P1,P2,tile[0][0],0,tile)
+    print("Center:",center_coord)
     neighbours_matches = dict()
+    for n in neighbours_neighbours:
+        pp.pprint(n)
+        pp.pprint(neighbours_neighbours[n])
+    for n in neighbours_coords:
+        print(n)
+        print(neighbours_coords[n])
     for neighbour in neighbours_coords:
         initials = list()
         matches = list()
@@ -264,7 +305,7 @@ def add_new_symmetry(cfo,tilecoord,positions,known_symmetries):
 
 
 def explore_rotations(tile,poly):
-    if(DEBUG1 or DEBUG2 or DEBUG3):Draw.initialise_drawing(WIDTH,HEIGHT)
+    if(DEBUG1 or DEBUG2 or DEBUG3 or 1):Draw.initialise_drawing(WIDTH,HEIGHT)
     if(DEBUG1 or DEBUG2 or DEBUG3):Draw.empty_shapes()
     #Draw.polygon_shape((Point(0,0),Point(150,0),Point(150,150)), (255,0,0), alpha=1, outline=1)
     startcase = 0
@@ -277,7 +318,7 @@ def explore_rotations(tile,poly):
     if(DEBUG2):print("Coordinate infos:",neighbour_coord)
     if(DEBUG2):print("Number of axes:",dim)
     for coord in sorted(neighbour_coord):
-        print(coord,":",neighbour_coord[coord])
+        if(DEBUG2):print(coord,":",neighbour_coord[coord])
     print(flush=True)
     positions = dict()
     symmetry_axis = list()
@@ -285,7 +326,7 @@ def explore_rotations(tile,poly):
         for face in poly:
             for orientation in range(len(poly[face])):
                 positions[(case,face,orientation)]=list()
-    print("Possible combinations: %d"%len(positions))
+    if(DEBUG3):print("Possible combinations: %d"%len(positions))
 
     pos = (P1,P2,0,0,0,[0 for x in range(dim)],1)
     to_explore = [pos]
@@ -317,14 +358,14 @@ def explore_rotations(tile,poly):
             newcases = tile[case%len(tile)]
             faceshift = len(poly)-orientation
             newfaces = poly[face][orientation:]+poly[face][:orientation]
-            print(case%len(tile),newcases)
-            print(face%len(poly),newfaces)
+            if(DEBUG3):print(case%len(tile),newcases)
+            if(DEBUG3):print(face%len(poly),newfaces)
             for i in range(len(newcases)):
                 newface = newfaces[i]
                 newcase = newcases[i]
                 #if(newcase%len(tile)!=newcase):
                 #    continue
-                print("index",i,"going to",newcase)
+                if(DEBUG3):print("index",i,"going to",newcase)
                 if(len(tile[newcase%len(tile)])!=len(poly[newface])):
                     continue
                 pa,pb=(startpoints*2)[i:i+2] #where to start to draw the new case
@@ -345,8 +386,8 @@ def explore_rotations(tile,poly):
 
                 to_explore.append((p1p,p2p,newcase,newface,newface_orientation,newtilecoord,newtilecoordsign))
         positions[(case%len(tile),face,orientation)].append(tilecoord)
-    print(positions)
-    print("Done exploring everything!")
+    if(DEBUG3):print(positions)
+    if(DEBUG3):print("Done exploring everything!")
     if(DEBUG1 or DEBUG3):Draw.loop()
     #Next: explore the space!
 
