@@ -130,7 +130,7 @@ def extend_tile(p1, p2, currentcase, oldcase, tile):
                 to_visit.append([p2,p1,nextcase, currentcase])
                 visitedcases.append(nextcase)
                 #if(DEBUG1):print("De %d, index %d next %d"%(realcurrent, index,nextcase))
-        if(DEBUG1 or DEBUG4):input()
+        if(DEBUG1 or DEBUG4):Draw.wait_for_input()
     return tilepoints
 
 
@@ -156,7 +156,7 @@ def get_neighbours_positions(tile,p1=P1,p2=P2,startcase=0,recurse=0):
         if(DEBUG1):Draw.text_center(str(case),*floatcenterpoint(initial_points),(0,0,255),12)
         if(DEBUG1):Draw.refresh()
         explored.append(case)
-        if(DEBUG1):input()
+        if(DEBUG1):Draw.wait_for_input()
         for index,next in enumerate(tile[case]):
             branch_p1=initial_points[index]
             branch_p2=initial_points[index+1]
@@ -367,10 +367,10 @@ def explore_rotations(tile,poly):
         Draw.text_center(str(tilecoord)+str(tilecoordsign),*floatcenterpoint(startpoints),(255,255,255),int(ext/4))
         #Draw.text_center("%d(%d)"%(case,(case-(case%len(tile)))//len(tile)),*centerpoint(startpoints),(255,255,255),int(ext/2))
         Draw.refresh()
-        #input()
+        #Draw.wait_for_input()
         if(len(positions[(case%len(tile),face,orientation)])==0):
             #add_new_symmetry((case,face,orientation),tilecoord,positions,symmetry_axis)
-            #input()
+            #Draw.wait_for_input()
             newcases = tile[case%len(tile)]
             faceshift = len(poly)-orientation
             newfaces = poly[face][orientation:]+poly[face][:orientation]
@@ -405,6 +405,7 @@ def explore_rotations(tile,poly):
     if(DEBUG3):print(positions)
     if(DEBUG3):print("Done exploring everything!")
     if(DEBUG1 or DEBUG3):Draw.loop()
+    Draw.wait_for_input()
     #Next: explore the space!
 
 if __name__ == "__main__":

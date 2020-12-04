@@ -152,6 +152,22 @@ if(MODE=="pygame"):
         text = pygame.font.SysFont(None, size).render(text, True, color)
         shapes.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
 
+    def wait_for_input():
+        clock = pygame.time.Clock()
+        running=True
+        while running:
+            clock.tick(20)
+            for e in pygame.event.get():
+                if e.type == pygame.MOUSEBUTTONDOWN:
+                    print("Resume with mouse",e.type,flush=True)
+                    running = False
+                if e.type == pygame.KEYDOWN:
+                    running = False
+                    print("Resume with key",e.key,flush=True)
+                if e.type == pygame.QUIT:
+                    running = False
+                    print("Quit!",flush=True)
+                    #pygame.quit()
 
 
     def refresh():
