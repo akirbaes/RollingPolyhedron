@@ -553,7 +553,7 @@ def explore_borders(tile,poly):
                 startsides = len(poly[case])
                 nextcases=tile[newcase%len(tile)]
                 nextsides=len(nextcases)
-                borders[startpair]=dict()
+                #borders[startpair]=dict()
                 for face in poly:
                     if(len(tile[case])==len(poly[face])):
                         for orientation in range(len(poly[face])):
@@ -561,9 +561,14 @@ def explore_borders(tile,poly):
                             newface = poly[face][(orientation+i)%startsides]
                             nextfaces = poly[newface]
                             if(len(nextfaces)==nextsides):
-                                neworientation = (nextfaces.index(face) - nextcases.index(case%len(tile)))%nextsides
-                                borders[startpair][(face,orientation)]=(newface,neworientation)
-
+                                caseindex = find_matching_offset(case,newcase,tile)
+                                neworientation = (nextfaces.index(face) - caseindex)%nextsides
+                                #borders[startpair][(case,face,orientation)]=(newcase%len(tile),newface,neworientation)
+                                #borders.setdefault((case,face,orientation),set())
+                                borders.setdefault((case,face,orientation),dict())
+                                #borders[(case,face,orientation)].add((newcase%len(tile),newface,neworientation))
+                                borders[(case,face,orientation)][startpair]=(newcase%len(tile),newface,neworientation)
+    return borders
 def explore_rotations(tile,poly):
     if(DEBUG1 or DEBUG2 or DEBUG3 or 1):Draw.initialise_drawing(WIDTH,HEIGHT)
     if(DEBUG1 or DEBUG2 or DEBUG3):Draw.empty_shapes()
@@ -660,8 +665,16 @@ def explore_rotations(tile,poly):
     transformations = explore_borders(tile,poly)
     print("Borders:",len(transformations))
     pp.pprint(transformations)
+    """
+    for clas in classes:
+        if (0,0,0) in clas:
+            initial_clas = clas
+            break
+    to_explore = [initial_clas]"""
+
+
 if __name__ == "__main__":
-    explore_rotations(nets["cube"],polys["cube"])
+    explore_rotations(nets["j86"],polys["j86"])
 
 
 #Usage:
