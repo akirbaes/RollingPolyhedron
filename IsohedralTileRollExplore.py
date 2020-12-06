@@ -5,9 +5,9 @@ from PolyAndNets import *
 from time import sleep
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
-ext=60
-P1=Point(300,150)
-P2=Point(300,150+ext)
+ext=30
+P1=Point(300,350)
+P2=Point(300,350+ext)
 WIDTH=800
 HEIGHT=1000
 DEBUG1=False
@@ -15,8 +15,8 @@ DEBUG2=False
 DEBUG3=False
 DEBUG4=False
 DEBUG5=False
-DEBUG6=False
-DEBUG7=True
+DEBUG6=True
+DEBUG7=False
 def get_face_points(p1, p2, sides):
     if(sides==3):
         points = triangle(p1, p2)
@@ -436,6 +436,12 @@ def create_coordinates_system(neighbour_rules,centrosymmetries,translations,tran
             if(DEBUG6):print("Not solved with base potential",base_potential)
             base_potential.pop()
             evaluated_base = dict()
+
+    if (DEBUG6):
+        print("Solved with base potential", base_potential)
+        print("Partial solution:")
+        print(evaluated_base)
+        print("Remaining:",determined)
     extralength = 0
     for base in sorted(determined):
         """if(base in evaluated_base):
@@ -445,14 +451,16 @@ def create_coordinates_system(neighbour_rules,centrosymmetries,translations,tran
             evaluated_base[base]=[-x for x in evaluated_base[translation_get_pair[base]]]
             determined.remove(base)"""
         if(base in translations):
-            if(base+translation_get_pair[base] in translation_pairs):
+            if((base,translation_get_pair[base]) in translation_pairs):
                 #only for the firt one
+                if (DEBUG6):print("Translation pair",(base,translation_get_pair[base]))
                 extralength+=1
             else:
                 determined.remove(base)
+                if (DEBUG6):print("Translation half",base)
         else:
             extralength+=1
-
+    if(DEBUG6):print("Extra length to add:",extralength)
     for base in evaluated_base:
         evaluated_base[base].extend([0]*extralength)
     for i,base in enumerate(determined):
@@ -596,7 +604,7 @@ def explore_rotations(tile,poly):
                 positions[(case,face,orientation)]=list()
     if(DEBUG3):print("Possible combinations: %d"%len(positions))
 
-    """
+
     pos = (P1,P2,0,0,0,[0 for x in range(dim)],1)
     to_explore = [pos]
     while(to_explore):
@@ -658,23 +666,34 @@ def explore_rotations(tile,poly):
     print("Done exploring everything!")
     Draw.wait_for_input()
     #Next: explore the space!
-    """
+
     classes=explore_inside(tile,poly)
     print(len(classes),"classes found:")
     pp.pprint(classes)
     transformations = explore_borders(tile,poly)
+    borders = set(transformations)
     print("Borders:",len(transformations))
     pp.pprint(transformations)
+
+
     """
-    for clas in classes:
-        if (0,0,0) in clas:
-            initial_clas = clas
-            break
-    to_explore = [initial_clas]"""
+    to_explore = [([initial_class],[0]*dim,1)]
+    while to_explore:
+        pathclasses,coord,coordsign=to_explore.pop()
+        currentclass = pathclasses[-1]
+        possible_transformations = borders.intersection(currentclass)
+        for transformation_border in possible_transformations:
+            for transformation_path in transformations[transformation_border]:
+                coordshift,invertsign = neighbour_coord[transformation_path]
+                newcoord = [coord[i] + coordsign*coordshift[i] for i in range(dim)]
+                newcoordsign = coordsign*(1-invertsign*2)
+                
+                for clas in classes:"""
+
 
 
 if __name__ == "__main__":
-    explore_rotations(nets["j86"],polys["j86"])
+    explore_rotations(nets["j17"],polys["j17"])
 
 
 #Usage:
