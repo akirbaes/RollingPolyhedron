@@ -675,6 +675,23 @@ def explore_rotations(tile,poly):
     print("Borders:",len(transformations))
     pp.pprint(transformations)
 
+    for clas in classes:
+        if (0,0,0) in clas:
+            initial_class = classes.index(clas)
+            break
+    def class_index(cfo):
+        for i,clas in enumerate(classes):
+            if(cfo in clas):
+                return i
+    class_transfo = [[list() for clas in classes] for clas in classes]
+    for cfo in transformations:
+        class_start = class_index(cfo)
+        for bordercase in transformations[cfo]:
+            coordinate = neighbour_coord[bordercase]
+            for cfo_arrival in transformations[cfo][bordercase]:
+                class_end = class_index(cfo_arrival)
+                print(class_start,class_end,coordinate)
+                class_transfo[class_start][class_end].append(coordinate)
 
     """
     to_explore = [([initial_class],[0]*dim,1)]
