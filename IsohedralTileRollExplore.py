@@ -500,6 +500,69 @@ def add_new_symmetry(cfo,tilecoord,positions,known_symmetries):
     known_symmetries.append(tilecoord)
     positions[cfo].append(tilecoord)
 
+def explore_inside(tile,poly):
+    classes = list()
+    for start_case in tile:
+        for start_face in poly:
+            if(len(tile[start_case])==len(poly[start_face])):
+                for orientation in range(len(poly[start_face])):
+                    ###For every compatible CFO, start an exploration class
+                    pos = (start_case,start_face,orientation)
+                    if(any(pos in existing_class for existing_class in classes)):
+                        continue
+                    current_class = set()
+                    to_explore=set()
+                    to_explore.add(pos)
+
+                    while(to_explore):
+                        case,face,orientation=to_explore.pop()
+                        sides = len(poly[face])
+                        if(len(poly[case])!=sides):
+                            continue
+                        if((case,face,orientation) in current_class):
+                            continue
+                        current_class.add((case,face,orientation))
+
+                        newcases = tile[case]
+                        newfaces = poly[face][orientation:] + poly[face][:orientation]
+                        for i in range(sides):
+                            #for new areas to explore
+                            newcase = newcases[i]
+                            newface = newfaces[i]
+                            if(newcase%len(tile)==newcase):
+                                #still inside
+                                nextfaces = poly[newface]
+                                nextcases = tile[newcase]
+                                nextsides=len(nextfaces)
+                                if(len(tile[newcase])!=nextsides):
+                                    continue
+                                #look back for orientation
+                                neworientation = (nextfaces.index(face) - nextcases.index(case))%nextsides
+                                if((newcase,newface,neworientation) not in current_class):
+                                    to_explore.add((newcase,newface,neworientation))
+                    classes.append(current_class)
+    return classes
+
+def explore_borders(tile,poly):
+    borders = dict()
+    for case in tile:
+        for i,newcase in enumerate(tile[case]):
+            if(newcase%len(tile)!=newcase):
+                ###For every case pairs at the border
+                startpair = (case,newcase)
+                startsides = len(poly[case])
+                nextcases=tile[newcase%len(tile)]
+                nextsides=len(nextcases)
+                borders[startpair]=dict()
+                for face in poly:
+                    if(len(tile[case])==len(poly[face])):
+                        for orientation in range(len(poly[face])):
+                            #For  every (C)FO
+                            newface = poly[face][(orientation+i)%startsides]
+                            nextfaces = poly[newface]
+                            if(len(nextfaces)==nextsides):
+                                neworientation = (nextfaces.index(face) - nextcases.index(case%len(tile)))%nextsides
+                                borders[startpair][(face,orientation)]=(newface,neworientation)
 
 def explore_rotations(tile,poly):
     if(DEBUG1 or DEBUG2 or DEBUG3 or 1):Draw.initialise_drawing(WIDTH,HEIGHT)
@@ -528,6 +591,7 @@ def explore_rotations(tile,poly):
                 positions[(case,face,orientation)]=list()
     if(DEBUG3):print("Possible combinations: %d"%len(positions))
 
+    """
     pos = (P1,P2,0,0,0,[0 for x in range(dim)],1)
     to_explore = [pos]
     while(to_explore):
@@ -556,7 +620,6 @@ def explore_rotations(tile,poly):
             #add_new_symmetry((case,face,orientation),tilecoord,positions,symmetry_axis)
             #Draw.wait_for_input()
             newcases = tile[case%len(tile)]
-            faceshift = len(poly)-orientation
             newfaces = poly[face][orientation:]+poly[face][:orientation]
             if(DEBUG3):print(case%len(tile),newcases)
             if(DEBUG3):print(face%len(poly),newfaces)
@@ -590,8 +653,13 @@ def explore_rotations(tile,poly):
     print("Done exploring everything!")
     Draw.wait_for_input()
     #Next: explore the space!
-
-
+    """
+    classes=explore_inside(tile,poly)
+    print(len(classes),"classes found:")
+    pp.pprint(classes)
+    transformations = explore_borders(tile,poly)
+    print("Borders:",len(transformations))
+    pp.pprint(transformations)
 if __name__ == "__main__":
     explore_rotations(nets["cube"],polys["cube"])
 
