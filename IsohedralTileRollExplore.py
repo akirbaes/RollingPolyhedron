@@ -10,11 +10,12 @@ P1=Point(300,150)
 P2=Point(300,150+ext)
 WIDTH=800
 HEIGHT=1000
-DEBUG1=True
+DEBUG1=False
 DEBUG2=False
 DEBUG3=False
 DEBUG4=False
-
+DEBUG5=False
+DEBUG6=True
 def get_face_points(p1, p2, sides):
     if(sides==3):
         points = triangle(p1, p2)
@@ -130,7 +131,7 @@ def extend_tile(p1, p2, currentcase, oldcase, tile):
                 to_visit.append([p2,p1,nextcase, currentcase])
                 visitedcases.append(nextcase)
                 #if(DEBUG1):print("De %d, index %d next %d"%(realcurrent, index,nextcase))
-        if(DEBUG1 or DEBUG4):Draw.wait_for_input()
+        if(DEBUG1):Draw.wait_for_input()
     return tilepoints
 
 
@@ -215,13 +216,15 @@ def create_neighbour_coordinates(tile):
     center_coord=centeroftilestarting(P1,P2,tile[0][0],0,tile)
     print("Center:",center_coord)
     neighbours_matches = dict()
-
-    for n in neighbours_neighbours:
-        pp.pprint(n)
-        pp.pprint(neighbours_neighbours[n])
-    for n in neighbours_coords:
-        print(n)
-        print(neighbours_coords[n])
+    if(DEBUG5):
+        print("Neighbour neighbours:")
+        for n in neighbours_neighbours:
+            pp.pprint(n)
+            pp.pprint(neighbours_neighbours[n])
+        print("Neighbour coords:")
+        for n in neighbours_coords:
+            print(n)
+            print(neighbours_coords[n])
     for neighbour in neighbours_coords:
         initials = list()
         matches = list()
@@ -236,18 +239,51 @@ def create_neighbour_coordinates(tile):
             matches.append(possible_match) #if no match, this is bad       initials.sort()
         initials.sort()
         matches.sort()
-        neighbours_matches[neighbour]=(initials,matches)
-    print("Neighbours matches:", neighbours_matches)
+        neighbours_matches[neighbour]=(initials,matches) #to find more easily with who it matches
+
+    tag = ord("A")
+    neighbour_tags = dict()
+    for i, n in enumerate(neighbours_coords):
+        neighbour_tags[chr(i+tag)]=n
+        neighbour_tags[n]=chr(i+tag)
+        for pair in neighbours_coords[n]:
+            if(pair in neighbour_tags):
+                print("Error pair",pair,"is same as existing coord")
+                # be careful not to overwrite a coordinate
+            neighbour_tags[pair]=chr(i+tag)
+    if(DEBUG5):
+        print("Neighbour tags:")
+        pp.pprint(neighbour_tags)
+    adjacent_matches = dict()
+    for neighbour in neighbours_neighbours:
+        self_tag = neighbour_tags[neighbour]
+        for nnc in neighbours_neighbours[neighbour]:
+            #look for existing coordinates in neighbour's neighbours
+            if nnc in neighbours_coords:
+                arrival_tag = neighbour_tags[nnc]
+                for adjacent in neighbours_coords:
+                    #look for one arbitrary matching case
+                    if neighbours_neighbours[neighbour][nnc][0] in neighbours_coords[adjacent]:
+                        adjacent_tag = neighbour_tags[adjacent]
+                        break;
+                adjacent_matches[(self_tag,adjacent_tag)]=arrival_tag
+    if(DEBUG5):
+        print("Adjacent matches:")
+        pp.pprint(adjacent_matches)
     ####PART 3 : create a coordinates system based on how they connect
     # conway criterion for isohedral tiling
     if(DEBUG2):print("Neighbours matches:",neighbours_matches)
     pair_axis = dict()
     #pair_axis[current_case,next_case] = axis, sign, inverter
-
+    centrosymmetries = list()
+    translations = list()
+    translation_pairing = list()
     dimension = 0
     known_matches = list()
     known_dimensions = list()
-    print("Max dimensions:",len(neighbours_matches))
+    known_tags = list()
+    if(DEBUG5):
+        print("Max dimensions:",len(neighbours_matches))
     for n,neighbour in enumerate(neighbours_matches):
         if(DEBUG2):print("------Neighbour %d------"%n)
         initials, matches = neighbours_matches[neighbour]
@@ -256,8 +292,10 @@ def create_neighbour_coordinates(tile):
         if(initials==matches):
             if(DEBUG2):print("Identical, adding a central symmetry dimension (%d)"%dimension)
             #paired neighbour is same neighbour: central symetry
+            centrosymmetries.append(neighbour_tags[neighbour])
             known_dimensions.append(dimension)
             known_matches.append(matches)
+            known_tags.append(neighbour_tags[neighbour])
             for pair in initials:
                 #axis, sign, invert
                 pair_axis[pair]=dimension,+1,True
@@ -274,18 +312,153 @@ def create_neighbour_coordinates(tile):
                     #axis, sign, invert
                     pair_axis[pair]=dim,-1,False
                 if(DEBUG2):print("Found an existing dimension (%d)"%(dim))
+                translation_pairing.append((neighbour_tags[neighbour],known_tags[known_matches.index(initials)]))
+                translations.append(neighbour_tags[neighbour])
+                translations.append(known_tags[known_matches.index(initials)])
             else:
                 #A new dimension
                 if(DEBUG2):print("Not found, new dimension (%d)" % dimension)
                 known_matches.append(matches)
                 known_dimensions.append(dimension)
+                known_tags.append(neighbour_tags[neighbour])
                 for pair in initials:
                     #axis, sign, invert
                     pair_axis[pair]=dimension,+1,False
                 dimension+=1
 
-    return pair_axis, dimension
+    # return pair_axis, dimension
+    if(DEBUG5):
+        print("Known tags:",known_tags)
+        print("Adjacent pairings")
+        print("Centrosymmetries:", centrosymmetries)
+        print("Translations:", translations)
+        print("Translation pairings:", translation_pairing)
 
+    coordinates_system = create_coordinates_system(adjacent_matches, centrosymmetries, translations,translation_pairing)
+    pair_axis = dict()
+    for neighbour in neighbours_coords:
+        tag = neighbour_tags[neighbour]
+        for coord in neighbours_coords[neighbour]:
+            invert = tag in centrosymmetries
+            pair_axis[coord]=(coordinates_system[tag],invert)
+    return pair_axis
+
+def evaluate(rules,formula,centrosymmetries,translation_get_pair):
+    lenbase = len(tuple(rules.values())[0])
+    res = [0]*lenbase
+    sign = +1
+    i=0
+    while i<len(formula):
+        sym = formula[i]
+        if(sym=="-"):
+            i+=1
+            sym=translation_get_pair[formula[i]]
+        if(sym not in rules):
+            jump = [-x for x in rules[translation_get_pair[sym]]]
+        else:
+            jump = rules[sym]
+        res = [res[i] + sign*jump[i] for i in range(lenbase)]
+        if(sym in centrosymmetries):
+            sign=-sign
+        i+=1
+    return res
+def create_coordinates_system(neighbour_rules,centrosymmetries,translations,translation_pairs):
+    print("Received rules:")
+    pp.pprint(neighbour_rules)
+    print("Translation pairs:")
+    print(translation_pairs)
+    undetermined = set(neighbour_rules.values())
+    determined = set(centrosymmetries+translations)-undetermined
+    translation_get_pair = dict()
+    base_potential = sorted(undetermined)
+    for p,q in translation_pairs:
+        if(q in base_potential):
+            base_potential.remove(q)
+        translation_get_pair[p]=q
+        translation_get_pair[q]=p
+    print("Create coordinates system based on rules:")
+    pp.pprint(neighbour_rules)
+    print("Centrosymmetries:")
+    print(centrosymmetries)
+    solved = False
+    evaluated_base = dict()
+    while not solved:
+        for i, x in enumerate(base_potential):
+            evaluated_base[x]=[0]*len(base_potential)
+            evaluated_base[x][i]=1
+        print("Evaluated base step 1")
+        pp.pprint(evaluated_base)
+
+        #while any([y not in evaluated_base for y in undetermined]):
+        rulescopy = neighbour_rules.copy()
+        did_something=True
+        while rulescopy and did_something:
+            did_something = False
+            for rule in sorted(rulescopy):
+                y = neighbour_rules[rule]
+                if(y in evaluated_base):
+                    rulescopy.pop(rule)
+                    did_something=True
+                    continue
+                elif(y in translations and translation_get_pair[y] in evaluated_base):
+                    evaluated_base[y] = [-x for x in evaluated_base[translation_get_pair[y]]]
+                    did_something=True
+                elif(all([x in evaluated_base for x in rule])):
+                    evaluated_base[y]=evaluate(evaluated_base, rule, centrosymmetries, translation_get_pair)
+        if(rulescopy):
+            print("Could not process those rules:")
+            pp.pprint(rulescopy)
+
+        for y in undetermined:
+            if(y not in evaluated_base):
+                print("Could not resolve",y)
+        print(flush=True)
+        solved = True
+        print("Evaluated base step 2")
+        pp.pprint(evaluated_base)
+        for r in neighbour_rules:
+            sym = evaluate(evaluated_base, neighbour_rules[r], centrosymmetries, translation_get_pair)
+            ans = evaluate(evaluated_base, r, centrosymmetries, translation_get_pair)
+            #print(neighbour_rules[r],sym,r,ans)
+            if(sym!=ans):
+                solved = False
+                print("Not equal:",sym)
+
+        if(not solved):
+            print("Not solved with base potential",base_potential)
+            base_potential.pop()
+            evaluated_base = dict()
+    print("Solved with base potential",base_potential)
+    print("Solution:")
+    extralength = 0
+    for base in sorted(determined):
+        """if(base in evaluated_base):
+        #should never be true
+            determined.remove(base)
+        elif base in translations and (translation_get_pair[base] in evaluated_base):
+            evaluated_base[base]=[-x for x in evaluated_base[translation_get_pair[base]]]
+            determined.remove(base)"""
+        if(base in translations):
+            if(base+translation_get_pair[base] in translation_pairs):
+                #only for the firt one
+                extralength+=1
+            else:
+                determined.remove(base)
+        else:
+            extralength+=1
+
+    for base in evaluated_base:
+        evaluated_base[base].extend([0]*extralength)
+    for i,base in enumerate(determined):
+        extra=[0]*extralength
+        extra[i]=1
+        evaluated_base[base]=[0]*len(base_potential)+extra
+        if(base in translations):
+            extra[i]=-1
+            evaluated_base[translation_get_pair[base]]=[0]*len(base_potential)+extra
+
+    print(evaluated_base)
+    return evaluated_base
 import numpy as np
 def is_known(cfo,tilecoord,positions, known_symmetries):
     #Solve linear equation with known symetries and return true if integer solution
@@ -329,12 +502,15 @@ def explore_rotations(tile,poly):
     face_ori = 0
     case_ori = 0
     #extend_tile(Point(300,300),Point(300,310),0,tile[0][0],tile)
-    neighbour_coord,dim = create_neighbour_coordinates(tile)
+    neighbour_coord = create_neighbour_coordinates(tile)
+    dim=len(tuple(neighbour_coord.values())[0][0])
     if(DEBUG2):print("-"*20)
     if(DEBUG2):print("Coordinate infos:",neighbour_coord)
     if(DEBUG2):print("Number of axes:",dim)
     for coord in sorted(neighbour_coord):
         if(DEBUG2):print(coord,":",neighbour_coord[coord])
+        print(coord, ":", neighbour_coord[coord])
+    print("Dimensions:",dim)
     print(flush=True)
     positions = dict()
     symmetry_axis = list()
@@ -393,8 +569,8 @@ def explore_rotations(tile,poly):
                 newtilecoordsign=tilecoordsign
                 if(newcase!=newcase%len(tile) or newcase==case):
                     #print("Neighbour moving",(case%len(tile),newcase),newcase%len(tile))
-                    dim,increment,invertsign = neighbour_coord[(case%len(tile),newcase)]
-                    newtilecoord[dim]+=increment*tilecoordsign
+                    axis,invertsign = neighbour_coord[(case%len(tile),newcase)]
+                    newtilecoord=[newtilecoord[x] + axis[x]*tilecoordsign for x in range(len(newtilecoord))]
                     if(invertsign):
                         newtilecoordsign=-newtilecoordsign
                     #print(dim,increment,invertsign)
@@ -403,13 +579,13 @@ def explore_rotations(tile,poly):
                 to_explore.append((p1p,p2p,newcase,newface,newface_orientation,newtilecoord,newtilecoordsign))
         positions[(case%len(tile),face,orientation)].append(tilecoord)
     if(DEBUG3):print(positions)
-    if(DEBUG3):print("Done exploring everything!")
+    print("Done exploring everything!")
     if(DEBUG1 or DEBUG3):Draw.loop()
     Draw.wait_for_input()
     #Next: explore the space!
 
 if __name__ == "__main__":
-    explore_rotations(nets["j86"],polys["j86"])
+    explore_rotations(nets["cube"],polys["cube"])
 
 
 #Usage:
