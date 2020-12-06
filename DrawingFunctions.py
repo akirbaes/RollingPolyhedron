@@ -156,7 +156,11 @@ if(MODE=="pygame"):
         clock = pygame.time.Clock()
         running=True
         while running:
-            clock.tick(20)
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_RETURN]:
+                break;
+            if(len(pygame.event.get())==0):
+                clock.tick(20)
             for e in pygame.event.get():
                 if e.type == pygame.MOUSEBUTTONDOWN:
                     print("Resume with mouse",e.type,flush=True)
