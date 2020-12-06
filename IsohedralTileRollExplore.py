@@ -15,7 +15,8 @@ DEBUG2=False
 DEBUG3=False
 DEBUG4=False
 DEBUG5=False
-DEBUG6=True
+DEBUG6=False
+DEBUG7=True
 def get_face_points(p1, p2, sides):
     if(sides==3):
         points = triangle(p1, p2)
@@ -363,10 +364,11 @@ def evaluate(rules,formula,centrosymmetries,translation_get_pair):
         i+=1
     return res
 def create_coordinates_system(neighbour_rules,centrosymmetries,translations,translation_pairs):
-    print("Received rules:")
-    pp.pprint(neighbour_rules)
-    print("Translation pairs:")
-    print(translation_pairs)
+    if(DEBUG6):
+        print("Received rules:")
+        pp.pprint(neighbour_rules)
+        print("Translation pairs:")
+        print(translation_pairs)
     undetermined = set(neighbour_rules.values())
     determined = set(centrosymmetries+translations)-undetermined
     translation_get_pair = dict()
@@ -376,18 +378,20 @@ def create_coordinates_system(neighbour_rules,centrosymmetries,translations,tran
             base_potential.remove(q)
         translation_get_pair[p]=q
         translation_get_pair[q]=p
-    print("Create coordinates system based on rules:")
-    pp.pprint(neighbour_rules)
-    print("Centrosymmetries:")
-    print(centrosymmetries)
+    if(DEBUG6):
+        print("Create coordinates system based on rules:")
+        pp.pprint(neighbour_rules)
+        print("Centrosymmetries:")
+        print(centrosymmetries)
     solved = False
     evaluated_base = dict()
     while not solved:
         for i, x in enumerate(base_potential):
             evaluated_base[x]=[0]*len(base_potential)
             evaluated_base[x][i]=1
-        print("Evaluated base step 1")
-        pp.pprint(evaluated_base)
+        if(DEBUG6):
+            print("Evaluated base step 1")
+            pp.pprint(evaluated_base)
 
         #while any([y not in evaluated_base for y in undetermined]):
         rulescopy = neighbour_rules.copy()
@@ -406,30 +410,32 @@ def create_coordinates_system(neighbour_rules,centrosymmetries,translations,tran
                 elif(all([x in evaluated_base for x in rule])):
                     evaluated_base[y]=evaluate(evaluated_base, rule, centrosymmetries, translation_get_pair)
         if(rulescopy):
-            print("Could not process those rules:")
-            pp.pprint(rulescopy)
+            if(DEBUG6):
+                print("Could not process those rules:")
+                pp.pprint(rulescopy)
 
         for y in undetermined:
             if(y not in evaluated_base):
-                print("Could not resolve",y)
-        print(flush=True)
+                if(DEBUG6):print("Could not resolve",y)
+        if(DEBUG6):
+            print("Evaluated base step 2")
+            pp.pprint(evaluated_base)
         solved = True
-        print("Evaluated base step 2")
-        pp.pprint(evaluated_base)
         for r in neighbour_rules:
             sym = evaluate(evaluated_base, neighbour_rules[r], centrosymmetries, translation_get_pair)
             ans = evaluate(evaluated_base, r, centrosymmetries, translation_get_pair)
             #print(neighbour_rules[r],sym,r,ans)
             if(sym!=ans):
                 solved = False
-                print("Not equal:",sym)
-
+                if(DEBUG6):
+                    print("Not equal:")
+                    print(neighbour_rules[r],"=",sym)
+                    print(neighbour_rules[r],"=",r,"=",ans)
+                break
         if(not solved):
-            print("Not solved with base potential",base_potential)
+            if(DEBUG6):print("Not solved with base potential",base_potential)
             base_potential.pop()
             evaluated_base = dict()
-    print("Solved with base potential",base_potential)
-    print("Solution:")
     extralength = 0
     for base in sorted(determined):
         """if(base in evaluated_base):
@@ -457,7 +463,10 @@ def create_coordinates_system(neighbour_rules,centrosymmetries,translations,tran
             extra[i]=-1
             evaluated_base[translation_get_pair[base]]=[0]*len(base_potential)+extra
 
-    print(evaluated_base)
+    if (DEBUG6):
+        print("Solved with base potential",base_potential)
+        print("Solution:")
+        print(evaluated_base)
     return evaluated_base
 import numpy as np
 def is_known(cfo,tilecoord,positions, known_symmetries):
@@ -490,7 +499,6 @@ def add_new_symmetry(cfo,tilecoord,positions,known_symmetries):
         known_symmetries.append(possible_symmetry)
     known_symmetries.append(tilecoord)
     positions[cfo].append(tilecoord)
-
 
 
 def explore_rotations(tile,poly):
@@ -578,11 +586,11 @@ def explore_rotations(tile,poly):
 
                 to_explore.append((p1p,p2p,newcase,newface,newface_orientation,newtilecoord,newtilecoordsign))
         positions[(case%len(tile),face,orientation)].append(tilecoord)
-    if(DEBUG3):print(positions)
+    if(DEBUG3 or DEBUG7):pp.pprint(positions)
     print("Done exploring everything!")
-    if(DEBUG1 or DEBUG3):Draw.loop()
     Draw.wait_for_input()
     #Next: explore the space!
+
 
 if __name__ == "__main__":
     explore_rotations(nets["cube"],polys["cube"])
