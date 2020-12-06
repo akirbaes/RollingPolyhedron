@@ -10,7 +10,7 @@ P1=Point(300,150)
 P2=Point(300,150+ext)
 WIDTH=800
 HEIGHT=1000
-DEBUG1=False
+DEBUG1=True
 DEBUG2=False
 DEBUG3=False
 DEBUG4=False
@@ -32,14 +32,14 @@ def centeroftilestarting(p1, p2, prev, current, tile,draw=0):
     if(draw):
         #for shape in listofshapes:
         #    print("Centeroftiles using shape:",sorted([(p.x,p.y) for p in shape]))
-        #    print(floatcenterpoint(shape))
-        #    Draw.text_center("o",*floatcenterpoint(shape),(0,0,255),20)
+        #    print(centerpoint(shape))
+        #    Draw.text_center("o",*centerpoint(shape),(0,0,255),20)
         if(DEBUG4):print("Shapes received from extend:",len(listofshapes))
         if(DEBUG4):print("Coordinates of shapes used:")
-        if(DEBUG4):print(sorted(floatcenterpoint(shape) for shape in listofshapes))
+        if(DEBUG4):print(sorted(centerpoint(shape) for shape in listofshapes))
         if(DEBUG4):print("big average:")
-        if(DEBUG4):print(floatcenterpoint([Point(floatcenterpoint(shape)) for shape in listofshapes]))
-    return floatcenterpoint([Point(floatcenterpoint(shape)) for shape in listofshapes])
+        if(DEBUG4):print(centerpoint([Point(centerpoint(shape)) for shape in listofshapes]))
+    return centerpoint([Point(centerpoint(shape)) for shape in listofshapes])
 
 def find_match(previous, current, tile):
     """Paires a b
@@ -112,7 +112,7 @@ def extend_tile(p1, p2, currentcase, oldcase, tile):
         if(DEBUG1):Draw.polygon_shape(points, (255,0,0), alpha=0.1, outline=1)
         if(DEBUG4):print("Extend",currentcase)
         if(DEBUG4):print(visitedcases)
-        if(DEBUG1):Draw.text_center(str(realcurrent),*floatcenterpoint(points),(0,0,0),12)
+        if(DEBUG1):Draw.text_center(str(realcurrent),*centerpoint(points),(0,0,0),12)
         if(DEBUG1):Draw.refresh()
         #sleep(0.01)
         tilepoints.append(points)
@@ -153,14 +153,14 @@ def get_neighbours_positions(tile,p1=P1,p2=P2,startcase=0,recurse=0):
         initial_points=get_face_points(initial_p1,initial_p2,len(tile[case]))
         if(DEBUG1):Draw.polygon_shape(initial_points, (0,255*recurse,0), alpha=.5, outline=1)
         initial_points=initial_points+initial_points
-        if(DEBUG1):Draw.text_center(str(case),*floatcenterpoint(initial_points),(0,0,255),12)
+        if(DEBUG1):Draw.text_center(str(case),*centerpoint(initial_points),(0,0,255),12)
         if(DEBUG1):Draw.refresh()
         explored.append(case)
         if(DEBUG1):Draw.wait_for_input()
         for index,next in enumerate(tile[case]):
             branch_p1=initial_points[index]
             branch_p2=initial_points[index+1]
-            branch_points = 2*get_face_points(branch_p2, branch_p1, len(tile[case])) #the direction of the segment has to be reversed
+            branch_points = 2*get_face_points(branch_p2, branch_p1, len(tile[next%len(tile)])) #the direction of the segment has to be reversed
             #branch_points triangle starts at [case] as its origin
             #but next triangle loop considers starts at 0 (forgets previous)
             #rotate the triangle so that the origin side is 0
@@ -237,7 +237,7 @@ def create_neighbour_coordinates(tile):
         initials.sort()
         matches.sort()
         neighbours_matches[neighbour]=(initials,matches)
-
+    print("Neighbours matches:", neighbours_matches)
     ####PART 3 : create a coordinates system based on how they connect
     # conway criterion for isohedral tiling
     if(DEBUG2):print("Neighbours matches:",neighbours_matches)
@@ -364,7 +364,7 @@ def explore_rotations(tile,poly):
         color=Draw.colors[sum([abs(x*(n+1)) for n,x in enumerate(tilecoord)])%len(Draw.colors)]
         Draw.polygon_shape(startpoints,color,0.75,1)
         #Draw.text_center("%d/%d+%d"%(face,case%len(tile),(case-(case%len(tile)))//len(tile)),*centerpoint(startpoints),(255,255,255),int(ext/2))
-        Draw.text_center(str(tilecoord)+str(tilecoordsign),*floatcenterpoint(startpoints),(255,255,255),int(ext/4))
+        Draw.text_center(str(tilecoord)+str(tilecoordsign),*centerpoint(startpoints),(255,255,255),int(ext/4))
         #Draw.text_center("%d(%d)"%(case,(case-(case%len(tile)))//len(tile)),*centerpoint(startpoints),(255,255,255),int(ext/2))
         Draw.refresh()
         #Draw.wait_for_input()
@@ -409,7 +409,7 @@ def explore_rotations(tile,poly):
     #Next: explore the space!
 
 if __name__ == "__main__":
-    explore_rotations(nets["cube"],polys["cube"])
+    explore_rotations(nets["j86"],polys["j86"])
 
 
 #Usage:
