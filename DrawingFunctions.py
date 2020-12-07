@@ -11,7 +11,7 @@ def centerpoint(points):
 if(MODE=="pygame"):
     import pygame
 
-    colors = tuple((x, y, z) for z in range(0, 255, 128) for y in range(0, 255, 128) for x in range(0, 255, 128))
+    colors = tuple((x, y, z) for z in range(0, 255, 127) for y in range(0, 255, 127) for x in range(0, 255, 127))
 
 
     def initialise_drawing(w,h):
