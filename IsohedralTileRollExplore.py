@@ -15,8 +15,8 @@ DEBUG2=False
 DEBUG3=False
 DEBUG4=False
 DEBUG5=False
-DEBUG6=True
-DEBUG7=False
+DEBUG6=False
+DEBUG7=True
 def get_face_points(p1, p2, sides):
     if(sides==3):
         points = triangle(p1, p2)
@@ -592,10 +592,10 @@ def explore_rotations(tile,poly):
     if(DEBUG2):print("Coordinate infos:",neighbour_coord)
     if(DEBUG2):print("Number of axes:",dim)
     for coord in sorted(neighbour_coord):
-        if(DEBUG2):print(coord,":",neighbour_coord[coord])
-        print(coord, ":", neighbour_coord[coord])
-    print("Dimensions:",dim)
-    print(flush=True)
+        if(DEBUG2):
+            print(coord,":",neighbour_coord[coord])
+    #print("Dimensions:",dim)
+    #print(flush=True)
     positions = dict()
     symmetry_axis = list()
     for case in tile:
@@ -668,12 +668,12 @@ def explore_rotations(tile,poly):
     #Next: explore the space!
 
     classes=explore_inside(tile,poly)
-    print(len(classes),"classes found:")
-    pp.pprint(classes)
+    #print(len(classes),"classes found:")
+    #pp.pprint(classes)
     transformations = explore_borders(tile,poly)
     borders = set(transformations)
-    print("Borders:",len(transformations))
-    pp.pprint(transformations)
+    #print("Borders:",len(transformations))
+    #pp.pprint(transformations)
 
     for clas in classes:
         if (0,0,0) in clas:
@@ -688,13 +688,15 @@ def explore_rotations(tile,poly):
         class_start = class_index(cfo)
         for bordercase in transformations[cfo]:
             coordinate = neighbour_coord[bordercase]
-            for cfo_arrival in transformations[cfo][bordercase]:
-                class_end = class_index(cfo_arrival)
-                print(class_start,class_end,coordinate)
-                class_transfo[class_start][class_end].append(coordinate)
+            cfo_arrival = transformations[cfo][bordercase]
+            class_end = class_index(cfo_arrival)
+            #print(transformations[cfo][bordercase])
+            #print(cfo,cfo_arrival)
+            #print("C1,C2,coord",class_start,class_end,coordinate)
+            class_transfo[class_start][class_end].append(coordinate)
 
-    """
-    to_explore = [([initial_class],[0]*dim,1)]
+
+    """to_explore = [([initial_class],[0]*dim,1)]
     while to_explore:
         pathclasses,coord,coordsign=to_explore.pop()
         currentclass = pathclasses[-1]
@@ -710,7 +712,7 @@ def explore_rotations(tile,poly):
 
 
 if __name__ == "__main__":
-    explore_rotations(nets["j17"],polys["j17"])
+    explore_rotations(nets["cube"],polys["cube"])
 
 
 #Usage:
