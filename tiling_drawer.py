@@ -1,6 +1,8 @@
 # to work on to create a tiling creation software
 # has some useless functions copied from NetDrawer
 import pprint
+import tkinter
+import tkinter.filedialog
 import traceback
 
 import pygame
@@ -122,6 +124,7 @@ def loop():
             edge.draw_cursor()
         refresh()
         copy_change = "no change"
+        tiling_result  = {None:(None,)}
         for e in pygame.event.get():
             if e.type == pygame.MOUSEBUTTONDOWN:
                 if (e.button == 4):
@@ -138,7 +141,7 @@ def loop():
                     if(edge.mouse_inside()):
                         if (e.button == 1):
                             if(edge.mouse_click()):
-                                get_tiling()
+                                tiling_result=get_tiling()
                             break
                         elif (e.button == 3):
                             mouse_right_triggers.append(edge)
@@ -146,7 +149,7 @@ def loop():
                     #the issue is that a lot overlap
                     distances = [distance(centerpoint((edge.p1,edge.p2)), pygame.mouse.get_pos()) for edge in mouse_right_triggers]
                     mouse_right_triggers[distances.index(min(distances))].mouse_right_click()
-                    get_tiling()
+                    tiling_result=get_tiling()
             if e.type == pygame.KEYDOWN and e.key == pygame.K_RETURN:
                 all_objects = []
                 running = False
@@ -157,37 +160,77 @@ def loop():
                 running = False
                 print("Quit!", flush=True)
                 exit()
+        if tiling_result and None not in (a for key in tiling_result for a in tiling_result[key]):
+            top = tkinter.Tk()
+            top.withdraw()  # hide window
+            #filetypes=("Text txt",)
+            file_name = tkinter.filedialog.asksaveasfilename(parent=top)+'.txt'
+            top.destroy()
+            try:
+                f=open(file_name,"w")
+                f.write(pprint.pformat(tiling_result,indent=4,sort_dicts=True))
+                f.close()
+            except:
+                traceback.print_exc()
 
+            tiling_result_p = dict()
+            for key in tiling_result:
+                tiling_result_p[key] = [((isinstance(x,int) and x) or (isinstance(x,tuple) and x[0]+x[1]*len(tiling_result))) for x in tiling_result[key]]
+            print(tiling_result_p)
+            try:
+                f=open(file_name[:-3]+"dict","w")
+                f.write(pprint.pformat(tiling_result_p,indent=4,sort_dicts=True))
+                f.close()
+            except:
+                traceback.print_exc()
 
 
 def get_tiling():
     global copy_change
+
     copy_change="update"
-    firstedge = all_objects[0]
-    print("{")
+    pcounter = 1
+    all_neighbours = dict()
     for edge in all_objects:
-        edge.pcounter = 0
+        edge.pcounter = None
     for edge in all_objects:
         if not edge.active:
+            #face
             neighbours = []
             neighbour_objects = []
             if(edge.parent!=None):
                 neighbours.append(edge.parent.faceid)
             for chi in edge.children:
-                if not chi.active:
-                    if(chi.faceid in neighbours):
-                        #duplicate! but we can't process it right now
-                        chi.pcounter=neighbours.count(chi.faceid)
+                if not chi.active: #another face: internal
+                    # if(chi.faceid in neighbours):
+                    #     print("dupe")
+                    #     #duplicate! but we can't process it right now
+                    #     if(chi.pcounter==None):
+                    #         chi.pcounter==1
+                    #
+                    #     chi.pcounter=neighbours.count(chi.faceid)
                     neighbours.append(chi.faceid)
                 else:
                     if(chi.is_neighbour()):
-                        neighbours.append(chi.other.parent.faceid)
+                        if(chi.same_position(chi.other)):
+                            neighbours.append(chi.other.parent.faceid)
+                        else:
+                            if(chi.pcounter==None):
+                                chi.pcounter = pcounter
+                                chi.other.pcounter = pcounter
+                                if(chi.parent == chi.other.parent):
+                                    chi.other.pcounter = -pcounter
+                                pcounter+=1
+                            neighbours.append((chi.other.parent.faceid,chi.pcounter))
                     else:
                         neighbours.append(None)
 
+            all_neighbours[edge.faceid]=neighbours
+            #print(edge.faceid,":",neighbours,len(edge.children))
+    #print("}")
+    pprint.pprint(all_neighbours,indent=4,sort_dicts=True)
+    return all_neighbours
 
-            print(edge.faceid,":",neighbours,len(edge.children))
-    print("}")
 
 def draw_copy(points,edge):
     global copy_change
@@ -366,7 +409,7 @@ class Edge():
                 Edge.cursors.append(self)
         else:
             # surf = get_surface(Edge.depth)
-            draw_polygon(1, self.points, (255, 0, 0), 0.5, 0)
+            draw_polygon(1, self.points, (255, 0, 0), 0.5+self.mouse_inside()/2, 0)
             draw_polygon(1, self.points, (0, 0, 0), 0, 1)
             # border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
             center = centerpoint(self.points)
