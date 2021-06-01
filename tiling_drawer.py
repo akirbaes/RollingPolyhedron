@@ -161,6 +161,8 @@ def loop():
                 running = False
                 print("Quit!", flush=True)
                 exit()
+
+        refresh()
         if tiling_result and None not in (a for key in tiling_result for a in tiling_result[key]):
             top = tkinter.Tk()
             top.withdraw()  # hide window
@@ -186,9 +188,13 @@ def loop():
             except:
                 traceback.print_exc()
 
+            tiling_result_t = dict()
+            for key in tiling_result:
+                tiling_result_t[key] = [(isinstance(x,tuple) and x) or (isinstance(x,int) and (x,0)) for x in tiling_result[key]]
+            pprint.pprint(tiling_result_t,indent=4,sort_dicts=True)
             try:
                 f=open(file_name,"w")
-                f.write("test")
+                f.write(("all_tilings['%s'] = \\\n"%basename)+pprint.pformat(tiling_result_t,indent=4,sort_dicts=True))
                 f.close()
             except:
                 traceback.print_exc()

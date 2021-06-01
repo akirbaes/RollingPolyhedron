@@ -2,6 +2,8 @@
 #just draws a tiling
 #useless or out-to-date functions copied from main
 """
+import os
+
 from GeometryFunctions import *
 from sys import setrecursionlimit
 import DrawingFunctions as Draw
@@ -487,12 +489,61 @@ def exploreA(p1, p2, case, face, previouscase=None, previousface=None):
                     return True
 
 from tilings import *
+all_tilings=dict()
+path = "isogonal_tilings"
+for dirpath, dirnames, filenames in os.walk(path):
+
+    for name in filenames:
+        if name.endswith((".py")):
+            pathname =os.path.join(dirpath, name)
+            f = open(pathname)
+            data = f.read()
+            f.close()
+            exec(data)
+
+isogonals = all_tilings
+print(isogonals)
+
 if __name__ == "__main__":
     global shape_name
     global net
     global order
     # for shape_name in missing:
     # for shape_name in shapes_names:
+
+    for tilename in platonics:
+        net = platonics[tilename]
+        tilename="platonics_"+tilename
+        print("]"*50+tilename)
+        Draw.text_topleftalign(tilename,2,2,(0,0,0),30)
+        shape=net
+        order=sorted(net.keys())
+        visualise(p1, p2, 0, net[0][0], 2)
+        fill_screen(p1,p2,order[0],color=None)
+        try:os.mkdir("platonic_tilings")
+        except:pass
+        Draw.text_topleftalign(tilename,2,2,(255,0,0),30,bgcolor=(255,255,255))
+        Draw.refresh()
+
+        Draw.save_screen("platonic_tilings/"+tilename+ ".png")
+        #Draw.wait_for_input()
+        Draw.empty_shapes()
+
+    for tilename in isogonals:
+        net = isogonals[tilename]
+        tilename="isogonal_"+tilename
+        print("]"*50+tilename)
+        Draw.text_topleftalign(tilename,2,2,(0,0,0),30)
+        shape=net
+        order=sorted(net.keys())
+        visualise(p1, p2, 0, net[0][0], 2)
+        fill_screen(p1,p2,order[0],color=None)
+        Draw.text_topleftalign(tilename,2,2,(255,0,0),30,bgcolor=(255,255,255))
+        Draw.refresh()
+        Draw.save_screen("isogonal_tilings/"+tilename+ ".png")
+        #Draw.wait_for_input()
+        Draw.empty_shapes()
+    #exit()
 
     for tilename in archimedeans:
         net = archimedeans[tilename]
@@ -505,23 +556,10 @@ if __name__ == "__main__":
         fill_screen(p1,p2,order[0],color=None)
         Draw.text_topleftalign(tilename,2,2,(255,0,0),30,bgcolor=(255,255,255))
         Draw.refresh()
-        Draw.save_screen(tilename+ ".png")
-        Draw.wait_for_input()
-        Draw.empty_shapes()
-    for tilename in platonics:
-        net = platonics[tilename]
-        tilename="platonics_"+tilename
-        print("]"*50+tilename)
-        Draw.text_topleftalign(tilename,2,2,(0,0,0),30)
-        shape=net
-        order=sorted(net.keys())
-        visualise(p1, p2, 0, net[0][0], 2)
-        fill_screen(p1,p2,order[0],color=None)
-        Draw.text_topleftalign(tilename,2,2,(255,0,0),30,bgcolor=(255,255,255))
-        Draw.refresh()
-
-        Draw.save_screen(tilename+ ".png")
-        Draw.wait_for_input()
+        try:os.mkdir("archimedean_tilings")
+        except:pass
+        Draw.save_screen("archimedean_tilings/"+tilename+ ".png")
+        #Draw.wait_for_input()
         Draw.empty_shapes()
 
     """
