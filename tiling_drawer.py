@@ -1,5 +1,6 @@
 # to work on to create a tiling creation software
 # has some useless functions copied from NetDrawer
+import os
 import pprint
 import tkinter
 import tkinter.filedialog
@@ -164,10 +165,10 @@ def loop():
             top = tkinter.Tk()
             top.withdraw()  # hide window
             #filetypes=("Text txt",)
-            file_name = tkinter.filedialog.asksaveasfilename(parent=top)+'.txt'
+            file_name = tkinter.filedialog.asksaveasfilename(parent=top)
             top.destroy()
             try:
-                f=open(file_name,"w")
+                f=open(file_name+'.txt',"w")
                 f.write(pprint.pformat(tiling_result,indent=4,sort_dicts=True))
                 f.close()
             except:
@@ -175,15 +176,22 @@ def loop():
 
             tiling_result_p = dict()
             for key in tiling_result:
-                tiling_result_p[key] = [((isinstance(x,int) and x) or (isinstance(x,tuple) and x[0]+x[1]*len(tiling_result))) for x in tiling_result[key]]
-            print(tiling_result_p)
+                tiling_result_p[key] = [((isinstance(x,tuple) and x[0]+x[1]*len(tiling_result))) or (isinstance(x,int) and x) for x in tiling_result[key]]
+            pprint.pprint(tiling_result_p,indent=4,sort_dicts=True)
             try:
-                f=open(file_name[:-3]+"dict","w")
-                f.write(pprint.pformat(tiling_result_p,indent=4,sort_dicts=True))
+                basename = os.path.basename(file_name)
+                f=open(file_name+".py","w")
+                f.write(("all_tilings['%s'] = \\\n"%basename)+pprint.pformat(tiling_result_p,indent=4,sort_dicts=True))
                 f.close()
             except:
                 traceback.print_exc()
 
+            try:
+                f=open(file_name,"w")
+                f.write("test")
+                f.close()
+            except:
+                traceback.print_exc()
 
 def get_tiling():
     global copy_change
