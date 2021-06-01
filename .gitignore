@@ -1,0 +1,5 @@
+*.png
+.idea/
+__pycache__
+*.gif
+venv/
