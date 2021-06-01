@@ -373,7 +373,7 @@ def big_explore(tiling, rolling, p1, p2, case, face,prints=False):
     if(prints):print(case, face, tiling[case])
     polys = visualise(tiling, p1, p2, case, tiling[case][0], color=3, fill=True, prints=prints)
     for poly in polys:
-        starting_area.add(poly.center)
+        starting_area.add(poly.center())
     while (exploreA(tiling, rolling, p1, p2, case, face,prints=prints)):
         small_orientation = set()
     print("Finished exploring the area")
