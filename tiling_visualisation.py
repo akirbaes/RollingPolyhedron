@@ -1,22 +1,9 @@
 """Tileset visualiser by Akira Baes
-A future version should interface with a tile-representation-generator directly
-
-First, "extend" show the representation of a single tile with its neighbouring tiles infos
-
-"fill_screen" then fill the screen with the given tile to verify that it is a tile
-
-"explore" is supposed to find all the places that can be rolled into, with a stopping condition when reaching a position+orientation that has already been met,
-but it is rather difficult to read to determine if it can roll in the space or not.
-
-V1.1 I'm trying to look at one specific one in more details (hexagonal antiprism), but maximum recrsion depth gets in the way, must rewrite
-But by symmetry, there is nothing exceptional to see, only that my algorithm stops too early before filling the screen.
-V1.2 rewriting it in several files for pycharm
+#just draws a tiling
+#useless or out-to-date functions copied from main
 """
-from Point import Point
-from time import sleep
 from GeometryFunctions import *
 from sys import setrecursionlimit
-import sys
 import DrawingFunctions as Draw
 
 setrecursionlimit(10 ** 4)
@@ -28,18 +15,18 @@ p2 = Point(300 + EDGESIZE, 300)  # 350 300
 textsize = int(round((EDGESIZE) / 2))
 
 Draw.initialise_drawing(WIDTH, HEIGHT)
-from PolyAndTessNets import shapes_names, nets, polys, missing
 
 
 def make_shape(points, color, filling=0):
+    color = (180,180,180)
     Draw.polygon_shape(points, color, filling)
-    Draw.polygon_shape(points, (0, 0, 0), 0, outline=1)
+    Draw.polygon_shape(points, (0, 0, 0), 0, outline=2)
     return points
 
 
 def make_cursor(points, color=5, filling=0.1):
     Draw.polygon_cursor(points, color, filling)
-    Draw.polygon_cursor(points, color, 0, outline=1)
+    Draw.polygon_cursor(points, color, 0, outline=2)
     return points
 
 
@@ -78,7 +65,7 @@ class Poly:
             self.pid = make_shape(points, color, 1)
         # print(points)
 
-        number(realid, sum(points, Point(0, 0)) / len(points))
+        #number(realid, sum(points, Point(0, 0)) / len(points))
 
     def order(self, neighbor):
         index = self.n.index(neighbor)
@@ -127,18 +114,18 @@ def get_face_points(p1, p2, face, noisy=True):
     return points
 
 
-def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, ord=None):
+def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, ord=None,prints=False):
     # Copy of extend, but fills the whole space
     realshape = newshape % len(order)
     if (drawnshapes == None):
         drawnshapes = list()
-    print("Visualise---------", newshape, oldshape, "(%s)" % realshape, shape[realshape])
+    if(prints):print("Visualise---------", newshape, oldshape, "(%s)" % realshape, shape[realshape])
     if (shapespoly == None):
         shapespoly = list()
     points = get_face_points(p1, p2, newshape, False)
     shapespoly.append(Poly(newshape, points, color, fill))
     current = shape[realshape]
-    print(current, 'of shape', realshape, ', coming from', oldshape)
+    if(prints):print(current, 'of shape', realshape, ', coming from', oldshape)
     try:
         index = current.index(oldshape)
     except:
@@ -170,31 +157,31 @@ def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=
     return shapespoly
 
 
-def extend(p1, p2, newshape, oldshape=None, drawnshapes=None, shapespoly=None):
+def extend(p1, p2, newshape, oldshape=None, drawnshapes=None, shapespoly=None, prints=False):
     # Visualize one tile and the neighbouring infos
     if (drawnshapes == None):
         drawnshapes = list()
     if (shapespoly == None):
         shapespoly = list()
-    print(end="Draw the")
+    if(prints):print(end="Draw the")
     realshape = newshape % len(order)
     if (len(shape[realshape])) == 3:
         points = triangle(p1, p2)
-        print(" triangle ", newshape, "(%d)" % realshape)
+        if(prints):print(" triangle ", newshape, "(%d)" % realshape)
     elif (len(shape[realshape])) == 4:
         points = square(p1, p2)
-        print(" square ", newshape, "(%d)" % realshape)
+        if(prints):print(" square ", newshape, "(%d)" % realshape)
     else:
         points = hexagon(p1, p2)
-        print(" hexagon ", newshape, "(%d)" % realshape)
+        if(prints):print(" hexagon ", newshape, "(%d)" % realshape)
 
     shapespoly.append(Poly(newshape, points, 1))
     current = shape[realshape]
     if (oldshape != None and newshape == realshape):
-        print(oldshape, "in", current, newshape, realshape)
+        if(prints):print(oldshape, "in", current, newshape, realshape)
         index = current.index(oldshape)
         current = current[index:] + current[:index]
-        print("Previous:", oldshape, "Next:", current)
+        if(prints):print("Previous:", oldshape, "Next:", current)
     shapespoly[-1].fill(current)
     drawnshapes.append(newshape)
 
@@ -250,7 +237,7 @@ from random import randint
 tempshape = []
 
 
-def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=None, color=None):
+def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=None, color=None, prints=False):
     global tempshape
 
     if (exploredpoints == None):
@@ -269,7 +256,7 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
 
     exploredpoints.append(centerpoint(points))
     current = shape[realshape]
-    print("Oldshape:", oldshape)
+    if(prints):print("Oldshape:", oldshape)
     if (oldshape == None):
         # Turns a n+P number into n-P (find pair)
         oldshape = -current[0] + 2 * (current[0] % len(order))
@@ -277,7 +264,7 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
 
     # if(oldshape!=None and newshape==realshape): #on explore même quand on est dehors
     # print(oldshape,"in",current,newshape,realshape)
-    print(current, "of shape", realshape, "coming from", oldshape, flush=True)
+    if(prints):print(current, "of shape", realshape, "coming from", oldshape, flush=True)
     try:
         index = current.index(oldshape)
     except:
@@ -350,7 +337,7 @@ else:
 """
 
 
-def big_explore(p1, p2, case, face):
+def big_explore(p1, p2, case, face, prints=False):
     global big_orientation
     global starting_area
     global small_orientation
@@ -361,13 +348,13 @@ def big_explore(p1, p2, case, face):
     big_orientation = set()
     small_orientation = set()
     all_points = set()
-    print(case, face, net[case])
+    if(prints):print(case, face, net[case])
     polys = visualise(p1, p2, case, net[case][0], color=3, fill=True)
     for poly in polys:
         starting_area.add(poly.center)
     while (exploreA(p1, p2, case, face)):
         small_orientation = set()
-    print("Finished exploring the area")
+    if(prints):print("Finished exploring the area")
 
 
 screenshot_counter = 0
@@ -509,7 +496,7 @@ if __name__ == "__main__":
 
     for tilename in archimedeans:
         net = archimedeans[tilename]
-        tilename="archimedean: "+tilename
+        tilename="archimedean_"+tilename
         print("]"*50+tilename)
         Draw.text_topleftalign(tilename,2,2,(0,0,0),30)
         shape=net
@@ -518,11 +505,12 @@ if __name__ == "__main__":
         fill_screen(p1,p2,order[0],color=None)
         Draw.text_topleftalign(tilename,2,2,(255,0,0),30,bgcolor=(255,255,255))
         Draw.refresh()
+        Draw.save_screen(tilename+ ".png")
         Draw.wait_for_input()
         Draw.empty_shapes()
     for tilename in platonics:
         net = platonics[tilename]
-        tilename="platonics: "+tilename
+        tilename="platonics_"+tilename
         print("]"*50+tilename)
         Draw.text_topleftalign(tilename,2,2,(0,0,0),30)
         shape=net
@@ -531,6 +519,8 @@ if __name__ == "__main__":
         fill_screen(p1,p2,order[0],color=None)
         Draw.text_topleftalign(tilename,2,2,(255,0,0),30,bgcolor=(255,255,255))
         Draw.refresh()
+
+        Draw.save_screen(tilename+ ".png")
         Draw.wait_for_input()
         Draw.empty_shapes()
 

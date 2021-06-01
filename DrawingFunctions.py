@@ -31,12 +31,12 @@ if(MODE=="pygame"):
         s.fill((0, 0, 0, 0))
         #print(color + (int(round(256*alpha)),))
         color_alpha = color + (int(alpha*255),)
-        pygame.draw.polygon(s, color_alpha, [(p.x, p.y) for p in points])
+        #pygame.draw.polygon(s, color_alpha, [(p.x, p.y) for p in points])
 
         if(outline):
-            pygame.draw.lines(s, (0,0,0), True, [(p.x, p.y) for p in points])
-        ppoint = centerpoint(points[:2]*20+points)
-        pygame.draw.circle(s, (255,255,255),ppoint,1)
+            pygame.draw.aalines(s, (0,0,0), True, [(p.x, p.y) for p in points], outline)
+        # ppoint = centerpoint(points[:2]*20+points)
+        # pygame.draw.circle(s, (255,255,255),ppoint,1)
         #pygame.draw.line(s,(255,128,128),points[0].as_tuple(),points[1].as_tuple(),2)
         shapes.blit(s, (0, 0))
 
@@ -73,7 +73,7 @@ if(MODE=="pygame"):
     def polygon_orientation(points,orientation,face_count,max_count,outline=0,case_count=0):
         #Draw a little triangles to show the reached orientation on the face.
         line = (points+points)[orientation:orientation+2]
-        print(line,orientation,orientation+2)
+        #print(line,orientation,orientation+2)
         perpendicular = Point(centerpoint(points))-centerpoint(line)
         tangent=(line[1]-line[0])/max_count
         perpendicular=perpendicular/perpendicular.length()*tangent.length()
@@ -93,7 +93,7 @@ if(MODE=="pygame"):
 
         c = face_count/(max_count)
         color = tuple(int(x*255) for x in hls_to_rgb(c,0.5,1))
-        print(color)
+        #print(color)
 
         pygame.draw.polygon(above, color, [(p.x, p.y) for p in tri])
 
@@ -105,7 +105,7 @@ if(MODE=="pygame"):
         if(outline==1):
             p3 = Point(centerpoint(points))
             tri2 = tri[:2]+(p3,)
-            print(tri2)
+            #print(tri2)
             pygame.draw.polygon(above, color, [(p.x, p.y) for p in tri2])
             pygame.draw.lines(above, (0,0,0),0, [(p.x, p.y) for p in (tri2+tri2)[1:4]])
             color1 = tuple(int(x*255) for x in hls_to_rgb(c,0.45,1))
@@ -160,6 +160,16 @@ if(MODE=="pygame"):
         text = pygame.font.SysFont(None, size).render(text, True, color)
         shapes.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
 
+    def text_rotated(text,x,y,color,size,angle,underline = False):
+        if(isinstance(color,int)):
+            color=colors[color%len(colors)]
+        text = pygame.font.SysFont(None, size*2).render(text, True, color)
+        if(underline):
+            pygame.draw.line(text,(0,0,0),(0,text.get_height()-1),(text.get_width(),text.get_height()-1), 2)
+        text = pygame.transform.rotate(text,angle)
+        text = pygame.transform.smoothscale(text,(text.get_width()//2,text.get_height()//2))
+        shapes.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
+
     def wait_for_input():
         clock = pygame.time.Clock()
         running=True
@@ -179,7 +189,7 @@ if(MODE=="pygame"):
                 if e.type == pygame.QUIT:
                     running = False
                     print("Quit!",flush=True)
-                    #pygame.quit()
+                    pygame.quit()
 
 
     def refresh():

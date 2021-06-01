@@ -19,10 +19,13 @@
 
 #p = len(tiling)
 #extract faceid = n%p
-#extract k = -n + 2*n%p
+#extract k = n//p
+#invert k: -n + 2*n%p
 #matching rule:
-#k==0: match with other k==0
+#k==0: match with other k==0 directly
 #k!=0: try to match with -k, otherwise, try to match with k
+
+#can be simplified to: try to match with -k, then with --k
 
 platonics = dict()
 platonics["3^6"] = {
