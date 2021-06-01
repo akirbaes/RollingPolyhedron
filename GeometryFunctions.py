@@ -39,7 +39,8 @@ def centerpoint(points):
     return (int(round(mx / len(points))), int(round(my / len(points))))
 
 def distance(p1,p2):
-    x,y,xx,yy = p1, p2
+    x,y = p1
+    xx,yy = p2
     return ((x-xx)**2+(y-yy)**2)**0.5
 
 def square(p1, p2):
