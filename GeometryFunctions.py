@@ -38,6 +38,9 @@ def centerpoint(points):
         my += y
     return (int(round(mx / len(points))), int(round(my / len(points))))
 
+def distance(p1,p2):
+    x,y,xx,yy = p1, p2
+    return ((x-xx)**2+(y-yy)**2)**0.5
 
 def square(p1, p2):
     # creates a rectangle clockwise to p1,p2
@@ -62,7 +65,8 @@ def triangle(p1, p2):
 
 
 def hexagon(p1, p2):
-    # creates a triangle clockwise to p1,p2
+    # creates a hexagon clockwise to p1,p2
+    # precision decreases as points are added to eachother
     p1 = p1
     p2 = p2
     sol = [(p1), (p2)]
@@ -76,4 +80,36 @@ def hexagon(p1, p2):
     """pb = p1 + ((p2-p1)/2)
 	ph = 
 	dist = (p2-p1)"""
+    return sol
+
+
+def octagon(p1, p2):
+    # creates an octagon clockwise to p1,p2
+    # precision decreases as points are added to eachother
+    p1 = p1
+    p2 = p2
+    sol = [(p1), (p2)]
+    pa = p1
+    pb = p2
+    for i in range(6):
+        pn = pb + (pa - pb).rotate(-3 * pi / 4)
+        sol.append((pn))
+        pa = pb
+        pb = pn
+    return sol
+
+
+def dodecagon(p1, p2):
+    # creates a dodecagon clockwise to p1,p2
+    # precision decreases as points are added to eachother
+    p1 = p1
+    p2 = p2
+    sol = [(p1), (p2)]
+    pa = p1
+    pb = p2
+    for i in range(10):
+        pn = pb + (pa - pb).rotate(-5 * pi / 6)
+        sol.append((pn))
+        pa = pb
+        pb = pn
     return sol

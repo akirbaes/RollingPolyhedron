@@ -127,18 +127,18 @@ def get_face_points(p1, p2, face, noisy=True):
     return points
 
 
-def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, ord=None, prints=False):
+def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, ord=None):
     # Copy of extend, but fills the whole space
     realshape = newshape % len(order)
     if (drawnshapes == None):
         drawnshapes = list()
-    if(prints):print("Visualise---------", newshape, oldshape, "(%s)" % realshape, shape[realshape])
+    print("Visualise---------", newshape, oldshape, "(%s)" % realshape, shape[realshape])
     if (shapespoly == None):
         shapespoly = list()
     points = get_face_points(p1, p2, newshape, False)
     shapespoly.append(Poly(newshape, points, color, fill))
     current = shape[realshape]
-    if(prints):print(current, 'of shape', realshape, ', coming from', oldshape)
+    print(current, 'of shape', realshape, ', coming from', oldshape)
     try:
         index = current.index(oldshape)
     except:
@@ -150,7 +150,7 @@ def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=
     shapespoly[-1].fill(current)
     drawnshapes.append(realshape)
 
-    #Draw.refresh()
+    Draw.refresh()
     # sleep(0.1)
     # print("I have",len(points),"points")
     # if(newshape==realshape):
@@ -161,7 +161,7 @@ def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=
         p1 = points[index % len(points)]
         p2 = points[(index + 1) % len(points)]
         if (p not in drawnshapes) and (p % len(order) == p):
-            visualise(p2, p1, p, newshape, color, drawnshapes, shapespoly, fill, prints=prints)
+            visualise(p2, p1, p, newshape, color, drawnshapes, shapespoly, fill)
         """else:
 			if(p in drawnshapes):
 				print("P in drawn:",p,drawnshapes,p not in drawnshapes)
@@ -250,7 +250,7 @@ from random import randint
 tempshape = []
 
 
-def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=None, color=None, prints=None):
+def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=None, color=None):
     global tempshape
 
     if (exploredpoints == None):
@@ -269,7 +269,7 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
 
     exploredpoints.append(centerpoint(points))
     current = shape[realshape]
-    if(prints):print("Oldshape:", oldshape)
+    print("Oldshape:", oldshape)
     if (oldshape == None):
         # Turns a n+P number into n-P (find pair)
         oldshape = -current[0] + 2 * (current[0] % len(order))
@@ -277,13 +277,13 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
 
     # if(oldshape!=None and newshape==realshape): #on explore même quand on est dehors
     # print(oldshape,"in",current,newshape,realshape)
-    if(prints):print(current, "of shape", realshape, "coming from", oldshape, flush=True)
+    print(current, "of shape", realshape, "coming from", oldshape, flush=True)
     try:
         index = current.index(oldshape)
     except:
         # Maybe the -P +P formula is not respected
         index = current.index(-oldshape + 2 * (oldshape % len(order)))
-        if(prints):print("Exception matching", oldshape % len(order), "+%dP" % (oldshape // len(order)))
+        print("Exception matching", oldshape % len(order), "+%dP" % (oldshape // len(order)))
     current = current[index:] + current[:index]
     # print("Previous:",oldshape,"Next:",current)
     # screen.fill((255,255,255))
@@ -300,10 +300,10 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
         if (color == None):
             c = randint(0, 100)
             c = -1
-            drawnpoly += visualise(p1, p2, newshape, oldshape, c, fill=False, prints=prints)
+            drawnpoly += visualise(p1, p2, newshape, oldshape, c, fill=False)
         else:
-            visualise(p1, p2, newshape, oldshape, color, fill=False, prints=prints)
-        #print("Drawn")
+            visualise(p1, p2, newshape, oldshape, color, fill=False)
+        print("Drawn")
     # print(drawnpoly[-1])
     # color+=1
     # print("Finished drawing")
@@ -313,7 +313,7 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
         p2 = points[(index + 1) % len(points)]
         # print("Do I explore ",realshape," to ",p,"(",p%len(order),") ?")
         if ((p % len(order) == p) and (p % len(order) != realshape)):
-            fill_screen(p2, p1, real(p), newshape - rest(p), exploredpoints, drawnpoly, color, prints=prints)
+            fill_screen(p2, p1, real(p), newshape - rest(p), exploredpoints, drawnpoly, color)
 
     for index, p in enumerate(current):
         # print(index)
@@ -324,7 +324,7 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
             # color+=1
             # print(newshape,p,rest(p))
             # print(newshape + rest(p))
-            fill_screen(p2, p1, real(p), newshape - rest(p), exploredpoints, drawnpoly, color, prints=prints)
+            fill_screen(p2, p1, real(p), newshape - rest(p), exploredpoints, drawnpoly, color)
 
 
 """
@@ -350,7 +350,7 @@ else:
 """
 
 
-def big_explore(p1, p2, case, face,prints=False):
+def big_explore(p1, p2, case, face):
     global big_orientation
     global starting_area
     global small_orientation
@@ -362,10 +362,10 @@ def big_explore(p1, p2, case, face,prints=False):
     small_orientation = set()
     all_points = set()
     print(case, face, net[case])
-    polys = visualise(p1, p2, case, net[case][0], color=3, fill=True, prints=prints)
+    polys = visualise(p1, p2, case, net[case][0], color=3, fill=True)
     for poly in polys:
         starting_area.add(poly.center)
-    while (exploreA(p1, p2, case, face,prints=prints)):
+    while (exploreA(p1, p2, case, face)):
         small_orientation = set()
     print("Finished exploring the area")
 
@@ -373,7 +373,7 @@ def big_explore(p1, p2, case, face,prints=False):
 screenshot_counter = 0
 
 
-def exploreA(p1, p2, case, face, previouscase=None, previousface=None,prints=True):
+def exploreA(p1, p2, case, face, previouscase=None, previousface=None):
     global screenshot_counter
     # Draw.save_screen("scrsh/%s%d.png"%(shape_name,screenshot_counter))
     screenshot_counter += 1
@@ -392,7 +392,6 @@ def exploreA(p1, p2, case, face, previouscase=None, previousface=None,prints=Tru
     # print("carré",face,"venant de",previousface)
     else:
         points = hexagon(p1, p2)
-    #if(prints):
     Draw.refresh()
     Draw.empty_cursor()
 
@@ -438,7 +437,7 @@ def exploreA(p1, p2, case, face, previouscase=None, previousface=None,prints=Tru
             else:
                 outline = 2
                 # black outline
-        if(prints):print(len(points))
+        print(len(points))
         Draw.polygon_orientation(points, (0 - caseOrientation + faceOrientation - caseOrientation) % len(points),
                                  face_count, max_count, outline, case_count)
 
@@ -447,7 +446,7 @@ def exploreA(p1, p2, case, face, previouscase=None, previousface=None,prints=Tru
         if (face == case and caseOrientation == faceOrientation and centerpoint(points) not in starting_area):
             if (centerpoint(points) not in big_orientation):
 
-                polys = visualise(p1, p2, case, previouscase, color=1, fill=True,prints=prints)
+                polys = visualise(p1, p2, case, previouscase, color=1, fill=True)
                 ct = None
                 for poly in polys:
                     ct = poly.center
@@ -467,7 +466,7 @@ def exploreA(p1, p2, case, face, previouscase=None, previousface=None,prints=Tru
     elif (points_outside(points)):
         return False
     else:
-        if(prints):Draw.empty_cursor()
+        Draw.empty_cursor()
 
         current_cursor[:] = make_cursor(points, -2, filling=0.1)
         for pti in range(len(points)):
@@ -507,62 +506,87 @@ if __name__ == "__main__":
     global order
     # for shape_name in missing:
     # for shape_name in shapes_names:
-    tiles = list(archimedeans)+list(platonics)
+
+    for tilename in archimedeans:
+        net = archimedeans[tilename]
+        tilename="archimedean: "+tilename
+        print("]"*50+tilename)
+        Draw.text_topleftalign(tilename,2,2,(0,0,0),30)
+        shape=net
+        order=sorted(net.keys())
+        visualise(p1, p2, 0, net[0][0], 2)
+        fill_screen(p1,p2,order[0],color=None)
+        Draw.text_topleftalign(tilename,2,2,(255,0,0),30,bgcolor=(255,255,255))
+        Draw.refresh()
+        Draw.wait_for_input()
+        Draw.empty_shapes()
+    for tilename in platonics:
+        net = platonics[tilename]
+        tilename="platonics: "+tilename
+        print("]"*50+tilename)
+        Draw.text_topleftalign(tilename,2,2,(0,0,0),30)
+        shape=net
+        order=sorted(net.keys())
+        visualise(p1, p2, 0, net[0][0], 2)
+        fill_screen(p1,p2,order[0],color=None)
+        Draw.text_topleftalign(tilename,2,2,(255,0,0),30,bgcolor=(255,255,255))
+        Draw.refresh()
+        Draw.wait_for_input()
+        Draw.empty_shapes()
+
+    """
     for shape_name in ["j8"]:
-        for tiling_name in tiles:
-            global order
-            global shape
-            global shapes
-            global tilecases
-            global roll
-            global net
-            roll = polys[shape_name]
-            #roll=polys["hexagonal_antiprism"]
-            if (roll == None):
-                continue
-            #net = nets[shape_name]
-            net = archimedeans[tiling_name]
+        global order
+        global shape
+        global shapes
+        global tilecases
+        global roll
+        global net
+        roll = polys[shape_name]
+        if (roll == None):
+            continue
+        net = nets[shape_name]
 
-            shape = net
-            order = sorted(shape)
-            shapes = []
-            tilecases = []
-            Draw.empty_shapes()
-            Draw.empty_cursor()
-            Draw.refresh()
-            #visualise(p1, p2, 0, net[0][0], 2)
-            #Draw.refresh()
-            #print("EXTEND")
-            #sleep(2) ;
-            #extend(p1,p2,order[0])
-            # Draw.save_screen("net_%s.png" % shape_name)
-            #Draw.refresh()
-            #Draw.empty_shapes()
-            #sleep(2) ;
-            fill_screen(p1,p2,order[0],color=None) ;
-            Draw.refresh()
+        shape = net
+        order = sorted(shape)
+        shapes = []
+        tilecases = []
+        Draw.empty_shapes()
+        Draw.empty_cursor()
+        Draw.refresh()
+        visualise(p1, p2, 0, net[0][0], 2)
+        Draw.refresh()
+        print("EXTEND")
+        sleep(2) ;
+        extend(p1,p2,order[0])
+        # Draw.save_screen("net_%s.png" % shape_name)
+        Draw.refresh()
+        Draw.empty_shapes()
+        sleep(2) ;
+        fill_screen(p1,p2,order[0],color=None) ;
+        sleep(2)
 
-            # Commented to gain time
+        # Commented to gain time
 
-            # Draw.empty_shapes()
-            print("#" * 30)
+        # Draw.empty_shapes()
+        print("#" * 30)
 
-            # p2 = Point(330,300) #350 300
-            big_explore(p1, p2, 0, 2)
-            Draw.refresh()
+        # p2 = Point(330,300) #350 300
+        big_explore(p1, p2, 0, 0)
 
-            Draw.save_screen(shape_name+"_rolling_in_"+tiling_name+".png")
-            Draw.refresh()
-            sleep(1)
-            # for c in current_cursor:
-            #    graph.delete(c)
-            Draw.empty_cursor()
-            current_cursor[:] = []
-            Draw.refresh()
-            # input("Finished")
+        # Draw.save_screen("tess_%s.png" % shape_name)
+        Draw.refresh()
+
+        # for c in current_cursor:
+        #    graph.delete(c)
+        Draw.empty_cursor()
+        current_cursor[:] = []
+        Draw.refresh()
+        # input("Finished")
     print("Done!", flush=True)
     Draw.loop()
     # sleep(2)
+    """
     # case = part of J1 net on which we are rolling
     # face = part of J1R polyhedron which is looking at the floor
 

@@ -13,8 +13,8 @@ from GeometryFunctions import *
 from PolyAndTessNets import *
 
 pp = pprint.PrettyPrinter(indent=4)
-WIDTH = 600
-HEIGHT = 600
+WIDTH = 800
+HEIGHT = 800
 EDGE_SIZE = 30
 p1 = Point(300, 300)
 p2 = Point(300+EDGE_SIZE, 300)
@@ -123,6 +123,12 @@ def loop():
                         edge.mouse_click()
                     elif(e.button==3):
                         edge.mouse_right_click()
+                    elif(e.button==4):
+                        #wheel_up
+                        pass
+                    elif(e.button==5):
+                        #wheel down
+                        pass
             if e.type== pygame.KEYDOWN and e.key == pygame.K_RETURN:
                 all_objects = []
                 running=False
@@ -133,22 +139,85 @@ def loop():
                 print("Quit!", flush=True)
                 exit()
 
+class DummyParent():
+    def __init__(self):
+        self.favorite = None
 
 class Edge():
     depth = 0
+    numbering = set()
+    shapes_functions = (None, None, None, triangle, square, None, hexagon, None, octagon, None, None, None, dodecagon)
+    select_neighbour = None
 
-    def __init__(self, coords, poly, face0, face1):
+    def get_a_faceid(self):
+        number = 0
+        while number in Edge.numbering:
+            number+=1
+            if(number not in Edge.numbering):
+                Edge.numbering.add(number)
+                return number
+    def forget_faceid(self):
+        Edge.numbering.remove(self.faceid)
+    def is_neighbour(self):
+       return self.other!=None
+    def get_unique_p(self,other_p=0):
+        self.pcount = max(self.pcount+1,other_p)
+        return self.pcount
+    def same_position(self,other):
+        return distance(floatcenterpoint((self.coords)),floatcenterpoint(other.coords))<2
+    def set_link(self,other):
+        self.other = other
+        other.other=self
+        if(self.parent==other.parent and self.parent!=None):
+            #self link
+            #functions also when linking to same edge
+            p = self.parent.get_unique_p()
+            other.set_parent_neighbour(self.parent.faceid-p*self.parent.nextshape)
+            self.set_parent_neighbour(self.parent.faceid+p*self.parent.nextshape)
+        elif(self.same_position(other)):
+            #internal link
+            self.set_parent_neighbour(other.parent.faceid)
+            other.set_parent_neighbour(self.parent.faceid)
+        else:
+            #external link
+            p = self.parent.get_unique_p(other.parent.get_unique_p())
+            other.pcount = p
+            self.set_parent_neighbour(other.parent.faceid+p*other.parent.nextshape)
+            other.set_parent_neighbour(self.parent.faceid+p*self.parent.nextshape)
+
+
+        self.set_parent_neighbour(self.parent.faceid)
+        other.set_parent_neighbour(other.parent.faceid)
+    def __init__(self, coords, polysize, parent):
+        self.pcount=0 #as face
+        self.p = -1 #as pairing edge
+        self.parent = parent
+        self.other=None
         self.children=[]
         self.active = True
-        self.coords = coords
+        self.coords = coords #pair
         self.p1, self.p2 = coords
-        self.poly = poly
-        self.face0 = face0  # previous face : do not draw
-        self.face1 = face1  # next face: draw
-        self.nextshape = len(poly[face1])
-        shape = (None, None, None, triangle, square, None, hexagon)[self.nextshape]
+        self.faceid=None
+        self.nextshape = polysize
+        shape = Edge.shapes_functions[self.nextshape]
         self.points = shape(self.p1, self.p2)
+        self.neighbours = [None]*self.nextshape
+        try:
+            self.neighbours[0]=parent.faceid
+        except:
+            pass
+        for edge in all_objects:
+            if(edge!=self and self.same_position(edge)):
+                self
+                break
+
+
+        #check with all the edges if same coords as this: must be internal neighbour
         self.draw()
+    def refresh_shape(self,polysize):
+        self.nextshape=polysize
+        shape = Edge.shapes_functions[self.nextshape]
+        self.points = shape(self.p1, self.p2)
 
     def draw(self):
         if(self.active):
@@ -160,77 +229,96 @@ class Edge():
             surf = get_surface(Edge.depth)
             draw_polygon(1,self.points,(255,0,0),0.5,0)
             draw_polygon(1,self.points,(0,0,0),0,1)
+            border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
             center = centerpoint(self.points)
-            draw_text(1,str(self.face1),*center,(0,0,0),EDGE_SIZE/2)
+
+            surf = get_surface(1)
+            pygame.draw.line(surf, (250, 250, 250,255), border, center, 3)
+
+            if not(self.favorite is None):
+                border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
+                border = centerpoint(self.favorite.points)
+
+            draw_text(1,str(self.faceid),*center,(0,0,0),EDGE_SIZE/2)
 
 
     def draw_cursor(self):
         surf = get_surface(2)
         if(self.active):
-            if self.face1 not in visitedfaces:
+            if True: #self.is_parent_favorite(): #self.face1 not in visitedfaces:
                 pygame.draw.line(surf, (0, 255, 0), self.p1.as_tuple(), self.p2.as_tuple(), 1)
                 if (self.mouse_inside()):
                     pygame.draw.polygon(surf, (0, 128, 255, 128), [(p.x, p.y) for p in self.points])
                     center = centerpoint(self.points)
-                    draw_text(2,str(self.face1),*center,(0,0,0),EDGE_SIZE/2)
+                    border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
+                    #pygame.draw.line(surf, (250, 250, 250), border, center, 3)
+                    #draw_text(2,str(self.faceid),*center,(0,0,0),EDGE_SIZE/2)
                 else:
                     center = centerpoint(self.points)
-                    draw_text(2,str(self.face1),*center,(192,192,192),EDGE_SIZE/2)
+                    border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
+                    #pygame.draw.line(surf, (250, 250, 250), border, center, 3)
+                    draw_text(2,str(self.faceid),*center,(192,192,192),EDGE_SIZE/2)
                     draw_polygon(1,self.points,(0,0,0),0.1,0)
                     #pygame.draw.polygon(surf, (0, 0, 0, 16), [(p.x, p.y) for p in self.points])
-            else:
-                pygame.draw.line(surf, (0, 0, 0), self.p1.as_tuple(), self.p2.as_tuple(), 1)
+            #else:
+            #    pygame.draw.line(surf, (0, 0, 0), self.p1.as_tuple(), self.p2.as_tuple(), 1)
+
+    def set_parent_neighbour(self,faceid):
+        try:
+            index = self.parent.children.index(self)
+            self.parent.neighbours[index]=faceid
+        except:
+            pass
 
     def mouse_inside(self):
         mx, my = pygame.mouse.get_pos()
         return is_inside(Point(mx, my), self.points)
 
     def mouse_click(self):
-        if (self.mouse_inside() and self.active and self.face1 not in visitedfaces):
+        if (self.mouse_inside() and self.active):# and self.face1 not in visitedfaces):
             print(visitededges)
             self.active=False
-            visitedfaces.add(self.face1)
-            if(self.face0 in visitedfaces):
-                visitededges.add((self.face0,self.face1))
-                visitededges.add((self.face1,self.face0))
-            print(visitededges)
-            #net_structure.get(self.face0,[]).append(self.face1) #or rather: empty structure, set edge to None or face1
+            self.faceid = self.get_a_faceid()
+            self.set_parent_neighbour(self.faceid)
             for i in range(1,len(self.points)):
                 pa = self.points[i]
                 pb = self.points[(i+1)%len(self.points)]
-                next_edges = self.poly[self.face1]
-                old_edge_id = next_edges.index(self.face0)
-                next_edge = next_edges[(old_edge_id+i)%len(next_edges)]
                 #must reverse order since we want the shape to continue outside
-                ed=Edge((pb, pa), poly, self.face1, next_edge)
+                ed=Edge((pb, pa), self.nextshape, self)
                 all_objects.append(ed)
                 self.children.append(ed)
-            if(len(visitedfaces)==len(self.poly)):
-                second_main()
+            #if(len(visitedfaces)==len(self.poly)):
+            #    second_main()
     def mouse_right_click(self):
         if (self.mouse_inside()) and not self.active:
             self.remove_traces()
+        elif(self.mouse_inside()) and self.active:
+            pass
+            #link stuff by pairs
     def remove_traces(self):
+        if(self.other != None):
+            self.other.other = None
+            self.other.set_parent_neighbour(None)
+            self.other=None
+            self.set_parent_neighbour(None)
         if(not self.active):
-            visitedfaces.remove(self.face1)
-            try:
-                visitededges.remove((self.face0,self.face1))
-            except KeyError:
-                pass
-            try:
-                visitededges.remove((self.face1,self.face0))
-            except KeyError:
-                pass
             for ed in self.children:
                 ed.remove_traces()
                 all_objects.remove(ed)
         self.children=[]
+        self.favorite=None
+        self.parent.favorite=None
         self.active=True
             #delete the edges that were created by this, and its descendance
 
+cubotahedron = {
+
+
+
+}
 
 if __name__ == "__main__":
-    for working_poly in ["j89","j90","j12","j13","j17","j51","j84"]:
+    for working_poly in ["octahedron","cube","j89","j90","j12","j13","j17","j51","j84"]:
         global polyname
         polyname = working_poly
         poly = polys[working_poly]
@@ -239,8 +327,9 @@ if __name__ == "__main__":
         #pygame.scrap.put(pygame.SCRAP_BMP,pygame.surfarray.array3d(screen))
         visitedfaces=set()
         visitededges=set()
-        all_objects.append(Edge((p1, p2), poly, 0, poly[0][0]))
-        all_objects.append(Edge((p2, p1), poly, poly[0][0], 0))
+        dummy=DummyParent()
+        all_objects.append(Edge((p1, p2), poly, 0, poly[0][0],dummy))
+        all_objects.append(Edge((p2, p1), poly, poly[0][0], 0,dummy))
         refresh()
         print(working_poly)
         loop()

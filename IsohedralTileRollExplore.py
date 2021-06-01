@@ -1,7 +1,7 @@
 #from main import *
 import DrawingFunctions as Draw
 from GeometryFunctions import *
-from PolyAndNets import *
+from PolyAndTessNets import *
 from time import sleep
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
@@ -664,7 +664,7 @@ def explore_rotations(tile,poly):
         positions[(case%len(tile),face,orientation)].append(tilecoord)
     if(DEBUG3 or DEBUG7):pp.pprint(positions)
     print("Done exploring everything!")
-    Draw.wait_for_input()
+    #Draw.wait_for_input()
     #Next: explore the space!
 
     classes=explore_inside(tile,poly)
@@ -692,11 +692,157 @@ def explore_rotations(tile,poly):
             class_end = class_index(cfo_arrival)
             #print(transformations[cfo][bordercase])
             #print(cfo,cfo_arrival)
-            #print("C1,C2,coord",class_start,class_end,coordinate)
-            class_transfo[class_start][class_end].append(coordinate)
+            if(coordinate):
+                print("C1,C2,coord",class_start,class_end,coordinate)
+                class_transfo[class_start][class_end].append(coordinate)
+    print("Class transformations:")
+    #pp.pprint(class_transfo)
+
+    def print_matrix(mat,explored=[]):
+        for ind,line in enumerate(mat):
+            print()
+            for index,elem in enumerate(line):
+                if(elem):
+                    if(elem<10):
+                        print(end=str(int(elem)))
+                    elif(elem-10<52):
+                        print(end=chr(ord("A")+elem-10))
+                    else:
+                        print(end="#")
+                    """if(len(str(int(elem)))>1):
+                        try:
+                            print(end=chr(ord("A")+elem))
+                        except:
+                            print(end="X")"""
+                else:
+                    print(end=str(int(elem)))
+        print()
+    def print_matrix_limited(mat,limitations):
+        for i,line in enumerate(mat):
+            if(not(i in limitations)):
+                continue
+            print()
+            for j,elem in enumerate(line):
+                if(not(j in limitations)):
+                    continue
+                if (elem):
+                    print(end="X")
+                    """if(len(str(int(elem)))>1):
+                        try:
+                            print(end=chr(ord("A")+elem))
+                        except:
+                            print(end="X")"""
+                else:
+                    print(end=str(int(elem)))
+        print()
+
+    size = len(classes)
+    class_transfo_matshow = [[bool(class_transfo[i][j]) for i in range(size)] for j in range(size)]
+
+    def print_classmat(class_transfo):
+        for line in class_transfo:
+            print()
+            for index,element in enumerate(line):
+                if(element):
+                    if(index==initial_class):
+                        print(end="I")
+                    else:
+                        print(end="X")
+                else:
+                    print(end=" ")
+
+    def add_matr(ma1,ma2):
+        m = len(ma1[0])
+        p = len(ma2)
+        ma3 = [[ma1[i][j] or ma2[i][j] for i in range(m)] for j in range(p)]
+        return ma3
 
 
-    """to_explore = [([initial_class],[0]*dim,1)]
+    def mul_matr(ma1,ma2):
+        m = len(ma1[0])
+        p = len(ma2)
+        n = len(ma1) # and len(ma2[0])
+        ma3 = [[bool(sum((ma1[i][k] * ma2[k][j] for k in range(n)))) for i in range(m)] for j in range(p)]
+        """for i in range(p):
+            for j in range(m):
+                for k in range(n):
+                    #ma3[i][j]+=ma1[i][k]*ma2[k][j]
+                    ma3[i][j] = ma3[i][j]  or ma1[i][k] * ma2[k][j]"""
+        return ma3
+
+    all_classes = set(range(len(classes)))
+    all_explored = list()
+    explore = [initial_class]
+    explored = [initial_class]
+    while(all_classes):
+        #print(all_classes)
+        while explore:
+            new = explore.pop()
+            for next,elem in enumerate(class_transfo[new]):
+                if(elem and not(next in explored)):
+                    explore.append(next)
+                    explored.append(next)
+        all_classes = all_classes.difference(set(explored))
+        all_explored.append(explored)
+        if(all_classes):
+            explore = [list(all_classes).pop()]
+            explored = [explore[0]]
+
+    print()
+    print("Classes:",len(classes))
+    print("Reachable classes from initial:",len(all_explored[0]))
+    print(all_explored[0])
+    print("Reachability groups:",len(all_explored))
+    print("Their sizes:")
+    print(", ".join(str(len(e)) for e in all_explored if len(e)>1))
+    print("And",sum(1 for e in all_explored if len(e)==1),"of size 1")
+    #pp.pprint(all_explored)
+    ma = class_transfo_matshow
+
+
+    print("Limited form by",all_explored[0])
+    print_matrix_limited(ma,all_explored[0])
+    #print_matrix(ma)
+
+
+    for i in range(size):
+        print("Step",i)
+        ma2 = mul_matr(ma,ma)
+        if(ma2==ma):
+            break
+        ma = add_matr(ma2, ma)
+    print("Full form:")
+    print_matrix(ma,all_explored[0])
+
+    for y,line in enumerate(ma):
+        for x,elem in enumerate(ma):
+            c = ma[y][x]
+            if(c):# or x==y):
+                for index,group in enumerate(all_explored):
+                    #print(x,y,group,x in group or y in group)
+                    if(x in group or y in group):
+                        c=index+1
+                        if(len(group)==1):
+                            c=-1
+            ma[y][x]=c
+
+    print(all_explored)
+    explore_order = list()
+    for x in all_explored:
+        explore_order.extend(x)
+
+    ordered = [[0 for i in range(size)] for j in range(size)]
+    for index,clas in enumerate(explore_order):
+        for index2,clas2 in enumerate(explore_order):
+            ordered[index][index2]=ma[clas][clas2]
+
+    print_matrix(ordered)
+    Draw.turn_into_image(ordered)
+    #pp.pprint(classes)
+    #explored_classes = list()
+    """"
+    to_explore = [([initial_class],[0]*dim,1)]
+    pp.pprint(transformations)
     while to_explore:
         pathclasses,coord,coordsign=to_explore.pop()
         currentclass = pathclasses[-1]
@@ -706,13 +852,16 @@ def explore_rotations(tile,poly):
                 coordshift,invertsign = neighbour_coord[transformation_path]
                 newcoord = [coord[i] + coordsign*coordshift[i] for i in range(dim)]
                 newcoordsign = coordsign*(1-invertsign*2)
-                
-                for clas in classes:"""
+                #if()
+                #for clas in classes:
+    """
 
-
-
+    Draw.wait_for_input()
 if __name__ == "__main__":
     explore_rotations(nets["cube"],polys["cube"])
+    #explore_rotations(nets["tetrahedron"],polys["tetrahedron"])
+    #explore_rotations(nets["j1"],polys["j1"])
+    explore_rotations(nets["octahedron"],polys["octahedron"])
 
 
 #Usage:

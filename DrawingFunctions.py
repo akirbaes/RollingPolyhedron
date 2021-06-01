@@ -146,6 +146,14 @@ if(MODE=="pygame"):
     def empty_shapes():
         shapes.fill((0,0,0,0))
 
+    def text_topleftalign(text,x,y,color,size,bgcolor = None):
+        if(isinstance(color,int)):
+            color=colors[color%len(colors)]
+        text = pygame.font.SysFont(None, size).render(text, True, color)
+        if(bgcolor):
+            pygame.draw.rect(shapes,bgcolor,(x,y,text.get_width(),text.get_height()))
+        shapes.blit(text, (x,y))
+
     def text_center(text,x,y,color,size):
         if(isinstance(color,int)):
             color=colors[color%len(colors)]
@@ -204,5 +212,18 @@ if(MODE=="pygame"):
 
     def save_screen(filename):
         pygame.image.save(screen, filename)
+
+
+    def turn_into_image(matrice,filename="default.png"):
+        width = len(matrice)
+        height=len(matrice[1])
+        image = pygame.Surface((width, height))
+        image.fill((0,0,0))
+        for y,line in enumerate(matrice):
+            for x,elem in enumerate(line):
+                c=colors[int(elem)]
+                image.set_at((x,y),c)
+        pygame.image.save(image, filename)
+
 if(MODE=="tkinter"):
     pass
