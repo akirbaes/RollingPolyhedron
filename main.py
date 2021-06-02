@@ -21,8 +21,8 @@ setrecursionlimit(10 ** 4)
 WIDTH = 800
 HEIGHT = 800
 EDGESIZE = 50
-p1 = Point(300, 300)
-p2 = Point(300 + EDGESIZE, 300)  # 350 300
+p1 = RollyPoint(300, 300)
+p2 = RollyPoint(300 + EDGESIZE, 300)  # 350 300
 textsize = int(round((EDGESIZE) / 2))
 
 Draw.initialise_drawing(WIDTH, HEIGHT)
@@ -249,7 +249,7 @@ def big_explore(tiling, rolling, p1, p2, case, face,prints=False):
     if(prints):print(case, face, tiling[case])
     polys = visualise(tiling, p1, p2, case, tiling[case][0], color=3, fill=True, prints=prints)
     for poly in polys:
-        starting_area.add(poly.center())
+        starting_area.add(tuple(poly.center())) #already tuple
     while (exploreA(tiling, rolling, p1, p2, case, face,prints=prints)):
         small_orientation = set()
     print("Finished exploring the area")
@@ -336,8 +336,8 @@ def exploreA(tiling, rolling, p1, p2, case, face, previouscase=None, previousfac
                 ct = None
                 for poly in polys:
                     ct = poly.center
-                    big_orientation.add(ct)
-                    all_points.add(ct)
+                    big_orientation.add(tuple(ct))
+                    all_points.add(tuple(ct))
                 # small_orientation.add(ct,currentFaceNeighbours)
                 # instead of continuing, return and restart from beginning
                 # so those orientations are a special case
@@ -367,7 +367,7 @@ def exploreA(tiling, rolling, p1, p2, case, face, previouscase=None, previousfac
 
         if (centerpoint(points) not in all_points):
             make_shape(points, 1, filling=0.5)
-            all_points.add(centerpoint(points))
+            all_points.add(tuple(centerpoint(points)))
         # numbours(case,currentCaseNeighbours,points)
         # orientations[case].append(orientation)
         small_orientation.add((cent, tuple(orientation)))
