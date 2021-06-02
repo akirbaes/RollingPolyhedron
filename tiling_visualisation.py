@@ -9,6 +9,26 @@ from GeometryFunctions import *
 from sys import setrecursionlimit
 import DrawingFunctions as Draw
 
+
+from tilings_oldformat import *
+
+all_tilings = dict()
+path = "isogonal_tilings"
+for dirpath, dirnames, filenames in os.walk(path):
+
+    for name in filenames:
+        if name.endswith((".py")):
+            pathname = os.path.join(dirpath, name)
+            f = open(pathname)
+            data = f.read()
+            f.close()
+            exec(data)
+
+isogonals = all_tilings
+print(isogonals)
+
+
+
 setrecursionlimit(10 ** 4)
 WIDTH = 800
 HEIGHT = 800
@@ -16,32 +36,21 @@ EDGESIZE = 50
 p1 = Point(300, 300)
 p2 = Point(300 + EDGESIZE, 300)  # 350 300
 textsize = int(round((EDGESIZE) / 2))
-
 Draw.initialise_drawing(WIDTH, HEIGHT)
-
-
 def make_shape(points, color, filling=0):
     color = (180, 180, 180)
     Draw.polygon_shape(points, color, filling)
     Draw.polygon_shape(points, (0, 0, 0), 0, outline=2)
     return points
-
-
 def make_cursor(points, color=5, filling=0.1):
     Draw.polygon_cursor(points, color, filling)
     Draw.polygon_cursor(points, color, 0, outline=2)
     return points
-
-
 def number(id, point):
     # graph.create_text((point.x, point.y), text=str(id))
     Draw.text_center(str(id), point.x, point.y, (0, 0, 0), textsize)
-
-
 def numcenter(id, points):
     number(id, sum(points, Point(0, 0)) / len(points))
-
-
 def numbours(id, neighbours, points):
     m = sum(points, Point(0, 0)) / len(points)
     number(id, m)
@@ -134,7 +143,7 @@ def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=
     except:
         # Maybe the -P +P formula is not respected
         index = current.index(-oldshape + 2 * (oldshape % len(order)))
-        print("Exception matching", oldshape % len(order), "+%dP" % (oldshape // len(order)))
+        #print("Exception matching", oldshape % len(order), "+%dP" % (oldshape // len(order)))
 
     current = current[index:] + current[:index]
     shapespoly[-1].fill(current)
@@ -273,23 +282,6 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
 
 screenshot_counter = 0
 
-from tilings import *
-
-all_tilings = dict()
-path = "isogonal_tilings"
-for dirpath, dirnames, filenames in os.walk(path):
-
-    for name in filenames:
-        if name.endswith((".py")):
-            pathname = os.path.join(dirpath, name)
-            f = open(pathname)
-            data = f.read()
-            f.close()
-            exec(data)
-
-isogonals = all_tilings
-print(isogonals)
-
 
 def convert_tiling(tiling):
     p = len(tiling)
@@ -333,14 +325,12 @@ if __name__ == "__main__":
         order = sorted(net.keys())
         visualise(p1, p2, 0, net[0][0], 2)
         fill_screen(p1, p2, order[0], color=None)
-        try:
-            os.mkdir("platonic_tilings")
-        except:
-            pass
         Draw.text_topleftalign(tilename, 2, 2, (255, 0, 0), 30, bgcolor=(255, 255, 255))
         Draw.refresh()
 
-        Draw.save_screen("platonic_tilings/" + tilename + ".png")
+        try:os.mkdir("platonic_tilings_images")
+        except:pass
+        Draw.save_screen("platonic_tilings_images/" + tilename + ".png")
         # Draw.wait_for_input()
         Draw.empty_shapes()
 
@@ -355,7 +345,9 @@ if __name__ == "__main__":
         fill_screen(p1, p2, order[0], color=None)
         Draw.text_topleftalign(tilename, 2, 2, (255, 0, 0), 30, bgcolor=(255, 255, 255))
         Draw.refresh()
-        Draw.save_screen("isogonal_tilings/" + tilename + ".png")
+        try:os.mkdir("isogonal_tilings_images")
+        except:pass
+        Draw.save_screen("isogonal_tilings_images/" + tilename + ".png")
         # Draw.wait_for_input()
         Draw.empty_shapes()
     # exit()
@@ -371,10 +363,8 @@ if __name__ == "__main__":
         fill_screen(p1, p2, order[0], color=None)
         Draw.text_topleftalign(tilename, 2, 2, (255, 0, 0), 30, bgcolor=(255, 255, 255))
         Draw.refresh()
-        try:
-            os.mkdir("archimedean_tilings")
-        except:
-            pass
-        Draw.save_screen("archimedean_tilings/" + tilename + ".png")
+        try:os.mkdir("archimedean_tilings_images")
+        except:pass
+        Draw.save_screen("archimedean_tilings_images/" + tilename + ".png")
         # Draw.wait_for_input()
         Draw.empty_shapes()
