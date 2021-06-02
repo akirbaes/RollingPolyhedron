@@ -4,15 +4,17 @@
 #fully expanded: second_main prints the net and takes a picture→return to main
 #[Enter]→go to next polyhedron
 import pprint, time, pygame
+import traceback
+
 from GeometryFunctions import *
 from poly_dicts.johnson_nets import johnson_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.prism_nets import prism_nets
-WIDTH = 600
-HEIGHT = 600
-EDGE_SIZE = 30
-p1 = Point(300, 300)
-p2 = Point(300+EDGE_SIZE, 300)
+WIDTH = 1000
+HEIGHT = 1000
+EDGE_SIZE = 50
+p1 = Point(WIDTH/2, HEIGHT/2)
+p2 = Point(WIDTH/2+EDGE_SIZE, HEIGHT/2)
 
 all_poly = dict(**plato_archi_nets, **johnson_nets, **prism_nets)
 all_poly_names = list(all_poly.keys())
@@ -95,8 +97,8 @@ def loop():
                     elif(e.button==3):
                         edge.mouse_right_click()
 
-                print("Visited:", visitedfaces)
-                print("Not visited:", set(poly.keys()) - visitedfaces)
+                print("Visited:", visitedfaces or None)
+                print("Not visited:", (set(poly.keys()) - visitedfaces) or None)
             if e.type== pygame.KEYDOWN and e.key == pygame.K_RETURN:
                 filename = "%s[%s.png" % (polyname,int(time.time()))
                 draw_text(1,polyname,WIDTH/2,20,(255,0,0),35)
@@ -134,6 +136,8 @@ class DummyParent():
 class Edge():
     depth = 0
 
+    shapes_functions = (None, None, None, triangle, square, pentagon, hexagon, None, octagon, None, decagon, None, dodecagon)
+
     def __init__(self, coords, poly, face0, face1, parent):
         self.favorite = None
         self.parent = parent
@@ -145,8 +149,12 @@ class Edge():
         self.face0 = face0  # previous face : do not draw
         self.face1 = face1  # next face: draw
         self.nextshape = len(poly[face1])
-        shape = (None, None, None, triangle, square, None, hexagon)[self.nextshape]
-        self.points = shape(self.p1, self.p2)
+        try:
+            shape = Edge.shapes_functions[self.nextshape]
+            self.points = shape(self.p1, self.p2)
+        except:
+            print("Tried to draw shape with %i sides"%self.nextshape)
+            traceback.print_exc()
         self.draw()
 
     def draw(self):
@@ -200,8 +208,8 @@ class Edge():
         mx, my = pygame.mouse.get_pos()
         return is_inside(Point(mx, my), self.points)
 
-    def mouse_click(self):
-        if (self.mouse_inside() and self.active and self.is_parent_favorite()):# and self.face1 not in visitedfaces):
+    def mouse_click(self,force=False):
+        if ((self.mouse_inside() or force) and self.active and self.is_parent_favorite()):# and self.face1 not in visitedfaces):
             # print(visitededges)
             self.active=False
             visitedfaces.add(self.face1)
@@ -210,7 +218,8 @@ class Edge():
                 visitededges.add((self.face1,self.face0))
             # print(visitededges)
             #net_structure.get(self.face0,[]).append(self.face1) #or rather: empty structure, set edge to None or face1
-            for i in range(1,len(self.points)):
+            start = 0 #start = 1
+            for i in range(start,len(self.points)):
                 pa = self.points[i]
                 pb = self.points[(i+1)%len(self.points)]
                 next_edges = self.poly[self.face1]
@@ -261,8 +270,11 @@ if __name__ == "__main__":
         dummy=DummyParent()
         secondface = poly[startface][0]
         all_objects = []
-        all_objects.append(Edge((p1, p2), poly, startface, secondface ,dummy))
-        all_objects.append(Edge((p2, p1), poly, secondface, startface,dummy))
+        startedge = Edge((p1, p2), poly, secondface, startface ,dummy)
+        all_objects.append(startedge)
+        startedge.mouse_click(force=True)
+
+        #all_objects.append(Edge((p2, p1), poly, secondface, startface,dummy))
         refresh()
-        print(working_poly)
+        print(working_poly.capitalize(),"face #%i (%i/%i)"%(startface,startface+1,len(poly)))
         loop()
