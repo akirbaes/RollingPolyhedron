@@ -1,3 +1,10 @@
+"""Create a tiling manually based on an image and export it as a dict
+Mousewheel to change shape
+Left click to add a face
+Right click on a face to remove it and its children
+Right click on an edge to link it to another edge
+Once all edges are linked, it will prompt you to save the net under a name."""
+
 # to work on to create a tiling creation software
 # might have some useless functions copied from NetDrawer
 import os

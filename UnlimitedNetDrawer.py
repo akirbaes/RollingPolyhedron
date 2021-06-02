@@ -1,3 +1,8 @@
+"""Checking the path of a polyhedron
+Left and Right to choose a poly out of Johnsons, Platonics, most Archimedeans and some Prisms
+Up and Down to choose the starting face
+Click to roll and cover the space
+[Enter] to take a screenshot"""
 #Roll a poly by clicking to expand
 #Left and Right changes the poly
 #Up and Down changes the starting face
@@ -140,7 +145,8 @@ def loop():
                 print("Quit!", flush=True)
                 exit()
 
-    #wipe_surface(2)
+    #
+    wipe_surface(2)
     #wipe_surface(0)
     #wipe_surface(1)
     wipe_surface(3)
