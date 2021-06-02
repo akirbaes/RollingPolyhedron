@@ -91,7 +91,7 @@ def loop():
     while running:
         clock.tick(30)
         # print(get_all_depths())
-        print(sum(1 for edge in all_objects if edge.is_parent_favorite()))
+        # print(sum(1 for edge in all_objects if edge.is_parent_favorite()))
         wipe_surface(2)
         #wipe_surface(1)
         #wipe_surface(0)
