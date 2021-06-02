@@ -61,7 +61,7 @@ def numbours(id, neighbours, points):
         number(neighbours[i] % len(order), p)
 
 
-class Poly:
+class RollyPoly:
     def __init__(self, id, points, color=None, full=False, alpha=1):
         self.n = []
         self.id = id
@@ -135,7 +135,7 @@ def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=
     if (shapespoly == None):
         shapespoly = list()
     points = get_face_points(p1, p2, newshape, False)
-    shapespoly.append(Poly(newshape, points, color, fill))
+    shapespoly.append(RollyPoly(newshape, points, color, fill))
     current = shape[realshape]
     if (prints): print(current, 'of shape', realshape, ', coming from', oldshape)
     try:
