@@ -335,7 +335,7 @@ def exploreA(tiling, rolling, p1, p2, case, face, previouscase=None, previousfac
                 polys = visualise(tiling, p1, p2, case, previouscase, color=1, fill=True,prints=prints)
                 ct = None
                 for poly in polys:
-                    ct = poly.center
+                    ct = poly.center()
                     big_orientation.add(tuple(ct))
                     all_points.add(tuple(ct))
                 # small_orientation.add(ct,currentFaceNeighbours)
