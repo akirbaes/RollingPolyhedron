@@ -3,6 +3,7 @@
 #useless or out-to-date functions copied from main
 """
 import os
+import pprint
 
 from GeometryFunctions import *
 from sys import setrecursionlimit
@@ -20,7 +21,7 @@ Draw.initialise_drawing(WIDTH, HEIGHT)
 
 
 def make_shape(points, color, filling=0):
-    color = (180,180,180)
+    color = (180, 180, 180)
     Draw.polygon_shape(points, color, filling)
     Draw.polygon_shape(points, (0, 0, 0), 0, outline=2)
     return points
@@ -67,7 +68,7 @@ class Poly:
             self.pid = make_shape(points, color, 1)
         # print(points)
 
-        #number(realid, sum(points, Point(0, 0)) / len(points))
+        # number(realid, sum(points, Point(0, 0)) / len(points))
 
     def order(self, neighbor):
         index = self.n.index(neighbor)
@@ -102,13 +103,13 @@ def get_face_points(p1, p2, face, noisy=True):
     elif (len(shape[faceid])) == 4:
         points = square(p1, p2)
         if (noisy): print(" square ", face)
-    elif(len(shape[faceid]))==6:
+    elif (len(shape[faceid])) == 6:
         points = hexagon(p1, p2)
         if (noisy): print(" hexagon ", face)
-    elif(len(shape[faceid]))==8:
+    elif (len(shape[faceid])) == 8:
         points = octagon(p1, p2)
         if (noisy): print(" octagon ", face)
-    elif(len(shape[faceid]))==12:
+    elif (len(shape[faceid])) == 12:
         points = dodecagon(p1, p2)
         if (noisy): print(" dodecagon ", face)
     else:
@@ -116,18 +117,18 @@ def get_face_points(p1, p2, face, noisy=True):
     return points
 
 
-def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, ord=None,prints=False):
-    # Copy of extend, but fills the whole space
+def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, ord=None,
+              prints=False):
     realshape = newshape % len(order)
     if (drawnshapes == None):
         drawnshapes = list()
-    if(prints):print("Visualise---------", newshape, oldshape, "(%s)" % realshape, shape[realshape])
+    if (prints): print("Visualise---------", newshape, oldshape, "(%s)" % realshape, shape[realshape])
     if (shapespoly == None):
         shapespoly = list()
     points = get_face_points(p1, p2, newshape, False)
     shapespoly.append(Poly(newshape, points, color, fill))
     current = shape[realshape]
-    if(prints):print(current, 'of shape', realshape, ', coming from', oldshape)
+    if (prints): print(current, 'of shape', realshape, ', coming from', oldshape)
     try:
         index = current.index(oldshape)
     except:
@@ -157,52 +158,6 @@ def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=
 			if(p%len(order)!=p):
 				print("P not to draw",p,p%len(order))"""
     return shapespoly
-
-
-def extend(p1, p2, newshape, oldshape=None, drawnshapes=None, shapespoly=None, prints=False):
-    # Visualize one tile and the neighbouring infos
-    if (drawnshapes == None):
-        drawnshapes = list()
-    if (shapespoly == None):
-        shapespoly = list()
-    if(prints):print(end="Draw the")
-    realshape = newshape % len(order)
-    if (len(shape[realshape])) == 3:
-        points = triangle(p1, p2)
-        if(prints):print(" triangle ", newshape, "(%d)" % realshape)
-    elif (len(shape[realshape])) == 4:
-        points = square(p1, p2)
-        if(prints):print(" square ", newshape, "(%d)" % realshape)
-    else:
-        points = hexagon(p1, p2)
-        if(prints):print(" hexagon ", newshape, "(%d)" % realshape)
-
-    shapespoly.append(Poly(newshape, points, 1))
-    current = shape[realshape]
-    if (oldshape != None and newshape == realshape):
-        if(prints):print(oldshape, "in", current, newshape, realshape)
-        index = current.index(oldshape)
-        current = current[index:] + current[:index]
-        if(prints):print("Previous:", oldshape, "Next:", current)
-    shapespoly[-1].fill(current)
-    drawnshapes.append(newshape)
-
-    # sleep(0.1)
-    # print("I have",len(points),"points")
-    if (newshape == realshape):
-        for index, p in enumerate(current):
-            # print(index)
-            p1 = points[index % len(points)]
-            p2 = points[(index + 1) % len(points)]
-            if not p in drawnshapes or p == newshape and not (newshape != p and p == oldshape):
-                ###[TODO] ici pose problème de retourner à même shape
-                # print(p,shapes)
-                # print("Work",newshape)
-                if (p == newshape):
-                    p += len(order)
-                extend(p2, p1, p, newshape, drawnshapes, shapespoly)
-
-    Draw.refresh()
 
 
 def point_outside(point):
@@ -258,7 +213,7 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
 
     exploredpoints.append(centerpoint(points))
     current = shape[realshape]
-    if(prints):print("Oldshape:", oldshape)
+    if (prints): print("Oldshape:", oldshape)
     if (oldshape == None):
         # Turns a n+P number into n-P (find pair)
         oldshape = -current[0] + 2 * (current[0] % len(order))
@@ -266,7 +221,7 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
 
     # if(oldshape!=None and newshape==realshape): #on explore même quand on est dehors
     # print(oldshape,"in",current,newshape,realshape)
-    if(prints):print(current, "of shape", realshape, "coming from", oldshape, flush=True)
+    if (prints): print(current, "of shape", realshape, "coming from", oldshape, flush=True)
     try:
         index = current.index(oldshape)
     except:
@@ -316,186 +271,17 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
             fill_screen(p2, p1, real(p), newshape - rest(p), exploredpoints, drawnpoly, color)
 
 
-"""
-Two things:
-the face, and the orientation
-The orientation = current face (its shape) and order
-
-For example, we went 2-3 on the net, and 4-1 on the shape
-
-So on face 3, if face 3 is 2,4,6, we note, 4,X,X (the important part is the 4 at the beginning of the 1 face, matching the order in face 3)
-We re-order them from the smallest face, so that it always matches
-
-Same orientation as beginning: fill the normal set
-Then go into a new set: until meet an orientation that we already met before, then stop
-
-
-Algo:
-If orientation is not in face
-	Add orientation in face (and draw it)
-	Try out possible rolls (same shape, adjacent)
-else:
-	found (draw it differently)
-"""
-
-
-def big_explore(p1, p2, case, face, prints=False):
-    global big_orientation
-    global starting_area
-    global small_orientation
-    global all_points
-    global current_cursor
-    current_cursor = []
-    starting_area = set()
-    big_orientation = set()
-    small_orientation = set()
-    all_points = set()
-    if(prints):print(case, face, net[case])
-    polys = visualise(p1, p2, case, net[case][0], color=3, fill=True)
-    for poly in polys:
-        starting_area.add(poly.center)
-    while (exploreA(p1, p2, case, face)):
-        small_orientation = set()
-    if(prints):print("Finished exploring the area")
-
-
 screenshot_counter = 0
 
-
-def exploreA(p1, p2, case, face, previouscase=None, previousface=None):
-    global screenshot_counter
-    # Draw.save_screen("scrsh/%s%d.png"%(shape_name,screenshot_counter))
-    screenshot_counter += 1
-    # copy of explore, try to fill in whole shapes
-    # print("Exploring",previouscase,"to",case,"with face",previousface,"to",face)
-    if (previouscase not in net[case] and previouscase != None):
-        if (previouscase % len(net) - (previouscase - (previouscase % len(net))) in net[case]):
-            previouscase = previouscase % len(net) - (previouscase - (previouscase % len(net)))
-            # print("Had to fix this part for J8...")
-    # else same shape
-    if (len(roll[face]) == 3):
-        points = triangle(p1, p2)
-    # print("triangle de",face,"venant de",previousface)
-    elif (len(roll[face]) == 4):
-        points = square(p1, p2)
-    # print("carré",face,"venant de",previousface)
-    else:
-        points = hexagon(p1, p2)
-    Draw.refresh()
-    Draw.empty_cursor()
-
-    current_cursor[:] = []
-
-    if (len(net[case]) != len(roll[face])):
-        # print(current_cursor,points)
-        current_cursor.extend(make_cursor(points, -3, 0.7))
-
-        # current_cursor.append(make_cursor(points, color=-3,fill=True))
-        # different shapes: incompatible
-        return False
-
-    currentCaseNeighbours = net[case]
-    currentFaceNeighbours = roll[face]
-    # print(currentCaseNeighbours,currentFaceNeighbours)
-    orientation = currentFaceNeighbours
-    if (previouscase != None):
-        # décalage : previouscase n'est pas le bas, le bas réel l'est: on fait l'inverse de la rotation pour qu'elle y soit
-        # print(currentCaseNeighbours)
-        caseOrientation = currentCaseNeighbours.index(previouscase)  # décalage actuel par rapport à la normale
-        # print("Orientation de case:",caseOrientation)
-        # points = points[caseOrientation:]+points[:caseOrientation]
-        currentCaseNeighbours = currentCaseNeighbours[caseOrientation:] + currentCaseNeighbours[:caseOrientation]
-
-        # décalage : previousface doit être le bas: on fait une rotation pour qu'elle y soit
-        faceOrientation = currentFaceNeighbours.index(previousface)
-        # décalage: la face du bas doit être la même que celle de l'orientation que la case
-        # faceOrientation = (faceOrientation - caseOrientation)%len(order)
-        currentFaceNeighbours = currentFaceNeighbours[faceOrientation:] + currentFaceNeighbours[:faceOrientation]
-        # print(caseOrientation,faceOrientation)
-
-        # print(currentCaseNeighbours,currentFaceNeighbours)
-        orientation = currentFaceNeighbours
-
-        case_count, max_count = Draw.create_orientation_data(case, net)
-        face_count, max_count = Draw.create_orientation_data(face, roll)
-        outline = 0
-        if (face == case):
-            if (faceOrientation == caseOrientation):
-                outline = 1
-                # white outline
-            else:
-                outline = 2
-                # black outline
-        print(len(points))
-        Draw.polygon_orientation(points, (0 - caseOrientation + faceOrientation - caseOrientation) % len(points),
-                                 face_count, max_count, outline, case_count)
-
-        # previouscase == previousface marche aussi
-        # caseOrientation==faceOrientation ne marche que si les orientations par défaut sont les mêmes
-        if (face == case and caseOrientation == faceOrientation and centerpoint(points) not in starting_area):
-            if (centerpoint(points) not in big_orientation):
-
-                polys = visualise(p1, p2, case, previouscase, color=1, fill=True)
-                ct = None
-                for poly in polys:
-                    ct = poly.center
-                    big_orientation.add(ct)
-                    all_points.add(ct)
-                # small_orientation.add(ct,currentFaceNeighbours)
-                # instead of continuing, return and restart from beginning
-                # so those orientations are a special case
-                return False
-            return False
-        # print("My orientation is",orientation)
-
-    cent = centerpoint(points)
-    if (cent in big_orientation or (cent, tuple(orientation)) in small_orientation):
-        # already visited this
-        return False
-    elif (points_outside(points)):
-        return False
-    else:
-        Draw.empty_cursor()
-
-        current_cursor[:] = make_cursor(points, -2, filling=0.1)
-        for pti in range(len(points)):
-            pp1, pp2 = points[pti], points[(pti + 1) % len(points)]
-            facesize = len(roll[currentFaceNeighbours[pti]])
-            if (facesize == 3):
-                current_cursor.extend(make_cursor(triangle(pp2, pp1), -2, filling=0.1))
-            elif (facesize == 4):
-                current_cursor.extend(make_cursor(square(pp2, pp1), -2, filling=0.1))
-            elif (facesize == 6):
-                current_cursor.extend(make_cursor(hexagon(pp2, pp1), -2, filling=0.1))
-
-        if (centerpoint(points) not in all_points):
-            make_shape(points, 1, filling=0.5)
-            all_points.add(centerpoint(points))
-        # numbours(case,currentCaseNeighbours,points)
-        # orientations[case].append(orientation)
-        small_orientation.add((cent, tuple(orientation)))
-        for i in range(len(currentFaceNeighbours)):
-            nextcasereal = currentCaseNeighbours[i]
-            nextface = currentFaceNeighbours[i]
-            p1 = points[i % len(points)]
-            p2 = points[(i + 1) % len(points)]
-            nextcase = nextcasereal % len(order)
-            difference = nextcasereal - nextcase
-            if (nextface != previousface):
-                # root.update()
-                # sleep(0.75)
-                # input()
-                if (exploreA(p2, p1, nextcase, nextface, case - difference, face)):
-                    return True
-
 from tilings import *
-all_tilings=dict()
+
+all_tilings = dict()
 path = "isogonal_tilings"
 for dirpath, dirnames, filenames in os.walk(path):
 
     for name in filenames:
         if name.endswith((".py")):
-            pathname =os.path.join(dirpath, name)
+            pathname = os.path.join(dirpath, name)
             f = open(pathname)
             data = f.read()
             f.close()
@@ -504,129 +290,91 @@ for dirpath, dirnames, filenames in os.walk(path):
 isogonals = all_tilings
 print(isogonals)
 
+
+def convert_tiling(tiling):
+    p = len(tiling)
+    return {key: list((((x % p), (x // p)) for x in value)) for key, value in tiling.items()}
+
+
+def convert_all_tiling(all_tilings, category_name):
+    output = """#dict[face]=[(neighbour_face, differenciator)]
+#neighbour faces in clockwise order
+#match differenciator: -d with +d, else d with d\n"""
+    output += category_name + "= dict()\n"
+    for tilename in all_tilings:
+        new_tiling = convert_tiling(all_tilings[tilename])
+        dictline = pprint.pformat(new_tiling, indent=4, sort_dicts=True,width=110)
+        output += "%s['%s'] = \\\n%s\n\n" % (category_name, tilename, dictline)
+    try:
+        os.mkdir("tiling_dicts")
+    except:
+        pass
+    f = open("tiling_dicts/" + category_name + ".py", "w")
+    f.write(output)
+    f.close()
+
+
 if __name__ == "__main__":
     global shape_name
     global net
     global order
     # for shape_name in missing:
     # for shape_name in shapes_names:
+    convert_all_tiling(platonics, "platonic_tilings")
+    convert_all_tiling(archimedeans, "archimedean_tilings")
+    convert_all_tiling(isogonals, "isogonal_tilings")
 
     for tilename in platonics:
         net = platonics[tilename]
-        tilename="platonics_"+tilename
-        print("]"*50+tilename)
-        Draw.text_topleftalign(tilename,2,2,(0,0,0),30)
-        shape=net
-        order=sorted(net.keys())
+        tilename = "platonics_" + tilename
+        print("]" * 50 + tilename)
+        Draw.text_topleftalign(tilename, 2, 2, (0, 0, 0), 30)
+        shape = net
+        order = sorted(net.keys())
         visualise(p1, p2, 0, net[0][0], 2)
-        fill_screen(p1,p2,order[0],color=None)
-        try:os.mkdir("platonic_tilings")
-        except:pass
-        Draw.text_topleftalign(tilename,2,2,(255,0,0),30,bgcolor=(255,255,255))
+        fill_screen(p1, p2, order[0], color=None)
+        try:
+            os.mkdir("platonic_tilings")
+        except:
+            pass
+        Draw.text_topleftalign(tilename, 2, 2, (255, 0, 0), 30, bgcolor=(255, 255, 255))
         Draw.refresh()
 
-        Draw.save_screen("platonic_tilings/"+tilename+ ".png")
-        #Draw.wait_for_input()
+        Draw.save_screen("platonic_tilings/" + tilename + ".png")
+        # Draw.wait_for_input()
         Draw.empty_shapes()
 
     for tilename in isogonals:
         net = isogonals[tilename]
-        tilename="isogonal_"+tilename
-        print("]"*50+tilename)
-        Draw.text_topleftalign(tilename,2,2,(0,0,0),30)
-        shape=net
-        order=sorted(net.keys())
+        tilename = "isogonal_" + tilename
+        print("]" * 50 + tilename)
+        Draw.text_topleftalign(tilename, 2, 2, (0, 0, 0), 30)
+        shape = net
+        order = sorted(net.keys())
         visualise(p1, p2, 0, net[0][0], 2)
-        fill_screen(p1,p2,order[0],color=None)
-        Draw.text_topleftalign(tilename,2,2,(255,0,0),30,bgcolor=(255,255,255))
+        fill_screen(p1, p2, order[0], color=None)
+        Draw.text_topleftalign(tilename, 2, 2, (255, 0, 0), 30, bgcolor=(255, 255, 255))
         Draw.refresh()
-        Draw.save_screen("isogonal_tilings/"+tilename+ ".png")
-        #Draw.wait_for_input()
+        Draw.save_screen("isogonal_tilings/" + tilename + ".png")
+        # Draw.wait_for_input()
         Draw.empty_shapes()
-    #exit()
+    # exit()
 
     for tilename in archimedeans:
         net = archimedeans[tilename]
-        tilename="archimedean_"+tilename
-        print("]"*50+tilename)
-        Draw.text_topleftalign(tilename,2,2,(0,0,0),30)
-        shape=net
-        order=sorted(net.keys())
-        visualise(p1, p2, 0, net[0][0], 2)
-        fill_screen(p1,p2,order[0],color=None)
-        Draw.text_topleftalign(tilename,2,2,(255,0,0),30,bgcolor=(255,255,255))
-        Draw.refresh()
-        try:os.mkdir("archimedean_tilings")
-        except:pass
-        Draw.save_screen("archimedean_tilings/"+tilename+ ".png")
-        #Draw.wait_for_input()
-        Draw.empty_shapes()
-
-    """
-    for shape_name in ["j8"]:
-        global order
-        global shape
-        global shapes
-        global tilecases
-        global roll
-        global net
-        roll = polys[shape_name]
-        if (roll == None):
-            continue
-        net = nets[shape_name]
-
+        tilename = "archimedean_" + tilename
+        print("]" * 50 + tilename)
+        Draw.text_topleftalign(tilename, 2, 2, (0, 0, 0), 30)
         shape = net
-        order = sorted(shape)
-        shapes = []
-        tilecases = []
-        Draw.empty_shapes()
-        Draw.empty_cursor()
-        Draw.refresh()
+        order = sorted(net.keys())
         visualise(p1, p2, 0, net[0][0], 2)
+        fill_screen(p1, p2, order[0], color=None)
+        Draw.text_topleftalign(tilename, 2, 2, (255, 0, 0), 30, bgcolor=(255, 255, 255))
         Draw.refresh()
-        print("EXTEND")
-        sleep(2) ;
-        extend(p1,p2,order[0])
-        # Draw.save_screen("net_%s.png" % shape_name)
-        Draw.refresh()
+        try:
+            os.mkdir("archimedean_tilings")
+        except:
+            pass
+        Draw.save_screen("archimedean_tilings/" + tilename + ".png")
+        # Draw.wait_for_input()
         Draw.empty_shapes()
-        sleep(2) ;
-        fill_screen(p1,p2,order[0],color=None) ;
-        sleep(2)
-
-        # Commented to gain time
-
-        # Draw.empty_shapes()
-        print("#" * 30)
-
-        # p2 = Point(330,300) #350 300
-        big_explore(p1, p2, 0, 0)
-
-        # Draw.save_screen("tess_%s.png" % shape_name)
-        Draw.refresh()
-
-        # for c in current_cursor:
-        #    graph.delete(c)
-        Draw.empty_cursor()
-        current_cursor[:] = []
-        Draw.refresh()
-        # input("Finished")
-    print("Done!", flush=True)
-    Draw.loop()
-    # sleep(2)
-    """
-    # case = part of J1 net on which we are rolling
-    # face = part of J1R polyhedron which is looking at the floor
-
-
-    """
-    orientations = dict()
-    for face in roll:
-        orientations[face] = []
-    explore(p1,p2,0,0)
-    print("Finished!")
-    for face in sorted(orientations):
-        print("orientations found for face",face,":", len(orientations[face]))
-        print(orientations[face])
-    """
-    # Draw.refresh()
