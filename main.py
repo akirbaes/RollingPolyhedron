@@ -28,7 +28,7 @@ textsize = int(round((EDGESIZE) / 2))
 Draw.initialise_drawing(WIDTH, HEIGHT)
 from PolyAndTessNets import polys
 
-from PolyFunctions import Poly, visualise, get_face_points, make_shape, make_cursor
+from PolyFunctions import RollyPoly, visualise, get_face_points, make_shape, make_cursor
 
 """
 def number(id, point):
@@ -73,7 +73,7 @@ def extend(polydict, p1, p2, newshape, oldshape=None, drawnshapes=None, shapespo
         points = hexagon(p1, p2)
         if(prints):print(" hexagon ", newshape, "(%d)" % realshape)
 
-    shapespoly.append(Poly(newshape, points, 1, p=len(polydict)))
+    shapespoly.append(RollyPoly(newshape, points, 1, p=len(polydict)))
     current = polydict[realshape]
     if (oldshape != None and newshape == realshape):
         if(prints):print(oldshape, "in", current, newshape, realshape)

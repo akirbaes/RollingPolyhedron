@@ -20,7 +20,7 @@ def make_cursor(points, color=5, filling=0.1):
     Draw.polygon_cursor(points, color, 0, outline=1)
     return points
 
-class Poly:
+class RollyPoly:
     def __init__(self, id, points, color=None, full=False, alpha=1, p=None):
         self.n = []
         self.id = id
@@ -112,7 +112,7 @@ def visualise(polydict, p1, p2, newshape, oldshape, color=0, drawnshapes=None, s
     if (shapespoly == None):
         shapespoly = list()
     points = get_face_points(polydict,p1, p2, newshape, noisy=False)
-    shapespoly.append(Poly(newshape, points, color, fill, p=len(polydict)))
+    shapespoly.append(RollyPoly(newshape, points, color, fill, p=len(polydict)))
     current = polydict[realshape]
     if(prints):print(current, 'of shape', realshape, ', coming from', oldshape)
     try:
