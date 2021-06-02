@@ -99,7 +99,9 @@ def loop():
                 print("Not visited:", (set(poly.keys()) - visitedfaces) or None)
             if e.type== pygame.KEYDOWN and e.key == pygame.K_RETURN:
                 filename = "%s[%s.png" % (polyname,int(time.time()))
-                draw_text(1,polyname,WIDTH/2,20,(255,0,0),35)
+                draw_text(1,polyname.capitalize(),WIDTH/2,20,(255,0,0),35)
+                if((set(poly.keys()) - visitedfaces)):
+                    draw_text(1,"Unvisited:"+str((set(poly.keys()) - visitedfaces)),WIDTH/2,50,(255,0,0),35)
                 refresh()
                 pygame.image.save(screen, filename)
                 print("Saved",filename)
