@@ -1,5 +1,5 @@
 from math import pi
-from Point import Point
+from RollyPoint import RollyPoint
 
 
 def pointAngle(a, b, c):
@@ -49,7 +49,7 @@ def square(p1, p2):
     p2 = p2
 
     p34 = p1 - p2
-    p3 = p2 + Point(p34.y, -p34.x)
+    p3 = p2 + RollyPoint(p34.y, -p34.x)
     p4 = p3 + p34
     return (p1), (p2), (p3), (p4)
 

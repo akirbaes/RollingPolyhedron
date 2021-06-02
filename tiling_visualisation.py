@@ -33,8 +33,8 @@ setrecursionlimit(10 ** 4)
 WIDTH = 800
 HEIGHT = 800
 EDGESIZE = 50
-p1 = Point(300, 300)
-p2 = Point(300 + EDGESIZE, 300)  # 350 300
+p1 = RollyPoint(300, 300)
+p2 = RollyPoint(300 + EDGESIZE, 300)  # 350 300
 textsize = int(round((EDGESIZE) / 2))
 Draw.initialise_drawing(WIDTH, HEIGHT)
 def make_shape(points, color, filling=0):
@@ -50,9 +50,9 @@ def number(id, point):
     # graph.create_text((point.x, point.y), text=str(id))
     Draw.text_center(str(id), point.x, point.y, (0, 0, 0), textsize)
 def numcenter(id, points):
-    number(id, sum(points, Point(0, 0)) / len(points))
+    number(id, sum(points, RollyPoint(0, 0)) / len(points))
 def numbours(id, neighbours, points):
-    m = sum(points, Point(0, 0)) / len(points)
+    m = sum(points, RollyPoint(0, 0)) / len(points)
     number(id, m)
     for i in range(len(neighbours)):
         p1 = points[i]

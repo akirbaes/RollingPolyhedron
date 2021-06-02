@@ -10,7 +10,7 @@ Rect  -- two points, forming a rectangle
 import math
 
 
-class Point:
+class RollyPoint:
     """A point identified by (x,y) coordinates.
 
     supports: +, -, *, /, str, repr
@@ -37,27 +37,27 @@ class Point:
 
     def __add__(self, p):
         """Point(x1+x2, y1+y2)"""
-        if not(isinstance(p,Point)):
-            p=Point(*p)
-        return Point(self.x + p.x, self.y + p.y)
+        if not(isinstance(p, RollyPoint)):
+            p=RollyPoint(*p)
+        return RollyPoint(self.x + p.x, self.y + p.y)
 
     def __sub__(self, p):
         """Point(x1-x2, y1-y2)"""
-        if not(isinstance(p,Point)):
-            p=Point(*p)
-        return Point(self.x - p.x, self.y - p.y)
+        if not(isinstance(p, RollyPoint)):
+            p=RollyPoint(*p)
+        return RollyPoint(self.x - p.x, self.y - p.y)
 
     def __mul__(self, scalar):
         """Point(x1*x2, y1*y2)"""
-        return Point(self.x * scalar, self.y * scalar)
+        return RollyPoint(self.x * scalar, self.y * scalar)
 
     def __truediv__(self, scalar):
         """Point(x1/x2, y1/y2)"""
-        return Point(self.x / scalar, self.y / scalar)
+        return RollyPoint(self.x / scalar, self.y / scalar)
 
     def __div__(self, scalar):
         """Point(x1/x2, y1/y2)"""
-        return Point(self.x / scalar, self.y / scalar)
+        return RollyPoint(self.x / scalar, self.y / scalar)
 
     def __str__(self):
         return "(%s, %s)" % (self.x, self.y)
@@ -78,7 +78,7 @@ class Point:
 
     def clone(self):
         """Return a full copy of this point."""
-        return Point(self.x, self.y)
+        return RollyPoint(self.x, self.y)
 
     def integerize(self):
         """Convert co-ordinate values to integers."""
@@ -126,7 +126,7 @@ class Point:
         """
         s, c = [f(rad) for f in (math.sin, math.cos)]
         x, y = (c * self.x - s * self.y, s * self.x + c * self.y)
-        return Point(x, y)
+        return RollyPoint(x, y)
 
     def rotate_about(self, p, theta):
         """Rotate counter-clockwise around a point, by theta degrees.
@@ -147,7 +147,7 @@ class Point:
         return self.x == other.x and self.y == other.y
 
     def __round__(self):
-        return Point(round(self.x), round(self.y))
+        return RollyPoint(round(self.x), round(self.y))
 
     def __iter__(self):
         yield self.x

@@ -17,8 +17,8 @@ from PolyFunctions import visualise
 WIDTH = 1000
 HEIGHT = 1000
 EDGE_SIZE = 50
-p1 = Point(WIDTH/2, HEIGHT/2)
-p2 = Point(WIDTH/2+EDGE_SIZE, HEIGHT/2)
+p1 = RollyPoint(WIDTH / 2, HEIGHT / 2)
+p2 = RollyPoint(WIDTH / 2 + EDGE_SIZE, HEIGHT / 2)
 
 all_poly = dict(**plato_archi_nets, **johnson_nets, **prism_nets)
 all_poly_names = list(all_poly.keys())
@@ -238,7 +238,7 @@ class Edge():
 
     def mouse_inside(self):
         mx, my = pygame.mouse.get_pos()
-        return is_inside(Point(mx, my), self.points)
+        return is_inside(RollyPoint(mx, my), self.points)
 
     def mouse_click(self,force=False):
         if ((self.mouse_inside() or force) and self.active and self.is_parent_favorite()):# and self.face1 not in visitedfaces):
@@ -281,6 +281,7 @@ class Edge():
             for ed in self.children:
                 ed.remove_traces()
                 all_objects.remove(ed)
+            # self.undraw()
         self.children=[]
         self.favorite=None
         self.parent.favorite=None

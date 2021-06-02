@@ -77,5 +77,7 @@ if __name__ == "__main__":
                 else:
                     matrices.append(newmat)
             print("Face %i of %i sides has %i distinct orientations"%(face,len(neighbours),len(matrices)))
-    
+
+        for face in sorted(net):
+
 

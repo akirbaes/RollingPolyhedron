@@ -21,8 +21,8 @@ pp = pprint.PrettyPrinter(indent=4)
 WIDTH = 800
 HEIGHT = 800
 EDGE_SIZE = 40
-p1 = Point(300, 300)
-p2 = Point(300 + EDGE_SIZE, 300)
+p1 = RollyPoint(300, 300)
+p2 = RollyPoint(300 + EDGE_SIZE, 300)
 depths = dict()
 
 current_facetype = 3
@@ -423,7 +423,7 @@ class Edge():
 
     def mouse_inside(self):
         mx, my = pygame.mouse.get_pos()
-        return is_inside(Point(mx, my), self.points)
+        return is_inside(RollyPoint(mx, my), self.points)
 
     def mouse_click(self):
         """Left click if activated turns into a face and makes children"""

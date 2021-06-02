@@ -1,5 +1,5 @@
 MODE="pygame"
-from Point import Point
+from RollyPoint import RollyPoint
 def centerpoint(points):
     mx = 0
     my = 0
@@ -80,7 +80,7 @@ if(MODE=="pygame"):
         #Draw a little triangles to show the reached orientation on the face.
         line = (points+points)[orientation:orientation+2]
         #print(line,orientation,orientation+2)
-        perpendicular = Point(centerpoint(points))-centerpoint(line)
+        perpendicular = RollyPoint(centerpoint(points)) - centerpoint(line)
         tangent=(line[1]-line[0])/max_count
         perpendicular=perpendicular/perpendicular.length()*tangent.length()
         perp=perpendicular.clone()/tangent.length()
@@ -94,7 +94,7 @@ if(MODE=="pygame"):
         if(perpendicular.length()<4):
             perpendicular/=perpendicular.length()/4
         tri = line[0]+tangent*face_count,line[0]+tangent*(face_count+1)
-        tri += Point(centerpoint(tri))+perpendicular,
+        tri += RollyPoint(centerpoint(tri)) + perpendicular,
 
 
         c = face_count/(max_count)
@@ -109,7 +109,7 @@ if(MODE=="pygame"):
         #quad = quad[0], quad[1], quad[1]+perp, quad[0]+perp
 
         if(outline==1):
-            p3 = Point(centerpoint(points))
+            p3 = RollyPoint(centerpoint(points))
             tri2 = tri[:2]+(p3,)
             #print(tri2)
             pygame.draw.polygon(above, color, [(p.x, p.y) for p in tri2])

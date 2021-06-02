@@ -6,8 +6,8 @@ from time import sleep
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 ext=30
-P1=Point(300,350)
-P2=Point(300,350+ext)
+P1=RollyPoint(300, 350)
+P2=RollyPoint(300, 350 + ext)
 WIDTH=800
 HEIGHT=1000
 DEBUG1=False
@@ -40,8 +40,8 @@ def centeroftilestarting(p1, p2, prev, current, tile,draw=0):
         if(DEBUG4):print("Coordinates of shapes used:")
         if(DEBUG4):print(sorted(centerpoint(shape) for shape in listofshapes))
         if(DEBUG4):print("big average:")
-        if(DEBUG4):print(centerpoint([Point(centerpoint(shape)) for shape in listofshapes]))
-    return centerpoint([Point(centerpoint(shape)) for shape in listofshapes])
+        if(DEBUG4):print(centerpoint([RollyPoint(centerpoint(shape)) for shape in listofshapes]))
+    return centerpoint([RollyPoint(centerpoint(shape)) for shape in listofshapes])
 
 def find_match(previous, current, tile):
     """Paires a b

@@ -16,8 +16,8 @@ pp = pprint.PrettyPrinter(indent=4)
 WIDTH = 600
 HEIGHT = 600
 EDGE_SIZE = 30
-p1 = Point(300, 300)
-p2 = Point(300+EDGE_SIZE, 300)
+p1 = RollyPoint(300, 300)
+p2 = RollyPoint(300 + EDGE_SIZE, 300)
 depths = dict()
 
 visitedfaces= set()
@@ -183,7 +183,7 @@ class Edge():
 
     def mouse_inside(self):
         mx, my = pygame.mouse.get_pos()
-        return is_inside(Point(mx, my), self.points)
+        return is_inside(RollyPoint(mx, my), self.points)
 
     def mouse_click(self):
         if (self.mouse_inside() and self.active and self.face1 not in visitedfaces):

@@ -1,11 +1,12 @@
 from math import atan2
 from GeometryFunctions import *
+from GeometryFunctions import RollyPoint
 import DrawingFunctions as Draw
 WIDTH = 800
 HEIGHT = 800
 EDGESIZE = 50
-p1 = Point(300, 300)
-p2 = Point(300 + EDGESIZE, 300)  # 350 300
+p1 = RollyPoint(300, 300)
+p2 = RollyPoint(300 + EDGESIZE, 300)  # 350 300
 textsize = int(round((EDGESIZE) / 2))
 
 
