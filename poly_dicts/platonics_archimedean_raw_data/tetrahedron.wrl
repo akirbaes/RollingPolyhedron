@@ -1,0 +1,22 @@
+#VRML V1.0 ascii
+Separator {
+ ShapeHints {vertexOrdering COUNTERCLOCKWISE faceType CONVEX}
+Separator {
+Material { diffuseColor 0 0 1 
+} #end Material 
+Separator {
+ Coordinate3 { point [
+ 0 0 2,   1.63299 -0.942809 -0.666667,   0 1.88562 -0.666667,   -1.63299 -0.942809 -0.666667,  ] } 
+NormalBinding { value PER_FACE }
+ Normal { vector [  0 -0.942809 0.333333,   0.816497 0.471405 0.333333,   -0.816497 0.471405 0.333333,   0 0 -1,  ] }
+Material { diffuseColor [ 0 0 1 ] }  IndexedFaceSet {
+  coordIndex [ 
+ 1,  0,  3,  -1,
+  2,  0,  1,  -1,
+  3,  0,  2,  -1,
+  3,  2,  1,  -1,
+  ] # end coordIndex 
+  } # end IndexedFaceSet 
+  } # end Separator 
+ } # end Separator 
+} # end final Separator
