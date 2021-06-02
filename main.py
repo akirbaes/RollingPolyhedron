@@ -385,7 +385,7 @@ def exploreA(tiling, rolling, p1, p2, case, face, previouscase=None, previousfac
                 if (exploreA(tiling, rolling, p2, p1, nextcase, nextface, case - difference, face)):
                     return True
 
-from tilings import *
+from tilings_oldformat import *
 if __name__ == "__main__":
     global shape_name
     global net
