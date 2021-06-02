@@ -320,9 +320,9 @@ if __name__ == "__main__":
     global order
     # for shape_name in missing:
     # for shape_name in shapes_names:
-    convert_all_tiling(platonics, "platonic_tilings")
-    convert_all_tiling(archimedeans, "archimedean_tilings")
-    convert_all_tiling(isogonals, "isogonal_tilings")
+    # convert_all_tiling(platonics, "platonic_tilings")
+    # convert_all_tiling(archimedeans, "archimedean_tilings")
+    # convert_all_tiling(isogonals, "isogonal_tilings")
 
     for tilename in platonics:
         net = platonics[tilename]

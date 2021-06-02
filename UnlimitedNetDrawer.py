@@ -73,6 +73,36 @@ def draw_polygon(depth, points, color, alpha=1, outline=False):
     surf.blit(s,(0,0))
     if outline:
         pygame.draw.lines(surf, (0, 0, 0), True, [(p.x, p.y) for p in points])
+def visualise(polydict, p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, prints=False):
+    # Copy of extend, but fills the whole space
+    realshape = newshape % len(polydict)
+    if (drawnshapes == None):
+        drawnshapes = list()
+    if(prints):print("Visualise---------", newshape, oldshape, "(%s)" % realshape, polydict[realshape])
+    if (shapespoly == None):
+        shapespoly = list()
+    points = get_face_points(polydict,p1, p2, newshape, noisy=False)
+    shapespoly.append(Poly(newshape, points, color, fill, p=len(polydict)))
+    current = polydict[realshape]
+    if(prints):print(current, 'of shape', realshape, ', coming from', oldshape)
+    try:
+        #match with -k
+        index = current.index(oldshape)
+    except:
+        #match with --k
+        index = current.index(-oldshape + 2 * (oldshape % len(polydict)))
+        if(prints):print("Matching", "%i[%i]"%(newshape,oldshape),"=",oldshape % len(order), "+%d(%i)" % (oldshape // len(polydict), len(polydict)))
+
+    current = current[index:] + current[:index]
+    shapespoly[-1].fill(current)
+    drawnshapes.append(realshape)
+
+    for index, p in enumerate(current):
+        p1 = points[index % len(points)]
+        p2 = points[(index + 1) % len(points)]
+        if (p not in drawnshapes) and (p % len(polydict) == p):
+            visualise(polydict, p2, p1, p, newshape, color, drawnshapes, shapespoly, fill, prints=prints)
+    return shapespoly
 
 def loop():
     global all_objects

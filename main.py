@@ -28,17 +28,7 @@ textsize = int(round((EDGESIZE) / 2))
 Draw.initialise_drawing(WIDTH, HEIGHT)
 from PolyAndTessNets import polys
 
-
-def make_shape(points, color, filling=0):
-    Draw.polygon_shape(points, color, filling)
-    Draw.polygon_shape(points, (0, 0, 0), 0, outline=1)
-    return points
-
-
-def make_cursor(points, color=5, filling=0.1):
-    Draw.polygon_cursor(points, color, filling)
-    Draw.polygon_cursor(points, color, 0, outline=1)
-    return points
+from PolyFunctions import Poly, visualise, get_face_points, make_shape, make_cursor
 
 """
 def number(id, point):
@@ -64,120 +54,6 @@ def numbours(id, neighbours, points):
 from math import atan2
 from math import pi
 
-class Poly:
-    def __init__(self, id, points, color=None, full=False, alpha=1, p=None):
-        self.n = []
-        self.id = id
-        self.points = points
-        self.color = color
-        if(p!=None):
-            realid = id % p
-        else:
-            realid = id
-        if (full):
-            self.pid = make_shape(points, color, 1)
-        elif (color == None):
-            # self.pid = make_shape(points, (int((id - realid) / len(order))) ,0.7)
-            self.pid = make_shape(points, (0, 0, 0), 0)
-        else:
-            self.pid = make_shape(points, color, 1)
-        # print(points)
-
-        #number(realid, sum(points, Point(0, 0)) / len(points))
-        center = centerpoint(points)
-        angle = 180.0*atan2(points[1].y-points[0].y,points[1].x-points[0].x)/pi
-        Draw.text_rotated(str(realid),center[0],center[1],(0,0,0),textsize,angle,underline=str(realid) in "0,6,8,9")
-
-    def order(self, neighbor):
-        index = self.n.index(neighbor)
-        return self.n[neighbor:] + self.n[:neighbor]
-
-    def fill(self, neighbours):
-        self.n = list(neighbours)
-
-    def __eq__(self, other):
-        return self.id == other
-
-    def has_points(self, pts):
-        # print(sorted(self.points),sorted(pts),sorted(self.points)==sorted(pts))
-        return sorted(round(x) for x in self.points) == sorted(round(x) for x in pts)
-
-    def remplis(self, color=(255, 0, 0)):
-        return
-        make_shape(self.points, (255, 0, 0), 0.1)
-
-    def __repr__(self):
-        return str(self.points)
-
-    def center(self) -> tuple:
-        return centerpoint(self.points)
-
-
-def get_face_points(shapedict, p1, p2, face, noisy=True):
-    faceid = face % len(shapedict)
-    if (len(shapedict[faceid])) == 3:
-        points = triangle(p1, p2)
-        if (noisy): print(" triangle ", face)
-    elif (len(shapedict[faceid])) == 4:
-        points = square(p1, p2)
-        if (noisy): print(" square ", face)
-    elif(len(shapedict[faceid]))==6:
-        points = hexagon(p1, p2)
-        if (noisy): print(" hexagon ", face)
-    elif(len(shapedict[faceid]))==8:
-        points = octagon(p1, p2)
-        if (noisy): print(" octagon ", face)
-    elif(len(shapedict[faceid]))==12:
-        points = dodecagon(p1, p2)
-        if (noisy): print(" dodecagon ", face)
-    else:
-        raise IndexError(len(shapedict[faceid]))
-    return points
-
-
-def visualise(polydict, p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, ord=None, prints=False):
-    # Copy of extend, but fills the whole space
-    realshape = newshape % len(polydict)
-    if (drawnshapes == None):
-        drawnshapes = list()
-    if(prints):print("Visualise---------", newshape, oldshape, "(%s)" % realshape, polydict[realshape])
-    if (shapespoly == None):
-        shapespoly = list()
-    points = get_face_points(polydict,p1, p2, newshape, noisy=False)
-    shapespoly.append(Poly(newshape, points, color, fill, p=len(polydict)))
-    current = polydict[realshape]
-    if(prints):print(current, 'of shape', realshape, ', coming from', oldshape)
-    try:
-        #match with -k
-        index = current.index(oldshape)
-    except:
-        #match with --k
-        index = current.index(-oldshape + 2 * (oldshape % len(polydict)))
-        if(prints):print("Matching", "%i[%i]"%(newshape,oldshape),"=",oldshape % len(order), "+%d(%i)" % (oldshape // len(polydict), len(polydict)))
-
-    current = current[index:] + current[:index]
-    shapespoly[-1].fill(current)
-    drawnshapes.append(realshape)
-
-    #Draw.refresh()
-    # sleep(0.1)
-    # print("I have",len(points),"points")
-    # if(newshape==realshape):
-    # print("Next ones:",current)
-    for index, p in enumerate(current):
-        # print("Looking",p)
-        # print(index)
-        p1 = points[index % len(points)]
-        p2 = points[(index + 1) % len(points)]
-        if (p not in drawnshapes) and (p % len(order) == p):
-            visualise(polydict, p2, p1, p, newshape, color, drawnshapes, shapespoly, fill, prints=prints)
-        """else:
-			if(p in drawnshapes):
-				print("P in drawn:",p,drawnshapes,p not in drawnshapes)
-			if(p%len(order)!=p):
-				print("P not to draw",p,p%len(order))"""
-    return shapespoly
-
 
 def extend(polydict, p1, p2, newshape, oldshape=None, drawnshapes=None, shapespoly=None, prints=False):
     # Visualize one tile and the neighbouring infos
@@ -186,7 +62,7 @@ def extend(polydict, p1, p2, newshape, oldshape=None, drawnshapes=None, shapespo
     if (shapespoly == None):
         shapespoly = list()
     if(prints):print(end="Draw the")
-    realshape = newshape % len(order)
+    realshape = newshape % len(polydict)
     if (len(polydict[realshape])) == 3:
         points = triangle(p1, p2)
         if(prints):print(" triangle ", newshape, "(%d)" % realshape)
@@ -219,7 +95,7 @@ def extend(polydict, p1, p2, newshape, oldshape=None, drawnshapes=None, shapespo
                 # print(p,shapes)
                 # print("Work",newshape)
                 if (s == newshape):
-                    s += len(order)
+                    s += len(polydict)
                 extend(polydict, p2, p1, s, newshape, drawnshapes, shapespoly)
 
     Draw.refresh()
@@ -237,7 +113,7 @@ def points_outside(points):
             return True
     return False
 
-
+"""
 def swap(oldshape):
     return -oldshape + 2 * (oldshape % len(order))
 
@@ -247,7 +123,7 @@ def rest(oldshape):
 
 
 def real(shape):
-    return shape % len(order)
+    return shape % len(order)"""
 
 
 def rounded(pts):
@@ -281,7 +157,7 @@ def fill_screen(tiling, p1, p2, newshape, oldshape=None, exploredpoints=None, dr
     if(prints):print("Oldshape:", oldshape)
     if (oldshape == None):
         # Turns a n+P number into n-P (find pair)
-        oldshape = -current[0] + 2 * (current[0] % len(order))
+        oldshape = -current[0] + 2 * (current[0] % len(tiling))
         # n%P - (n-n%P) = -n + 2*(n%P)
 
     # if(oldshape!=None and newshape==realshape): #on explore même quand on est dehors
@@ -321,19 +197,19 @@ def fill_screen(tiling, p1, p2, newshape, oldshape=None, exploredpoints=None, dr
         p1 = points[index % len(points)]
         p2 = points[(index + 1) % len(points)]
         # print("Do I explore ",realshape," to ",p,"(",p%len(order),") ?")
-        if ((p % len(order) == p) and (p % len(order) != realshape)):
-            fill_screen(tiling, p2, p1, real(p), newshape - rest(p), exploredpoints, drawnpoly, color, prints=prints)
+        if ((p % len(tiling) == p) and (p % len(tiling) != realshape)):
+            fill_screen(tiling, p2, p1, p%len(tiling), newshape - (p-(p%len(tiling))), exploredpoints, drawnpoly, color, prints=prints)
 
     for index, p in enumerate(current):
         # print(index)
         p1 = points[index % len(points)]
         p2 = points[(index + 1) % len(points)]
-        if ((p % len(order) != p) or p % len(order) == realshape):
+        if ((p % len(tiling) != p) or p % len(tiling) == realshape):
             # sleep(0.5)
             # color+=1
             # print(newshape,p,rest(p))
             # print(newshape + rest(p))
-            fill_screen(tiling, p2, p1, real(p), newshape - rest(p), exploredpoints, drawnpoly, color, prints=prints)
+            fill_screen(tiling, p2, p1, p%len(tiling), newshape - (p-(p%len(tiling))), exploredpoints, drawnpoly, color, prints=prints)
 
 
 """

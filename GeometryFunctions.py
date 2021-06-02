@@ -65,6 +65,21 @@ def triangle(p1, p2):
     return (p1), (p2), (p3)
 
 
+def pentagon(p1, p2):
+    # creates a hexagon clockwise to p1,p2
+    # precision decreases as points are added to eachother
+    p1 = p1
+    p2 = p2
+    sol = [(p1), (p2)]
+    pa = p1
+    pb = p2
+    for i in range(3):
+        pn = pb + (pa - pb).rotate(-108 * pi / 180)
+        sol.append((pn))
+        pa = pb
+        pb = pn
+    return sol
+
 def hexagon(p1, p2):
     # creates a hexagon clockwise to p1,p2
     # precision decreases as points are added to eachother
@@ -83,7 +98,6 @@ def hexagon(p1, p2):
 	dist = (p2-p1)"""
     return sol
 
-
 def octagon(p1, p2):
     # creates an octagon clockwise to p1,p2
     # precision decreases as points are added to eachother
@@ -100,6 +114,21 @@ def octagon(p1, p2):
     return sol
 
 
+def decagon(p1, p2):
+    # creates a dodecagon clockwise to p1,p2
+    # precision decreases as points are added to eachother
+    p1 = p1
+    p2 = p2
+    sol = [(p1), (p2)]
+    pa = p1
+    pb = p2
+    for i in range(8):
+        pn = pb + (pa - pb).rotate(-144 * pi / 180)
+        sol.append((pn))
+        pa = pb
+        pb = pn
+    return sol
+
 def dodecagon(p1, p2):
     # creates a dodecagon clockwise to p1,p2
     # precision decreases as points are added to eachother
@@ -114,3 +143,4 @@ def dodecagon(p1, p2):
         pa = pb
         pb = pn
     return sol
+
