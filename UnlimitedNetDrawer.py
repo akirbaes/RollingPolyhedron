@@ -182,9 +182,9 @@ class Edge():
     def draw(self):
         if(self.active):
             surf = get_surface(Edge.depth)
-            pygame.draw.circle(surf, (0, 0, 0), self.p1.as_tuple(), 2)
-            pygame.draw.circle(surf, (0, 0, 0), self.p2.as_tuple(), 2)
-            pygame.draw.line(surf, (0, 0, 0), self.p1.as_tuple(), self.p2.as_tuple(), 1)
+            pygame.draw.circle(surf, (0, 0, 0), tuple(int(x) for x in self.p1.as_tuple()), 2)
+            pygame.draw.circle(surf, (0, 0, 0), tuple(int(x) for x in self.p2.as_tuple()), 2)
+            pygame.draw.line(surf, (0, 0, 0), tuple(int(x) for x in self.p1.as_tuple()), tuple(int(x) for x in self.p2.as_tuple()), 1)
         else:
             surf = get_surface(Edge.depth)
             draw_polygon(1,self.points,(255,0,0),0.5,0)
