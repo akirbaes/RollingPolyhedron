@@ -3,28 +3,32 @@
 #main creates edges→loop
 #fully expanded: second_main prints the net and takes a picture→return to main
 #[Enter]→go to next polyhedron
-import pprint
-import pygame
+import pprint, time, pygame
 from GeometryFunctions import *
-from PolyAndTessNets import *
 from poly_dicts.johnson_nets import johnson_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.prism_nets import prism_nets
-
-pp = pprint.PrettyPrinter(indent=4)
 WIDTH = 600
 HEIGHT = 600
 EDGE_SIZE = 30
 p1 = Point(300, 300)
 p2 = Point(300+EDGE_SIZE, 300)
-depths = dict()
+
+all_poly = dict(**plato_archi_nets, **johnson_nets, **prism_nets)
+all_poly_names = list(all_poly.keys())
+
+startface = 0
+#startface=all_poly_names.index("cube")
+working_poly_id = 0
+
 
 visitedfaces= set()
 visitededges=set()
-#visited or not on the other structure
-#then the missing visits
+poly=None
 all_objects = []
 
+
+depths = dict()
 
 def get_all_depths():
     return [depths[d] for d in sorted(depths.keys())]
@@ -70,38 +74,6 @@ def draw_polygon(depth, points, color, alpha=1, outline=False):
     if outline:
         pygame.draw.lines(surf, (0, 0, 0), True, [(p.x, p.y) for p in points])
 
-
-def second_main():
-    #delete all edges and reconstruct the net part of the tiling
-    poly = all_objects[0].poly
-    face1 = all_objects[0].face1
-    partial_net = dict()
-    faces = [face1]
-    while(len(partial_net)<len(poly)):
-        face=faces.pop()
-        ref = poly[face]
-        newpath = []
-        partial_net[face]=newpath
-        for f in ref:
-            if((face,f) in visitededges):
-                newpath.append(f)
-            else:
-                newpath.append(None)
-            if(f not in partial_net):
-                faces.append(f)
-    pp.pprint(partial_net)
-
-    wipe_surface(2)
-    wipe_surface(0)
-    wipe_surface(1)
-    for edge in all_objects:
-        edge.draw()
-    refresh()
-    pygame.image.save(screen, "%s.png"%polyname)
-    #pygame.scrap.init()
-    #pygame.scrap.put(pygame.SCRAP_BMP,screen.)
-
-
 def loop():
     global all_objects
     clock = pygame.time.Clock()
@@ -122,15 +94,38 @@ def loop():
                         edge.mouse_click()
                     elif(e.button==3):
                         edge.mouse_right_click()
+
+                print("Visited:", visitedfaces)
+                print("Not visited:", set(poly.keys()) - visitedfaces)
             if e.type== pygame.KEYDOWN and e.key == pygame.K_RETURN:
-                all_objects = []
-                running=False
-                #jump to step 2
+                filename = "%s[%s.png" % (polyname,int(time.time()))
+                draw_text(1,polyname,WIDTH/2,20,(255,0,0),35)
+                pygame.image.save(screen, filename)
+                print("Saved",filename)
+
+            global working_poly_id
+            global startface
+            if e.type== pygame.KEYDOWN and e.key == pygame.K_LEFT:
+                startface=0
+                working_poly_id=(working_poly_id-1)%len(all_poly_names)
+                running = False
+            if e.type== pygame.KEYDOWN and e.key == pygame.K_RIGHT:
+                startface=0
+                working_poly_id=(working_poly_id+1)%len(all_poly_names)
+                running = False
+
+            if e.type== pygame.KEYDOWN and e.key == pygame.K_UP:
+                startface=(startface+1)%len(poly)
+                running = False
+            if e.type== pygame.KEYDOWN and e.key == pygame.K_DOWN:
+                startface=(startface-1)%len(poly)
+                running = False
 
             if e.type == pygame.QUIT:
                 running = False
                 print("Quit!", flush=True)
                 exit()
+
 
 class DummyParent():
     def __init__(self):
@@ -207,13 +202,13 @@ class Edge():
 
     def mouse_click(self):
         if (self.mouse_inside() and self.active and self.is_parent_favorite()):# and self.face1 not in visitedfaces):
-            print(visitededges)
+            # print(visitededges)
             self.active=False
             visitedfaces.add(self.face1)
             if(self.face0 in visitedfaces):
                 visitededges.add((self.face0,self.face1))
                 visitededges.add((self.face1,self.face0))
-            print(visitededges)
+            # print(visitededges)
             #net_structure.get(self.face0,[]).append(self.face1) #or rather: empty structure, set edge to None or face1
             for i in range(1,len(self.points)):
                 pa = self.points[i]
@@ -254,32 +249,20 @@ class Edge():
         self.active=True
             #delete the edges that were created by this, and its descendance
 
-cubotahedron = {
-
-
-
-}
 
 if __name__ == "__main__":
-    # johnson_nets
-    # plato_archi_nets
-    # prism_nets
-    # for working_poly in ["octahedron","cube","j89","j90","j12","j13","j17","j51","j84"]:
-    working_poly = "truncated_tetrahedron"
-    all_poly = dict(**plato_archi_nets, **johnson_nets, **prism_nets)
-    global polyname
-    polyname = working_poly
-    poly = all_poly[working_poly]
-    initialise_drawing()
-    #pygame.scrap.init()
-    #pygame.scrap.put(pygame.SCRAP_BMP,pygame.surfarray.array3d(screen))
-    visitedfaces=set()
-    visitededges=set()
-    dummy=DummyParent()
-    startface = 0
-    secondface = poly[0][0]
-    all_objects.append(Edge((p1, p2), poly, startface, secondface ,dummy))
-    all_objects.append(Edge((p2, p1), poly, secondface, startface,dummy))
-    refresh()
-    print(working_poly)
-    loop()
+    while(True):
+        working_poly = all_poly_names[working_poly_id]
+        polyname = working_poly
+        poly = all_poly[working_poly]
+        initialise_drawing()
+        visitedfaces=set()
+        visitededges=set()
+        dummy=DummyParent()
+        secondface = poly[startface][0]
+        all_objects = []
+        all_objects.append(Edge((p1, p2), poly, startface, secondface ,dummy))
+        all_objects.append(Edge((p2, p1), poly, secondface, startface,dummy))
+        refresh()
+        print(working_poly)
+        loop()
