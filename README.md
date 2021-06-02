@@ -1,5 +1,7 @@
 # Interesting for everyone
 
+ ----
+
 ## Unlimited Net Drawer
 
 ### Useful for: checking the path of a polyhedron
@@ -42,7 +44,13 @@ A folder with tiling dictionaries for a lot of tilings!
 
 A folder with net dictionaries for a lot of polyhedrons!
 
+ ----
+
+ ----
+
 # My stuff
+
+ ----
 
 ## NetDrawer
 
