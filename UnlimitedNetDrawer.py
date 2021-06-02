@@ -29,7 +29,7 @@ working_poly_id = 0
 
 
 visitedfaces= set()
-visitededges=set()
+# visitededges=set()
 poly=None
 all_objects = []
 
@@ -242,9 +242,9 @@ class Edge():
             # print(visitededges)
             self.active=False
             visitedfaces.add(self.face1)
-            if(self.face0 in visitedfaces):
-                visitededges.add((self.face0,self.face1))
-                visitededges.add((self.face1,self.face0))
+            # if(self.face0 in visitedfaces):
+            #     visitededges.add((self.face0,self.face1))
+            #     visitededges.add((self.face1,self.face0))
             # print(visitededges)
             #net_structure.get(self.face0,[]).append(self.face1) #or rather: empty structure, set edge to None or face1
             start = 0 #start = 1
@@ -267,18 +267,14 @@ class Edge():
             self.remove_traces()
     def remove_traces(self):
         if(not self.active):
-            try:
-                visitedfaces.remove(self.face1)
-            except:
-                pass
-            try:
-                visitededges.remove((self.face0,self.face1))
-            except KeyError:
-                pass
-            try:
-                visitededges.remove((self.face1,self.face0))
-            except KeyError:
-                pass
+            # try:
+            #     visitededges.remove((self.face0,self.face1))
+            # except KeyError:
+            #     pass
+            # try:
+            #     visitededges.remove((self.face1,self.face0))
+            # except KeyError:
+            #     pass
             for ed in self.children:
                 ed.remove_traces()
                 all_objects.remove(ed)
@@ -286,6 +282,11 @@ class Edge():
         self.favorite=None
         self.parent.favorite=None
         self.active=True
+        if not([node.face1 for node in all_objects if not node.active and node!=self and node.face1==self.face1]):
+            try:
+                visitedfaces.remove(self.face1)
+            except:
+                pass
             #delete the edges that were created by this, and its descendance
 
 
@@ -298,7 +299,7 @@ if __name__ == "__main__":
         polyname = working_poly
         poly = all_poly[working_poly]
         visitedfaces=set()
-        visitededges=set()
+        # visitededges=set()
         dummy=DummyParent()
         secondface = poly[startface][0]
         all_objects = []
