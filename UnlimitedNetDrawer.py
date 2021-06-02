@@ -1,8 +1,6 @@
-#Shows a partial net of the poly to click on to expand
-
-#main creates edges→loop
-#fully expanded: second_main prints the net and takes a picture→return to main
-#[Enter]→go to next polyhedron
+#Roll a poly by clicking to expand
+#Left and Right changes the poly
+#Up and Down changes the starting face
 import pprint, time, pygame
 import traceback
 
@@ -102,6 +100,7 @@ def loop():
             if e.type== pygame.KEYDOWN and e.key == pygame.K_RETURN:
                 filename = "%s[%s.png" % (polyname,int(time.time()))
                 draw_text(1,polyname,WIDTH/2,20,(255,0,0),35)
+                refresh()
                 pygame.image.save(screen, filename)
                 print("Saved",filename)
 
