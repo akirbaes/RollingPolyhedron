@@ -87,11 +87,13 @@ def loop():
 
     running = True
     drawn = False
-    updateshapes = False
+    # updateshapes = False
     while running:
         clock.tick(30)
+        # print(get_all_depths())
+        print(sum(1 for edge in all_objects if edge.is_parent_favorite()))
         wipe_surface(2)
-        wipe_surface(1)
+        #wipe_surface(1)
         #wipe_surface(0)
         for edge in all_objects:
             #edge.draw()
@@ -103,15 +105,16 @@ def loop():
         else:
             wipe_surface(3)
             drawn=False
-        draw_text(1, polyname.capitalize(), WIDTH / 2, 20, (0, 0, 0), 35)
+        draw_text(2, polyname.capitalize(), WIDTH / 2, 20, (0, 0, 0), 35)
         if ((set(poly.keys()) - visitedfaces)):
-            draw_text(1, "Unvisited:" + str((set(poly.keys()) - visitedfaces)), WIDTH / 2, 50, (0, 0, 0), 35)
+            draw_text(2, "Unvisited:" + str((set(poly.keys()) - visitedfaces)), WIDTH / 2, 50, (0, 0, 0), 35)
         refresh()
         for e in pygame.event.get():
             if e.type == pygame.MOUSEBUTTONDOWN:
                 for edge in all_objects:
-                    if(e.button==1 and edge.active) and edge.mouse_inside():
+                    if(e.button==1 and edge.active and edge.mouse_inside() and edge.is_parent_favorite()):
                         edge.mouse_click()
+                        break
                     elif(e.button==3 and not edge.active and edge.mouse_inside()):
                         edge.mouse_right_click()
                         wipe_surface(0)
@@ -225,7 +228,7 @@ class Edge():
                     border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
                     #pygame.draw.line(surf, (250, 250, 250), border, center, 3)
                     draw_text(2,str(self.face1),*center,(192,192,192),EDGE_SIZE/2)
-                    draw_polygon(1,self.points,(0,0,0),0.1,0)
+                    draw_polygon(2,self.points,(0,0,0),0.1,0)
                     #pygame.draw.polygon(surf, (0, 0, 0, 16), [(p.x, p.y) for p in self.points])
             #else:
             #    pygame.draw.line(surf, (0, 0, 0), self.p1.as_tuple(), self.p2.as_tuple(), 1)
@@ -266,7 +269,7 @@ class Edge():
         if (self.mouse_inside()) and not self.active:
             self.remove_traces()
     def remove_traces(self):
-        if(not self.active):
+        if(not self.active): #face, has children
             # try:
             #     visitededges.remove((self.face0,self.face1))
             # except KeyError:
