@@ -84,15 +84,17 @@ def loop():
     global working_poly_id
     global startface
     clock = pygame.time.Clock()
+
     running = True
     drawn = False
+    updateshapes = False
     while running:
         clock.tick(30)
         wipe_surface(2)
-        wipe_surface(0)
         wipe_surface(1)
+        #wipe_surface(0)
         for edge in all_objects:
-            edge.draw()
+            #edge.draw()
             edge.draw_cursor()
         if(len(visitedfaces)<=1):
             if(not drawn):
@@ -108,11 +110,14 @@ def loop():
         for e in pygame.event.get():
             if e.type == pygame.MOUSEBUTTONDOWN:
                 for edge in all_objects:
-                    if(e.button==1):
+                    if(e.button==1 and edge.active) and edge.mouse_inside():
                         edge.mouse_click()
-                    elif(e.button==3):
+                    elif(e.button==3 and not edge.active and edge.mouse_inside()):
                         edge.mouse_right_click()
-
+                        wipe_surface(0)
+                        for edge in all_objects:
+                            edge.draw()
+                        break
                 print("Visited:", visitedfaces or None)
                 print("Not visited:", (set(poly.keys()) - visitedfaces) or None)
             if e.type== pygame.KEYDOWN and e.key == pygame.K_RETURN:
@@ -145,11 +150,13 @@ def loop():
                 print("Quit!", flush=True)
                 exit()
 
+        #print(len(all_objects))
     #
     wipe_surface(2)
     #wipe_surface(0)
     #wipe_surface(1)
     wipe_surface(3)
+
 
 class DummyParent():
     def __init__(self):
@@ -181,25 +188,25 @@ class Edge():
 
     def draw(self):
         if(self.active):
-            surf = get_surface(Edge.depth)
+            surf = get_surface(0)
             pygame.draw.circle(surf, (0, 0, 0), tuple(int(x) for x in self.p1.as_tuple()), 2)
             pygame.draw.circle(surf, (0, 0, 0), tuple(int(x) for x in self.p2.as_tuple()), 2)
             pygame.draw.line(surf, (0, 0, 0), tuple(int(x) for x in self.p1.as_tuple()), tuple(int(x) for x in self.p2.as_tuple()), 1)
         else:
-            surf = get_surface(Edge.depth)
-            draw_polygon(1,self.points,(255,0,0),0.5,0)
-            draw_polygon(1,self.points,(0,0,0),0,1)
+            surf = get_surface(0)
+            draw_polygon(0,self.points,(255,0,0),0.5,0)
+            draw_polygon(0,self.points,(0,0,0),0,1)
             border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
             center = centerpoint(self.points)
 
-            surf = get_surface(1)
+            surf = get_surface(0)
             pygame.draw.line(surf, (250, 250, 250,255), border, center, 3)
 
             if not(self.favorite is None):
                 border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
                 border = centerpoint(self.favorite.points)
 
-            draw_text(1,str(self.face1),*center,(0,0,0),EDGE_SIZE/2)
+            draw_text(0,str(self.face1),*center,(0,0,0),EDGE_SIZE/2)
 
 
     def draw_cursor(self):
@@ -252,6 +259,7 @@ class Edge():
                 all_objects.append(ed)
                 self.children.append(ed)
                 self.parent.favorite=self
+            self.draw()
             #if(len(visitedfaces)==len(self.poly)):
             #    second_main()
     def mouse_right_click(self):
@@ -285,6 +293,7 @@ initialise_drawing()
 
 if __name__ == "__main__":
     while(True):
+        wipe_surface(0)
         working_poly = all_poly_names[working_poly_id]
         polyname = working_poly
         poly = all_poly[working_poly]
