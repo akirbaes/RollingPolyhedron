@@ -1,0 +1,74 @@
+#VRML V2.0 utf8
+WorldInfo{
+	title "biaugmented pentagonal prism (J53)(#97)"
+	info[
+	"Author: Vladimir Bulatov - bulatov@dots.physics.orst.edu"
+	]
+}
+NavigationInfo {
+	type "EXAMINE"
+	headlight TRUE
+}
+Transform {
+  children[
+  Shape{
+    geometry IndexedFaceSet{
+      solid FALSE
+      convex FALSE
+      colorPerVertex FALSE
+      color Color{
+        color [
+        0 0 0,0 0 0,0 0 0,
+        0.0 0.72 0.6, 
+        0.9 0.7 0.3,  
+        0.8 0.8 1.0,  
+        0.5 0.0 0.05, 
+        0.6 0.2 0.9,  
+        0.3 0.2 0.2,  
+        0.4 0.4 1,    
+        0.4 0.4 0.4,  
+        ]
+      }
+    coord Coordinate{
+         point[
+           -0.569544 0.202047 -0.316733,
+           -0.442600 -0.495635 -0.154836,
+           -0.333219 0.608225 0.238475,
+           -0.272560 0.853827 -0.443497,
+           -0.127819 -0.520649 0.500431,
+           -0.060218 0.161575 0.743510,
+           0.064352 -0.997832 -0.013820,
+           0.085457 0.248622 -0.629608,
+           0.212401 -0.449060 -0.467711,
+           0.321782 0.654801 -0.074400,
+           0.527182 -0.474073 0.187555,
+           0.594783 0.208150 0.430635,
+         ]
+    }
+    coordIndex[
+      4,5,2,0,1,-1,
+      8,7,9,11,10,-1,
+      5,4,10,11,-1,
+      2,5,11,9,-1,
+      1,0,7,8,-1,
+      2,3,0,-1,
+      2,9,3,-1,
+      0,3,7,-1,
+      7,3,9,-1,
+      1,6,4,-1,
+      1,8,6,-1,
+      4,6,10,-1,
+      10,6,8,-1,
+    ]
+    colorIndex[
+      5, 5, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 
+    ]
+    }
+    appearance Appearance {
+      material Material { 
+        shininess 1
+      }
+    }
+  }
+]
+}

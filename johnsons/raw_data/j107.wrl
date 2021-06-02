@@ -1,0 +1,66 @@
+#VRML V2.0 utf8
+WorldInfo{
+	title "tridiminished icosahedron (J63)(#107)"
+	info[
+	"Author: Vladimir Bulatov - bulatov@dots.physics.orst.edu"
+	]
+}
+NavigationInfo {
+	type "EXAMINE"
+	headlight TRUE
+}
+Transform {
+  children[
+  Shape{
+    geometry IndexedFaceSet{
+      solid FALSE
+      convex FALSE
+      colorPerVertex FALSE
+      color Color{
+        color [
+        0 0 0,0 0 0,0 0 0,
+        0.0 0.72 0.6, 
+        0.9 0.7 0.3,  
+        0.8 0.8 1.0,  
+        0.5 0.0 0.05, 
+        0.6 0.2 0.9,  
+        0.3 0.2 0.2,  
+        0.4 0.4 1,    
+        0.4 0.4 0.4,  
+        ]
+      }
+    coord Coordinate{
+         point[
+           -0.760044 0.469942 -0.146060,
+           -0.646348 -0.081975 0.681302,
+           -0.290922 0.002420 -0.896670,
+           -0.106958 -0.890600 0.442031,
+           -0.073561 0.726032 0.536016,
+           0.112708 -0.838441 -0.533210,
+           0.146105 0.778191 -0.439225,
+           0.799191 -0.582352 0.148866,
+           0.819831 0.416782 0.206952,
+         ]
+    }
+    coordIndex[
+      6,8,7,5,2,-1,
+      0,2,5,3,1,-1,
+      0,4,6,-1,
+      4,8,6,-1,
+      6,2,0,-1,
+      0,1,4,-1,
+      7,8,4,1,3,-1,
+      5,7,3,-1,
+    ]
+    colorIndex[
+      5, 5, 3, 3, 3, 3, 5, 3, 
+    ]
+    }
+    appearance Appearance {
+      material Material { 
+        shininess 1
+      }
+    }
+  }
+]
+}

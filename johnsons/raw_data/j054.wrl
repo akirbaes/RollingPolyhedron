@@ -1,0 +1,71 @@
+#VRML V2.0 utf8
+WorldInfo{
+	title "gyroelongated square pyramid (J10)(#54)"
+	info[
+	"Author: Vladimir Bulatov - bulatov@dots.physics.orst.edu"
+	]
+}
+NavigationInfo {
+	type "EXAMINE"
+	headlight TRUE
+}
+Transform {
+  children[
+  Shape{
+    geometry IndexedFaceSet{
+      solid FALSE
+      convex FALSE
+      colorPerVertex FALSE
+      color Color{
+        color [
+        0 0 0,0 0 0,0 0 0,
+        0.0 0.72 0.6, 
+        0.9 0.7 0.3,  
+        0.8 0.8 1.0,  
+        0.5 0.0 0.05, 
+        0.6 0.2 0.9,  
+        0.3 0.2 0.2,  
+        0.4 0.4 1,    
+        0.4 0.4 0.4,  
+        ]
+      }
+    coord Coordinate{
+         point[
+           -0.660978 0.147612 0.354659,
+           -0.579861 0.230360 -0.636323,
+           -0.550400 -0.669705 -0.206802,
+           0.017410 0.763221 -0.040673,
+           0.059075 -0.509663 0.566761,
+           0.129858 0.430497 0.893202,
+           0.408986 0.200898 -0.765887,
+           0.438447 -0.699167 -0.336366,
+           0.737463 0.105947 0.171429,
+         ]
+    }
+    coordIndex[
+      4,7,8,-1,
+      8,7,6,-1,
+      8,6,3,-1,
+      3,6,1,-1,
+      3,1,0,-1,
+      0,1,2,-1,
+      0,2,4,-1,
+      4,2,7,-1,
+      4,8,5,-1,
+      8,3,5,-1,
+      3,0,5,-1,
+      0,4,5,-1,
+      1,6,7,2,-1,
+    ]
+    colorIndex[
+      3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 
+    ]
+    }
+    appearance Appearance {
+      material Material { 
+        shininess 1
+      }
+    }
+  }
+]
+}

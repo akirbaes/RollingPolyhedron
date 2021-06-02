@@ -1,0 +1,69 @@
+#VRML V2.0 utf8
+WorldInfo{
+	title "snub disphenoid (J84)(#128)"
+	info[
+	"Author: Vladimir Bulatov - bulatov@dots.physics.orst.edu"
+	]
+}
+NavigationInfo {
+	type "EXAMINE"
+	headlight TRUE
+}
+Transform {
+  children[
+  Shape{
+    geometry IndexedFaceSet{
+      solid FALSE
+      convex FALSE
+      colorPerVertex FALSE
+      color Color{
+        color [
+        0 0 0,0 0 0,0 0 0,
+        0.0 0.72 0.6, 
+        0.9 0.7 0.3,  
+        0.8 0.8 1.0,  
+        0.5 0.0 0.05, 
+        0.6 0.2 0.9,  
+        0.3 0.2 0.2,  
+        0.4 0.4 1,    
+        0.4 0.4 0.4,  
+        ]
+      }
+    coord Coordinate{
+         point[
+           -0.671538 0.489370 0.555969,
+           -0.630173 -0.081871 -0.354420,
+           -0.555931 -0.579146 0.596264,
+           0.086109 0.700277 -0.177116,
+           0.235721 -0.676910 -0.125154,
+           0.250014 -0.009325 -0.968197,
+           0.308111 0.058055 0.656407,
+           0.977687 0.099548 -0.183753,
+         ]
+    }
+    coordIndex[
+      6,7,3,-1,
+      3,7,5,-1,
+      3,5,1,-1,
+      4,7,6,-1,
+      7,4,5,-1,
+      5,4,1,-1,
+      4,2,1,-1,
+      1,2,0,-1,
+      1,0,3,-1,
+      6,2,4,-1,
+      2,6,0,-1,
+      0,6,3,-1,
+    ]
+    colorIndex[
+      3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 
+    ]
+    }
+    appearance Appearance {
+      material Material { 
+        shininess 1
+      }
+    }
+  }
+]
+}
