@@ -127,10 +127,12 @@ def loop():
             top.withdraw()  # hide window
             #filetypes=("Text txt",)
             file_name = tkinter.filedialog.asksaveasfilename(parent=top)
+            basename = os.path.basename(file_name)
             top.destroy()
             try:
-                f=open(file_name+'.txt',"w")
-                f.write(pprint.pformat(tiling_result,indent=4,sort_dicts=True))
+                f=open(file_name+'.py',"w")
+                f.write(("all_tilings['%s'] = \\\n"%basename)+pprint.pformat(tiling_result,indent=4,sort_dicts=True))
+                #f.write(pprint.pformat(tiling_result,indent=4,sort_dicts=True))
                 f.close()
             except:
                 traceback.print_exc()
@@ -140,13 +142,13 @@ def loop():
                 tiling_result_p[key] = [((isinstance(x,tuple) and x[0]+x[1]*len(tiling_result))) or (isinstance(x,int) and x) for x in tiling_result[key]]
             pprint.pprint(tiling_result_p,indent=4,sort_dicts=True)
             try:
-                basename = os.path.basename(file_name)
-                f=open(file_name+".py","w")
+                f=open(file_name+".oldformat","w")
                 f.write(("all_tilings['%s'] = \\\n"%basename)+pprint.pformat(tiling_result_p,indent=4,sort_dicts=True))
                 f.close()
             except:
                 traceback.print_exc()
 
+            """
             tiling_result_t = dict()
             for key in tiling_result:
                 tiling_result_t[key] = [(isinstance(x,tuple) and x) or (isinstance(x,int) and (x,0)) for x in tiling_result[key]]
@@ -156,7 +158,7 @@ def loop():
                 f.write(("all_tilings['%s'] = \\\n"%basename)+pprint.pformat(tiling_result_t,indent=4,sort_dicts=True))
                 f.close()
             except:
-                traceback.print_exc()
+                traceback.print_exc()"""
 
 def get_tiling():
     """Generates the tiling dict and prints it"""
@@ -171,14 +173,14 @@ def get_tiling():
         if not edge.active: #face
             neighbours = []
             if(edge.parent!=None):
-                neighbours.append(edge.parent.faceid)
+                neighbours.append((edge.parent.faceid,0))
             for chi in edge.children:
                 if not chi.active: #is another face: internal neighbour
-                    neighbours.append(chi.faceid)
+                    neighbours.append((chi.faceid,0))
                 else:
                     if(chi.is_neighbour()):
                         if(chi.same_position(chi.other)):#internal link
-                            neighbours.append(chi.other.parent.faceid)
+                            neighbours.append((chi.other.parent.faceid,0))
                         else:
                             if(chi.pcounter==None):#external link, risk of duplicate so numbering it
                                 chi.pcounter = pcounter
