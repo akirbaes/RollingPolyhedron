@@ -1,6 +1,6 @@
 from math import atan2
-import DrawingFunctions as Draw
 from GeometryFunctions import *
+import DrawingFunctions as Draw
 WIDTH = 800
 HEIGHT = 800
 EDGESIZE = 50
@@ -77,12 +77,18 @@ def get_face_points(shapedict, p1, p2, face, noisy=True):
     elif (len(shapedict[faceid])) == 4:
         points = square(p1, p2)
         if (noisy): print(" square ", face)
+    elif(len(shapedict[faceid]))==5:
+        points = pentagon(p1, p2)
+        if (noisy): print(" pentagon ", face)
     elif(len(shapedict[faceid]))==6:
         points = hexagon(p1, p2)
         if (noisy): print(" hexagon ", face)
     elif(len(shapedict[faceid]))==8:
         points = octagon(p1, p2)
         if (noisy): print(" octagon ", face)
+    elif(len(shapedict[faceid]))==10:
+        points = decagon(p1, p2)
+        if (noisy): print(" decagon ", face)
     elif(len(shapedict[faceid]))==12:
         points = dodecagon(p1, p2)
         if (noisy): print(" dodecagon ", face)
@@ -91,7 +97,13 @@ def get_face_points(shapedict, p1, p2, face, noisy=True):
     return points
 
 
-def visualise(polydict, p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, prints=False):
+def visualise(polydict, p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, prints=False,surf=None,screen=None,shapes=None):
+    global s
+    try:
+        print(s)
+    except:
+        if(surf!=None):
+            Draw.set_s(surf,screen,shapes)
     # Copy of extend, but fills the whole space
     realshape = newshape % len(polydict)
     if (drawnshapes == None):

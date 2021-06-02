@@ -40,6 +40,12 @@ if(MODE=="pygame"):
         #pygame.draw.line(s,(255,128,128),points[0].as_tuple(),points[1].as_tuple(),2)
         shapes.blit(s, (0, 0))
 
+    def set_s(surf,rscreen,rshapes):
+        global screen, shapes, s
+        s=surf
+        screen=rscreen
+        shapes=rshapes
+
     def polygon_cursor(points, color, alpha=1, outline=False):
         if (isinstance(color, int)):
             color = colors[color % len(colors)]

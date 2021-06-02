@@ -8,6 +8,7 @@ from GeometryFunctions import *
 from poly_dicts.johnson_nets import johnson_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.prism_nets import prism_nets
+from PolyFunctions import visualise
 WIDTH = 1000
 HEIGHT = 1000
 EDGE_SIZE = 50
@@ -52,7 +53,6 @@ def initialise_drawing():
     s = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)  # working surface
     s.fill((0, 0, 0, 0))
 
-
 def refresh():
     screen.fill((255, 255, 255))
     for surf in get_all_depths():
@@ -73,41 +73,14 @@ def draw_polygon(depth, points, color, alpha=1, outline=False):
     surf.blit(s,(0,0))
     if outline:
         pygame.draw.lines(surf, (0, 0, 0), True, [(p.x, p.y) for p in points])
-def visualise(polydict, p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, prints=False):
-    # Copy of extend, but fills the whole space
-    realshape = newshape % len(polydict)
-    if (drawnshapes == None):
-        drawnshapes = list()
-    if(prints):print("Visualise---------", newshape, oldshape, "(%s)" % realshape, polydict[realshape])
-    if (shapespoly == None):
-        shapespoly = list()
-    points = get_face_points(polydict,p1, p2, newshape, noisy=False)
-    shapespoly.append(Poly(newshape, points, color, fill, p=len(polydict)))
-    current = polydict[realshape]
-    if(prints):print(current, 'of shape', realshape, ', coming from', oldshape)
-    try:
-        #match with -k
-        index = current.index(oldshape)
-    except:
-        #match with --k
-        index = current.index(-oldshape + 2 * (oldshape % len(polydict)))
-        if(prints):print("Matching", "%i[%i]"%(newshape,oldshape),"=",oldshape % len(order), "+%d(%i)" % (oldshape // len(polydict), len(polydict)))
-
-    current = current[index:] + current[:index]
-    shapespoly[-1].fill(current)
-    drawnshapes.append(realshape)
-
-    for index, p in enumerate(current):
-        p1 = points[index % len(points)]
-        p2 = points[(index + 1) % len(points)]
-        if (p not in drawnshapes) and (p % len(polydict) == p):
-            visualise(polydict, p2, p1, p, newshape, color, drawnshapes, shapespoly, fill, prints=prints)
-    return shapespoly
 
 def loop():
     global all_objects
+    global working_poly_id
+    global startface
     clock = pygame.time.Clock()
     running = True
+    drawn = False
     while running:
         clock.tick(30)
         wipe_surface(2)
@@ -116,6 +89,16 @@ def loop():
         for edge in all_objects:
             edge.draw()
             edge.draw_cursor()
+        if(len(visitedfaces)<=1):
+            if(not drawn):
+                visualise(poly, p1, p2, startface, poly[startface][0], surf=get_surface(2), screen=screen, shapes=get_surface(3))
+                drawn=True
+        else:
+            wipe_surface(3)
+            drawn=False
+        draw_text(1, polyname.capitalize(), WIDTH / 2, 20, (0, 0, 0), 35)
+        if ((set(poly.keys()) - visitedfaces)):
+            draw_text(1, "Unvisited:" + str((set(poly.keys()) - visitedfaces)), WIDTH / 2, 50, (0, 0, 0), 35)
         refresh()
         for e in pygame.event.get():
             if e.type == pygame.MOUSEBUTTONDOWN:
@@ -136,8 +119,6 @@ def loop():
                 pygame.image.save(screen, filename)
                 print("Saved",filename)
 
-            global working_poly_id
-            global startface
             if e.type== pygame.KEYDOWN and e.key == pygame.K_LEFT:
                 startface=0
                 working_poly_id=(working_poly_id-1)%len(all_poly_names)
@@ -159,6 +140,10 @@ def loop():
                 print("Quit!", flush=True)
                 exit()
 
+    #wipe_surface(2)
+    #wipe_surface(0)
+    #wipe_surface(1)
+    wipe_surface(3)
 
 class DummyParent():
     def __init__(self):
@@ -290,12 +275,13 @@ class Edge():
             #delete the edges that were created by this, and its descendance
 
 
+initialise_drawing()
+
 if __name__ == "__main__":
     while(True):
         working_poly = all_poly_names[working_poly_id]
         polyname = working_poly
         poly = all_poly[working_poly]
-        initialise_drawing()
         visitedfaces=set()
         visitededges=set()
         dummy=DummyParent()
@@ -304,7 +290,6 @@ if __name__ == "__main__":
         startedge = Edge((p1, p2), poly, secondface, startface ,dummy)
         all_objects.append(startedge)
         startedge.mouse_click(force=True)
-
         #all_objects.append(Edge((p2, p1), poly, secondface, startface,dummy))
         refresh()
         print(working_poly.capitalize(),"face #%i (%i/%i)"%(startface,startface+1,len(poly)))
