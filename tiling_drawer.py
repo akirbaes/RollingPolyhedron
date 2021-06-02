@@ -1,5 +1,5 @@
 # to work on to create a tiling creation software
-# has some useless functions copied from NetDrawer
+# might have some useless functions copied from NetDrawer
 import os
 import pprint
 import tkinter
@@ -8,7 +8,7 @@ import traceback
 
 import pygame
 from GeometryFunctions import *
-from PolyAndTessNets import *
+
 
 pp = pprint.PrettyPrinter(indent=4)
 WIDTH = 800
@@ -20,28 +20,23 @@ depths = dict()
 
 current_facetype = 3
 facetypes = [3, 4, 6, 12]
-visitedfaces = set()
-visitededges = set()
-# visited or not on the other structure
-# then the missing visits
-all_objects = []
+
+all_objects = [] #all edges
 
 selected_edge = None
 copy_change = "update"
 
+###Drawing layers functions
 def get_all_depths():
     return [depths[d] for d in sorted(depths.keys())]
-
 
 def get_surface(depth):
     if (depth not in depths):
         depths[depth] = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     return depths[depth]
 
-
 def wipe_surface(depth):
     get_surface(depth).fill((0, 0, 0, 0))
-
 
 def initialise_drawing():
     global screen, s
@@ -51,18 +46,16 @@ def initialise_drawing():
     s = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)  # working surface
     s.fill((0, 0, 0, 0))
 
-
 def refresh():
     screen.fill((255, 255, 255))
     for surf in get_all_depths():
         screen.blit(surf, (0, 0))
     pygame.display.update()
 
-
+###Drawing functions
 def draw_text(depth, text, x, y, color, size):
     text = pygame.font.SysFont(None, int(round(size))).render(text, True, color)
     get_surface(depth).blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
-
 
 def draw_polygon(depth, points, color, alpha=1, outline=False):
     surf = get_surface(depth)
@@ -73,38 +66,7 @@ def draw_polygon(depth, points, color, alpha=1, outline=False):
     if outline:
         pygame.draw.lines(surf, (0, 0, 0), True, [(p.x, p.y) for p in points])
 
-
-def second_main():
-    # delete all edges and reconstruct the net part of the tiling
-    poly = all_objects[0].poly
-    face1 = all_objects[0].face1
-    partial_net = dict()
-    faces = [face1]
-    while (len(partial_net) < len(poly)):
-        face = faces.pop()
-        ref = poly[face]
-        newpath = []
-        partial_net[face] = newpath
-        for f in ref:
-            if ((face, f) in visitededges):
-                newpath.append(f)
-            else:
-                newpath.append(None)
-            if (f not in partial_net):
-                faces.append(f)
-    pp.pprint(partial_net)
-
-    wipe_surface(2)
-    wipe_surface(0)
-    wipe_surface(1)
-    for edge in all_objects:
-        edge.draw()
-    refresh()
-    pygame.image.save(screen, "%s.png" % polyname)
-    # pygame.scrap.init()
-    # pygame.scrap.put(pygame.SCRAP_BMP,screen.)
-
-
+###Main loop
 def loop():
     global all_objects
     global copy_change
@@ -154,9 +116,6 @@ def loop():
             if e.type == pygame.KEYDOWN and e.key == pygame.K_RETURN:
                 all_objects = []
                 running = False
-
-                # jump to step 2
-
             if e.type == pygame.QUIT:
                 running = False
                 print("Quit!", flush=True)
@@ -200,36 +159,28 @@ def loop():
                 traceback.print_exc()
 
 def get_tiling():
+    """Generates the tiling dict and prints it"""
     global copy_change
+    copy_change="update" #this shouldn't be there, tells when to redraw the background
 
-    copy_change="update"
     pcounter = 1
     all_neighbours = dict()
     for edge in all_objects:
         edge.pcounter = None
     for edge in all_objects:
-        if not edge.active:
-            #face
+        if not edge.active: #face
             neighbours = []
-            neighbour_objects = []
             if(edge.parent!=None):
                 neighbours.append(edge.parent.faceid)
             for chi in edge.children:
-                if not chi.active: #another face: internal
-                    # if(chi.faceid in neighbours):
-                    #     print("dupe")
-                    #     #duplicate! but we can't process it right now
-                    #     if(chi.pcounter==None):
-                    #         chi.pcounter==1
-                    #
-                    #     chi.pcounter=neighbours.count(chi.faceid)
+                if not chi.active: #is another face: internal neighbour
                     neighbours.append(chi.faceid)
                 else:
                     if(chi.is_neighbour()):
-                        if(chi.same_position(chi.other)):
+                        if(chi.same_position(chi.other)):#internal link
                             neighbours.append(chi.other.parent.faceid)
                         else:
-                            if(chi.pcounter==None):
+                            if(chi.pcounter==None):#external link, risk of duplicate so numbering it
                                 chi.pcounter = pcounter
                                 chi.other.pcounter = pcounter
                                 if(chi.parent == chi.other.parent):
@@ -237,25 +188,22 @@ def get_tiling():
                                 pcounter+=1
                             neighbours.append((chi.other.parent.faceid,chi.pcounter))
                     else:
-                        neighbours.append(None)
+                        neighbours.append(None)#edge not yet matched
 
             all_neighbours[edge.faceid]=neighbours
             #print(edge.faceid,":",neighbours,len(edge.children))
-    #print("}")
     pprint.pprint(all_neighbours,indent=4,sort_dicts=True)
     return all_neighbours
 
 
 def draw_copy(points,edge):
+    #Draws a copy of the whole thing outside
+    #Inefficient but helpful
     global copy_change
     if(copy_change=="no change"):
         return
     drawn = []
     orientation = edge.parent.get_orientation(edge)
-    #caseOrientation = currentCaseNeighbours.index(previouscase)  # décalage actuel par rapport à la normale
-    # print("Orientation de case:",caseOrientation)
-    # points = points[caseOrientation:]+points[:caseOrientation]
-    #currentCaseNeighbours = currentCaseNeighbours[caseOrientation:] + currentCaseNeighbours[:caseOrientation]
     p1,p2 = (points[-orientation:]+points[:-orientation])[:2]
 
     to_draw = [(p1,p2,edge.parent)]
@@ -287,14 +235,14 @@ def draw_copy(points,edge):
             #pa,pb = points[-neigh.index(shape)], points[+1-neigh.index(shape)]
             to_draw.append((pa,pb,shape.parent))
 
-
         if (shape.active == False):
             drawn.append(shape)
             draw_polygon(-1,points,(128,128,128),0.1)
             center=centerpoint(points)
             draw_text(-1,str(shape.faceid),center[0],center[1],(128,128,128),EDGE_SIZE/2)
-class Edge():
 
+class Edge():
+    """Each edge of each polygon is an Edge object that turns into a face with children when deactivated"""
     depth = 0
     numbering = set()
     shapes_functions = (None, None, None, triangle, square, None, hexagon, None, octagon, None, None, None, dodecagon)
@@ -380,9 +328,10 @@ class Edge():
 
         # print("Other:", other.parent.faceid)
         if (self.parent == other.parent and self.parent != None):
+            pass
             # self link
             # functions also when linking to same edge
-            p = self.parent.get_unique_p()
+            #p = self.parent.get_unique_p()
             # other.set_parent_neighbour(self.parent.faceid - p * self.parent.polysize)
             # self.set_parent_neighbour(self.parent.faceid + p * self.parent.polysize)
         elif (self.same_position(other)):
@@ -393,7 +342,8 @@ class Edge():
             # other.set_parent_neighbour(self.parent.faceid)
         else:
             # external link
-            p = self.parent.get_unique_p(other.parent.get_unique_p())
+            #p = self.parent.get_unique_p(other.parent.get_unique_p())
+            pass
             #other.pcount = p
             # self.set_parent_neighbour(other.parent.faceid + p * other.parent.polysize)
             # other.set_parent_neighbour(self.parent.faceid + p * self.parent.polysize)
@@ -407,6 +357,7 @@ class Edge():
         self.points = shape(self.p1, self.p2)
 
     def draw(self):
+        #Draw one edge/face
         if self.active:
             surf = get_surface(Edge.depth)
             pygame.draw.circle(surf, (0, 0, 0), self.p1.as_tuple(), 2)
@@ -435,6 +386,7 @@ class Edge():
                 draw_text(1, str(self.faceid), *center, (0, 0, 0), EDGE_SIZE / 2)
 
     def draw_cursor(self):
+        #Draw the cursor (mouse reaction) to one edge/face
         surf = get_surface(2)
         if (self.active):
             if not self.is_neighbour():  # self.face1 not in visitedfaces:
@@ -465,6 +417,7 @@ class Edge():
         return is_inside(Point(mx, my), self.points)
 
     def mouse_click(self):
+        """Left click if activated turns into a face and makes children"""
         global selected_edge
         selected_edge = None
 
@@ -473,7 +426,7 @@ class Edge():
             self.faceid = self.get_a_faceid()
             # self.set_parent_neighbour(self.faceid)
             start = 1
-            if(len(all_objects)==1):
+            if(len(all_objects)==1): #the first edge has to create more because it has no parent to fill the origin
                 start = 0
             for i in range(start, len(self.points)):
                 pa = self.points[i]
@@ -486,6 +439,8 @@ class Edge():
         return True
 
     def mouse_right_click(self):
+        """Right click either link pair of activated edges
+        or deletes a face and all its children"""
         global selected_edge
         if (self.mouse_inside()) and not self.active:
             selected_edge=None
