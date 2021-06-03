@@ -13,7 +13,7 @@ from poly_dicts.prism_nets import prism_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.johnson_nets import johnson_nets
 
-PREVIEW = True
+PREVIEW = False
 SLOW=False
 
 if(PREVIEW):
@@ -32,7 +32,7 @@ all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
 all_tilings_names = list(all_tilings.keys()) #if you want to limit to a few, change this line
 # all_tilings_names = []
 #all_tilings_names=all_tilings_names[all_tilings_names.index("3^3x4^2"):]
-all_tilings_names=all_tilings_names[all_tilings_names.index("4^4"):]
+#ll_tilings_names=all_tilings_names[all_tilings_names.index("4^4"):]
 
 all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change this line
 # all_nets_names = ["cube"]
