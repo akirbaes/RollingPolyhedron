@@ -13,7 +13,7 @@ from poly_dicts.prism_nets import prism_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.johnson_nets import johnson_nets
 
-PREVIEW = False
+PREVIEW = True
 SLOW=False
 
 if(PREVIEW):
@@ -32,11 +32,12 @@ all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
 all_tilings_names = list(all_tilings.keys()) #if you want to limit to a few, change this line
 # all_tilings_names = []
 #all_tilings_names=all_tilings_names[all_tilings_names.index("3^3x4^2"):]
-#all_tilings_names=all_tilings_names[all_tilings_names.index("4^4"):]
+all_tilings_names=all_tilings_names[all_tilings_names.index("4^4"):]
 
 all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change this line
 # all_nets_names = ["cube"]
 #all_nets_names = all_nets_names[all_nets_names.index("j4"):]
+#all_nets_names = all_nets_names[all_nets_names.index("cube"):]
 
 
 resume_counter = -1
@@ -158,7 +159,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,
         if(PREVIEW):
             # screen.fill((255,255,255))
             drawtemp(cface,(255,0,0))
-            refresh()
+            # refresh()
             #if(SLOW):
             #    wait_for_input()
         # face, orientation = canon_fo(face, orientation,FaceSym, FFOO)
@@ -167,10 +168,10 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,
         if (face, orientation) in visited_places[ccenter]:
             if (PREVIEW):
                 # screen.fill((255,255,255)
-                drawtemp(cface,(0,255,0))
-                drawdir(p1,p2)
-                screen.blit(outlines, (0, 0))
+                drawtemp(cface,(0,255,0),2)
+                #drawdir(p1,p2)
                 refresh()
+                screen.blit(outlines, (0, 0))
                 # if(SLOW):
                 #     wait_for_input()
             continue #already visited
@@ -188,8 +189,8 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,
             for index, nextcellid in enumerate(tiling[case]):
                 nextcell, id = nextcellid
                 nextface = neighbours_faces[index]  # aligned with cell
-                #if(len(net[nextface])!=len(tiling[nextcell])):
-                #    continue
+                if(len(net[nextface])!=len(tiling[nextcell])):
+                    continue
 
                 coorientation = co_orient_face(net,face,nextface,tiling,case,nextcellid)
                 face_shift = net[nextface].index(face)
@@ -204,11 +205,11 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,
 
                 if(PREVIEW):
                     drawtemp(nextface_stub,(0,255,255),1)
-                    drawdir(pa,pb)
-                    screen.blit(temp,(0,0))
-                    refresh()
+                    #drawdir(pa,pb)
         # once=False
         # print(visits)
+        # if(PREVIEW):
+        #     refresh()
         # if(PREVIEW and SLOW):
            #wait_for_input()
 
