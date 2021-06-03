@@ -12,9 +12,13 @@ from tiling_dicts.isogonal_tilings import biisogonal_tilings
 from poly_dicts.prism_nets import prism_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.johnson_nets import johnson_nets
+from symmetry_classes.poly_symmetries import poly_symmetries
 
-PREVIEW = False
-SLOW=False
+PREVIEW = True
+GRADATION = True
+PREVIEWFREQUENCY=500
+# SLOW=False
+OPTIMISE_SYMMETRIES = True
 
 if(PREVIEW):
     import pygame
@@ -32,19 +36,29 @@ all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
 all_tilings_names = list(all_tilings.keys()) #if you want to limit to a few, change this line
 # all_tilings_names = []
 #all_tilings_names=all_tilings_names[all_tilings_names.index("3^3x4^2"):]
-#ll_tilings_names=all_tilings_names[all_tilings_names.index("4^4"):]
+# all_tilings_names=all_tilings_names[all_tilings_names.index("4^4"):]
+# all_tilings_names=all_tilings_names[all_tilings_names.index("(3^6;3^3x4^2)1"):]
 
 all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change this line
 # all_nets_names = ["cube"]
 #all_nets_names = all_nets_names[all_nets_names.index("j4"):]
 #all_nets_names = all_nets_names[all_nets_names.index("cube"):]
+# all_nets_names = all_nets_names[all_nets_names.index("snub_cube"):]
+# all_nets_names = all_nets_names[all_nets_names.index("j10"):]
+#all_nets_names = all_nets_names[all_nets_names.index("j50"):]
 
 
 resume_counter = -1
 
-
-from findPolySymmetries import canon_face, canon_fo, generate_FFOO_sym, generate_face_sym
-
+def canon_fo(polyname,face,orientation):
+    symmetries = poly_symmetries[polyname]
+    for sym in symmetries:
+        if (face,orientation) in sym:
+            #print("Found a symmetry!")
+            return min(sym)
+    return face, orientation
+#from findPolySymmetries import canon_face, canon_fo, generate_FFOO_sym, generate_face_sym
+import findPolySymmetries
 
 def cell_match(tiling, previous_case, newcaseid):
     return case_match(tiling, previous_case, newcaseid)
@@ -111,18 +125,20 @@ def drawdir(p1,p2,color=(128,128,128)):
     drawtemp(points,color,3)
 
 
-def area_explore(tiling, net, startcase, startface, startorientation, mapping,
-                 FFOO = None, FaceSym = None,
-                 area = (-100, -100, 900, 900), area2 = (0, 0, 800, 800), EDGESIZE = 50, precision = 7):
+def area_explore(tiling, net, startcase, startface, startorientation, mapping, polyname,
+                 area = (-100, -100, 900, 900), area2 = (-25, -25, 825, 825), EDGESIZE = 50, precision = 7):
     #The main function to call if you want to use this
     xx = (area[0]+area[2])/2
     yy = (area[1]+area[3])/2
     p1 = RollyPoint(xx,yy)
     p2 = RollyPoint(xx + EDGESIZE, yy)  # 350 300
+
+    if(PREVIEW):
+        previewcounter=0
     # if(FFOO is None):
     #     FFOO = generate_FFOO_sym(net)  # Face-Face-Orientation-Orientation symmetries
     #if(FaceSym is None):
-        #FaceSym = generate_face_sym(net)  # Face-Face-Orientation-Orientation symmetries
+        #FaceSym = findPolySymmetries.generate_face_sym(net)  # Face-Face-Orientation-Orientation symmetries
     visits = [(startface, startcase, startorientation, p1, p2)]
     #mapping = map_screenspace(tiling, startcase, area, p1, p2, precision)
     "mapping= visited areas[center points: (polygon, cell number)]"
@@ -135,13 +151,13 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,
             if ((area2[0] < ccenter[0] < area2[2]) and (area2[1] < ccenter[1] < area2[3])))
         if(visited==max_visitable):
             break
-        face, case, orientation, p1, p2 = visits.pop()
+        face, case, orientation, p1, p2 = visits.pop(0)
 
         if (len(net[face]) != len(tiling[case])):
-            if(PREVIEW):
-                cface = xgon(len(net[face]), p1, p2)
-                drawtemp(cface,(0,0,0),outline=1)
-                refresh()
+        #     if(PREVIEW):
+        #         # cface = xgon(len(net[face]), p1, p2)
+        #         # drawtemp(cface,(0,0,0),outline=1)
+        #         refresh()
                 #if(SLOW):
                 #    wait_for_input()
             "can't explore this"
@@ -156,27 +172,36 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,
             print("Place not mapped exception:", ccenter)
             continue #weird error
 
-        if(PREVIEW):
-            # screen.fill((255,255,255))
-            drawtemp(cface,(255,0,0))
-            # refresh()
-            #if(SLOW):
-            #    wait_for_input()
-        # face, orientation = canon_fo(face, orientation,FaceSym, FFOO)
-        #face = canon_face(face,FaceSym)
+        if(OPTIMISE_SYMMETRIES):
+            face, orientation = canon_fo(polyname,face, orientation)
+            # face = findPolySymmetries.canon_face(face, FaceSym)
 
         if (face, orientation) in visited_places[ccenter]:
-            if (PREVIEW):
+            # if (PREVIEW):
                 # screen.fill((255,255,255)
-                drawtemp(cface,(0,255,0),2)
+                # drawtemp(cface,(0,255,0),2)
                 #drawdir(p1,p2)
-                refresh()
-                screen.blit(outlines, (0, 0))
+                #refresh()
+                # screen.blit(outlines, (0, 0))
                 # if(SLOW):
                 #     wait_for_input()
             continue #already visited
 
         visited_places[ccenter].append((face, orientation))
+        if(PREVIEW):
+            if(GRADATION):
+                grade = len(visited_places[ccenter])
+                color = (min(int(255/grade)+max(0,grade*32-255-128-10*32),255),min(255,max(0,grade*24-192-10*24)),max(0,min(255,grade*16-10*16)))
+
+                try:
+                    drawtemp(cface,color)
+                except Exception as e:
+                    print(color)
+                    raise e
+            else:
+                if (len(visited_places[ccenter]) == 1):
+                    # screen.fill((255,255,255))
+                    drawtemp(cface, (255, 0, 0))
 
         # cface = cface[orientation:] + cface[:orientation]
         cface = cface
@@ -192,7 +217,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,
                 if(len(net[nextface])!=len(tiling[nextcell])):
                     continue
 
-                coorientation = co_orient_face(net,face,nextface,tiling,case,nextcellid)
+                #coorientation = co_orient_face(net,face,nextface,tiling,case,nextcellid)
                 face_shift = net[nextface].index(face)
                 case_shift = case_match(tiling,case,nextcellid)
                 # Create a stub nface at the edge of the current face
@@ -203,13 +228,16 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,
                 visits.append((nextface, nextcell, -case_shift+face_shift, pa, pb))
 
 
-                if(PREVIEW):
-                    drawtemp(nextface_stub,(0,255,255),1)
+                # if(PREVIEW):
+                #     drawtemp(nextface_stub,(0,255,255),1)
                     #drawdir(pa,pb)
         # once=False
         # print(visits)
-        # if(PREVIEW):
-        #     refresh()
+        if(PREVIEW):
+            previewcounter+=1
+            if(previewcounter%PREVIEWFREQUENCY==0):
+                refresh()
+                screen.blit(outlines, (0, 0))
         # if(PREVIEW and SLOW):
            #wait_for_input()
 
@@ -261,21 +289,32 @@ if __name__ == "__main__":
             #if(polyname!="snub_dodecahedron" and )
             #else:
             faces = list()
-            #FaceSym = generate_face_sym(net)
-            # FFOO = generate_FFOO_sym(net)
-            for face in sorted(net):
-                #faces.add(canon_face(face,FaceSym))
-                faces.append(face)
-            faceori = list()
-            for face in faces:
-                for orientation in range(len(net[face])):
-                    # faceori.add(canon_fo(face,orientation,FaceSym, FFOO))
-                    faceori.append((face,orientation))
+            # FaceSym = None
+            # if(OPTIMISE_SYMMETRIES):
+            #     FaceSym = findPolySymmetries.generate_face_sym(net)
+            #     print("...")
+            #     print(FaceSym)
+            # else:
             print("...")
+            # FFOO = generate_FFOO_sym(net)
+            # for face in sorted(net):
+            #     if(OPTIMISE_SYMMETRIES):
+            #         f = findPolySymmetries.canon_face(face,FaceSym)
+            #         if f not in faces:
+            #             faces.append(f)
+            #     else:
+            #         faces.append(face)
+
+            faceori = set()
+            for face in sorted(net):
+                for orientation in range(len(net[face])):
+                    faceori.add(canon_fo(polyname,face,orientation))
+                    # faceori.append((face,orientation))
             #Main loop
             for case in tiling:
                 screenspace =  map_screenspace(tiling,case,area,p1,p2,7)
                 if(PREVIEW):
+                    outlines.fill((255,255,255,0))
                     draw_background(outlines,screenspace)
                 "screenspace= visited areas[center points: (polygon, cell number)]"
 
@@ -286,14 +325,18 @@ if __name__ == "__main__":
                     if(SKIP_IF_SUCCESSFUL and (tilingname,polyname) in successful_pairs):
                         continue
 
+                    if (PREVIEW):
+                        screen.blit(outlines,(0,0))
+
                     #------------Run this with custom values if you want to without FFOO and FaceSym-----------
                     #result, visits = (area_explore(tiling,net,case,face,orientation,FFOO=FFOO,FaceSym=FaceSym))
                     #------------------------------------------------------------------------------------------
-                    result, visits = (area_explore(tiling,net,case,face,orientation,screenspace,
+                    result, visits = (area_explore(tiling,net,case,face,orientation,screenspace,polyname=polyname,
                                                    area=area,area2=area2))
                     # ,FaceSym=FaceSym))
 
                     # Ouptut result
+                    refresh()
 
                     if(result):
                         #print("Could explore the tiling %s with the polyhedron %s"%(tilingname,polyname))
@@ -309,6 +352,11 @@ if __name__ == "__main__":
                         print(out)
                         draw_answer(tilingname,polyname,visits,screenspace,net,p1,p2,face,orientation,area2[2],area2[3])
                         successful_pairs.add((tilingname,polyname))
+                        if(PREVIEW):
+                            refresh()
+                            try:os.mkdir("exploration_results/total")
+                            except:pass
+                            pygame.image.save(screen,"exploration_results/total/"+tilingname+" "+polyname+"pretty"+str(counter)+'.png')
 
                     elif not visits is None:
                         out=""
@@ -323,6 +371,7 @@ if __name__ == "__main__":
                         file.write(out + "\n")
                         file.close()
                         if(PREVIEW):
+                            refresh()
                             pygame.image.save(screen,"exploration_results/partial/"+tilingname+" "+polyname+str(counter)+'.png')
                     if(PREVIEW):
                         screen.fill((255,255,255))

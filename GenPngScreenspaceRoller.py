@@ -22,7 +22,7 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2):
             # Reorient it
             pa, pb = nextface_stub[-face_shift], nextface_stub[(-face_shift+1)%len(nextface_stub)]
             orientation = polyhedron[nextface].index(face)
-            visits.insert(0,(nextface,orientation,pa,pb))
+            visits.insert(0,(nextface,0,pa,pb))
 
 def draw_background(surf,grid):
     for points, cell in grid.values():
@@ -70,7 +70,10 @@ def draw_answer(tilingname,polyname,visits,grid,polyhedron,p1,p2,startface,start
 
     draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2)
     pygame.draw.polygon(surf, (255,255,0), convertToTuple(face), width=0)
-
     text = pygame.font.SysFont(None, 30).render(tilingname+" "+polyname, True, (0, 0, 0))
+    pygame.draw.rect(surf, (255,255,255),(0,0,text.get_width()+2,text.get_height()+2))
     surf.blit(text, (1,1))
-    pygame.image.save(surf,"exploration_results/"+tilingname+" "+polyname+'.png')
+    pygame.image.save(surf,"exploration_results/"+polyname+" rolls the "+tilingname+"tiling"+'.png')
+
+if __name__ == "__main__":
+    pass
