@@ -144,3 +144,7 @@ def dodecagon(p1, p2):
         pb = pn
     return sol
 
+xname = (None, None, None, "triangle", "square", None, "hexagon", None, "octagon", None, None, None, "dodecagon")
+def xgon(sides,p1,p2):
+    #not ngon because limited to some only
+    return (None, None, None, triangle, square, None, hexagon, None, octagon, None, None, None, dodecagon)[sides](p1,p2)

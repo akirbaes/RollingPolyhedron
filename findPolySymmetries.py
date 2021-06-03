@@ -130,6 +130,19 @@ def generate_rotation_sym(net):
                 matrices.append(newmat)
         print("Face %i of %i sides has %i distinct orientations" % (face, len(neighbours), len(matrices)))
 """
+def canon_face(face,Face):
+    return min(Face[face])
+def canon_fo(face,orientation,FaceSym,FFOO):
+    cface = canon_face(face,FaceSym)
+    cori = orientation
+    for i,val in enumerate(FFOO[face][cface][orientation]):
+        if val:
+            cori = i
+            break
+    return cface, cori
+
+
+
 def generate_FFOO_sym(net):
     maxsides = max(len(neigh) for neigh in net.values())
     FFOO = [[[[0 for o2 in range(maxsides)] for o1 in range(maxsides)] for face2 in sorted(net)] for face1 in sorted(net)]
@@ -138,7 +151,7 @@ def generate_FFOO_sym(net):
 
     order = sorted(net)
     mat = make_adjacency_matrix_ordered(net, order)
-    print(Face)
+    #print(Face)
     # Generate face sym
     for face1 in sorted(net):
         for face2 in sorted(net):
@@ -166,6 +179,11 @@ def generate_FFOO_sym(net):
                                 # print()
                                 FFOO[face1][face2][rot1][rot2]=1
                                 FFOO[face2][face1][rot2][rot1]=1
+
+        for face in sorted(net):
+            for rot in range(len(n1)):
+                FFOO[face][face][rot][rot]=1
+        #fill diagonals identities
     ffoon = numpy.array(FFOO)
     return ffoon
 if __name__ == "__main__":
