@@ -12,8 +12,10 @@ from tiling_dicts.isogonal_tilings import biisogonal_tilings
 from poly_dicts.prism_nets import prism_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.johnson_nets import johnson_nets
-PREVIEW = True
-SLOW=True
+
+PREVIEW = False
+SLOW=False
+
 if(PREVIEW):
     import pygame
     pygame.init()
@@ -30,11 +32,11 @@ all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
 all_tilings_names = list(all_tilings.keys()) #if you want to limit to a few, change this line
 # all_tilings_names = []
 #all_tilings_names=all_tilings_names[all_tilings_names.index("3^3x4^2"):]
-all_tilings_names=all_tilings_names[all_tilings_names.index("4^4"):]
+#all_tilings_names=all_tilings_names[all_tilings_names.index("4^4"):]
 
 all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change this line
 # all_nets_names = ["cube"]
-all_nets_names = all_nets_names[all_nets_names.index("j4"):]
+#all_nets_names = all_nets_names[all_nets_names.index("j4"):]
 
 
 resume_counter = -1
@@ -313,12 +315,13 @@ if __name__ == "__main__":
                         out+=("Tiling: %s\nPolyhedron: %s"%(tilingname, polyname)) + "\n"
                         out+=("Cell: %i\nFace: %i\nOrientation: %i orientation"%(case,face,orientation)) + "\n"
                         out+=("Visited cells: %s"%len(visits))
-                        secondfilename = folder + "partially_explored_of_interest" + start_timestamp + ".txt"
+                        try:os.mkdir("exploration_results/partial/")
+                        except:pass
+                        secondfilename = "exploration_results/partial/" + start_timestamp + ".txt"
                         file = open(secondfilename, "a")
                         file.write(out + "\n")
                         file.close()
-                        try:os.mkdir("exploration_results/partial/")
-                        except:pass
-                        pygame.image.save(screen,"exploration_results/partial/"+tilingname+" "+polyname+str(counter)+'.png')
+                        if(PREVIEW):
+                            pygame.image.save(screen,"exploration_results/partial/"+tilingname+" "+polyname+str(counter)+'.png')
                     if(PREVIEW):
                         screen.fill((255,255,255))

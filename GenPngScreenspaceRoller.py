@@ -14,7 +14,7 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2):
         face_poly = xgon(len(polyhedron[face]),p1,p2)
         face_poly = face_poly[orientation:]+face_poly[:orientation] #align
         pygame.draw.polygon(surface2, (255, 0, 0),convertToTuple(face_poly), width=0)
-
+        surface2.set_alpha(180)
         surf.blit(surface2, (0, 0))
         for index,nextface in enumerate(polyhedron[face]):
             face_shift = polyhedron[nextface].index(face)
@@ -65,7 +65,7 @@ def draw_answer(tilingname,polyname,visits,grid,polyhedron,p1,p2,startface,start
     surf.fill((255,255,255))
     face = xgon(len(polyhedron[startface]),p1,p2)
     draw_background(surf,grid)
-    surface2 = pygame.Surface((w,h))
+    surface2 = pygame.Surface((w,h), pygame.SRCALPHA)
     surface2.set_colorkey((0, 0, 0))
     surface2.set_alpha(180)
 
