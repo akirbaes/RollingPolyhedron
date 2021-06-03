@@ -333,6 +333,12 @@ if __name__ == "__main__":
         Draw.save_screen("platonic_tilings_images/" + tilename + ".png")
         # Draw.wait_for_input()
         Draw.empty_shapes()
+    isogonals['3.4^2.6;3.6.3.6)_2'] = \
+        {0: [2, 8, 1, 13],
+         1: [False, 29, 17, 3, 22, 34],
+         2: [False, 16, 21],
+         3: [1, 10, 4, 5],
+         4: [3, 31, 26]}
 
     for tilename in isogonals:
         net = isogonals[tilename]
