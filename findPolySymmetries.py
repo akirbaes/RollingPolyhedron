@@ -131,6 +131,7 @@ def generate_rotation_sym(net):
         print("Face %i of %i sides has %i distinct orientations" % (face, len(neighbours), len(matrices)))
 """
 def canon_face(face,Face):
+    return face
     return min(Face[face])
 def canon_fo(face,orientation,FaceSym,FFOO):
     cface = canon_face(face,FaceSym)
