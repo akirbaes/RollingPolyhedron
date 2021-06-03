@@ -369,9 +369,11 @@ class Edge():
         #Draw one edge/face
         if self.active:
             surf = get_surface(Edge.depth)
-            pygame.draw.circle(surf, (0, 0, 0), self.p1.as_tuple(), 2)
-            pygame.draw.circle(surf, (0, 0, 0), self.p2.as_tuple(), 2)
-            pygame.draw.line(surf, (0, 0, 0), self.p1.as_tuple(), self.p2.as_tuple(), 1)
+            pygame.draw.circle(surf, (0, 0, 0), tuple(int(x) for x in self.p1.as_tuple()), 2)
+            pygame.draw.circle(surf, (0, 0, 0), tuple(int(x) for x in self.p2.as_tuple()), 2)
+            pygame.draw.line(surf, (0, 0, 0),
+                             tuple(int(x) for x in self.p1.as_tuple()),
+                                   tuple(int(x) for x in self.p2.as_tuple()), 1)
             if self.is_neighbour():
                 center = centerpoint(self.points)
                 draw_text(1, str(self.other.parent.faceid), *center, (0, 0, 0), EDGE_SIZE / 2)
@@ -399,11 +401,12 @@ class Edge():
         surf = get_surface(2)
         if (self.active):
             if not self.is_neighbour():  # self.face1 not in visitedfaces:
-                pygame.draw.line(surf, (0, 255, 0), self.p1.as_tuple(), self.p2.as_tuple(), 1)
+                pygame.draw.line(surf, (0, 255, 0), tuple(int(x) for x in self.p1.as_tuple()),
+                                 tuple(int(x) for x in self.p2.as_tuple()), 1)
                 if(selected_edge==self):
-                    pygame.draw.polygon(surf, (0, 180, 0, 128), [(p.x, p.y) for p in self.points])
+                    pygame.draw.polygon(surf, (0, 180, 0, 128), [(int(p.x), int(p.y)) for p in self.points])
                 elif (self.mouse_inside() and self.is_closest_cursor()):
-                    pygame.draw.polygon(surf, (0, 128, 255, 128), [(p.x, p.y) for p in self.points])
+                    pygame.draw.polygon(surf, (0, 128, 255, 128), [(int(p.x), int(p.y)) for p in self.points])
                     center = centerpoint(self.points)
                     border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
                     # pygame.draw.line(surf, (250, 250, 250), border, center, 3)
@@ -417,7 +420,7 @@ class Edge():
                     draw_polygon(1, self.points, (0, 0, 0), 0.1, 0)
                     # pygame.draw.polygon(surf, (0, 0, 0, 16), [(p.x, p.y) for p in self.points])
             elif(self.mouse_inside() and self.is_closest_cursor()):
-                    pygame.draw.polygon(surf, (255, 0, 0, 32), [(p.x, p.y) for p in self.points])
+                    pygame.draw.polygon(surf, (255, 0, 0, 32), [(int(p.x), int(p.y)) for p in self.points])
             # else:
             #    pygame.draw.line(surf, (0, 0, 0), self.p1.as_tuple(), self.p2.as_tuple(), 1)
 
