@@ -146,16 +146,24 @@ def canon_fo(face,orientation,FaceSym,FFOO):
 def generate_FFOO_sym(net):
     maxsides = max(len(neigh) for neigh in net.values())
     FFOO = [[[[0 for o2 in range(maxsides)] for o1 in range(maxsides)] for face2 in sorted(net)] for face1 in sorted(net)]
-
-    Face = generate_face_sym(net)
+    FFOO=numpy.array(FFOO)
+    FaceSym = generate_face_sym(net)
 
     order = sorted(net)
     mat = make_adjacency_matrix_ordered(net, order)
     #print(Face)
+    for face in sorted(net):
+        for rot in range(len(net[face])):
+            FFOO[face][face][rot][rot]=1
+            for face2 in sorted(net):
+                if(face2 in FaceSym[face]):
+                    FFOO[face][face2][rot][rot]=1
+                    FFOO[face2][face][rot][rot]=1
+
     # Generate face sym
     for face1 in sorted(net):
         for face2 in sorted(net):
-            if len(net[face2]) == len(net[face1]) and face2 in Face[face1]:
+            if len(net[face2]) == len(net[face1]) and face2 in FaceSym[face1]:
                 order = sorted(net)
                 order[order.index(face1)], order[order.index(face2)] = order[order.index(face2)], order[
                     order.index(face1)]
@@ -180,12 +188,9 @@ def generate_FFOO_sym(net):
                                 FFOO[face1][face2][rot1][rot2]=1
                                 FFOO[face2][face1][rot2][rot1]=1
 
-        for face in sorted(net):
-            for rot in range(len(n1)):
-                FFOO[face][face][rot][rot]=1
         #fill diagonals identities
-    ffoon = numpy.array(FFOO)
-    return ffoon
+    #ffoon = numpy.array(FFOO)
+    return FFOO
 if __name__ == "__main__":
     for netname in ['hexagonal_prism']:  # all_nets:
         print(netname)
