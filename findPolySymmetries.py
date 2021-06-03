@@ -1,10 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*
+import os
+
 from poly_dicts.johnson_nets import johnson_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.prism_nets import prism_nets
 from copy import deepcopy
 import numpy
+import pprint
 
 all_nets = {**johnson_nets, **plato_archi_nets, **prism_nets}
 bits = " ▘▝▀▖▌▞▛▗▚▐▜▄▙▟█"
@@ -131,7 +134,6 @@ def generate_rotation_sym(net):
         print("Face %i of %i sides has %i distinct orientations" % (face, len(neighbours), len(matrices)))
 """
 def canon_face(face,Face):
-    return face
     return min(Face[face])
 def canon_fo(face,orientation,FaceSym,FFOO):
     cface = canon_face(face,FaceSym)
@@ -142,6 +144,24 @@ def canon_fo(face,orientation,FaceSym,FFOO):
             break
     return cface, cori
 
+def generate_classes(net,FFOO):
+    classes = dict()
+
+
+    for face1 in sorted(net):
+        for ori1 in range(len(net[face1])):
+            classes[(face1,ori1)]=set()
+    for idx, x in numpy.ndenumerate(FFOO):
+        f1,f2,ori1,ori2 = idx
+        if(x):
+            classes[f1,ori1].add((f2,ori2))
+    classes_unique = set( tuple(sorted(clas)) for clas in classes.values() )
+    return sorted(classes_unique)
+    # for face1 in sorted(net):
+    #     for ori1 in range(len(net[face1])):
+    #         for face2 in net:
+    #             for ori2 in range(len(net[face2])):
+    #                 FFOO[face1][face2][ori1][ori2]
 
 
 def generate_FFOO_sym(net):
@@ -192,14 +212,45 @@ def generate_FFOO_sym(net):
         #fill diagonals identities
     #ffoon = numpy.array(FFOO)
     return FFOO
-if __name__ == "__main__":
-    for netname in ['hexagonal_prism']:  # all_nets:
+
+
+
+def first_FOO_draft():
+    all_symmetries = dict()
+    for netname in all_nets:#["snub_cube"]:#['hexagonal_prism']:  # all_nets:
         print(netname)
         net: dict = all_nets[netname]
+        # order = sorted(net)
+        # prettyprint_adjacency(make_adjacency_matrix_ordered(net,order))
+        # order[2],order[0]=order[0],order[2]
+        # print()
+        # prettyprint_adjacency(make_adjacency_matrix_ordered(net,order))
+
+
+
+
         FFOO = generate_FFOO_sym(net)
-        prettierprint_FFOOmatrix(FFOO, borders = True)
+        classes = generate_classes(net,FFOO)
+        clasp = pprint.pformat(classes)
+        print(len(classes),"classes")
+        print(clasp)
+        try:os.mkdir("symmetry_classes/FFOO")
+        except:pass
+        f=open("symmetry_classes/FFOO/"+netname+"_"+"FFOO"+".txt","w")
+        f.write(clasp)
+        f.close()
+        all_symmetries[netname]=classes
+        # prettierprint_FFOOmatrix(FFOO, borders = True)
         #FFOO = [[[[0 for o2 in range(len(net[face2]))] for o1 in range(len(net[face1]))] for face2 in sorted(net)] for face1 in sorted(net)]
         # mat = make_adjacency_matrix(all_nets[netname])
         # print(mat)
         # prettyprint_adjacency(mat)
         # prettierprint_adjacency(mat)
+
+    all = pprint.pformat(all_symmetries)
+    f = open("symmetry_classes/" + "_" + "FFOO" + ".txt", "w")
+    f.write(all)
+    f.close()
+
+if __name__ == "__main__":
+    first_FOO_draft()
