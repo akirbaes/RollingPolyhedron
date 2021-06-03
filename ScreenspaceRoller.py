@@ -1,8 +1,9 @@
 """Roll a shape in a space with a given tiling and starting position
 """
 import os
-import time
-
+from datetime import datetime
+def make_timestamp():
+    return datetime.now().strftime("[%Hh%Mm%S]")
 from GeometryFunctions import *
 from tiling_dicts.archimedean_tilings import archimedean_tilings
 from tiling_dicts.platonic_tilings import platonic_tilings
@@ -86,6 +87,7 @@ def map_screenspace(tiling, startcell, area, p1, p2, precision):
 def area_explore(tiling, net, startcase, startface, startorientation, visualise=False,
                  FFOO = None, FaceSym = None,
                  area = (-100, -100, 900, 900), area2 = (0, 0, 800, 800), EDGESIZE = 50, precision = 7):
+    #The main function to call if you want to use this
     xx = (area[0]+area[2])/2
     yy = (area[1]+area[3])/2
     p1 = RollyPoint(xx,yy)
@@ -143,6 +145,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, visualise=
         #print("Could not visit everything: %s/%i"%(visited,max_visitable))
         if(visited>1):
             print("Could not visit everything: %s/%i"%(visited,max_visitable), "(c%i f%i o%i)"%(startcase,startface,startorientation))
+            visited_places = {center for center,visitors in visited_places.items() if visitors}
             return False, visited_places
         return False, None
     else:
@@ -153,19 +156,22 @@ if __name__ == "__main__":
     folder = "exploration_results"+os.sep
     try:os.mkdir(folder)
     except:pass
-    filename = folder+"exploration_logs"+str(int(time.time()))+".txt"
+    start_timestamp = make_timestamp()
+    filename = folder+"exploration_logs"+start_timestamp+".txt"
     file = open(filename,"w")
     file.close()
     counter = 0
 
+    successful_pairs = set()
+    SKIP_IF_SUCCESSFUL = True
 
     for tilingname in all_tilings_names:
         tiling = all_tilings[tilingname]
         for polyname in all_nets_names:
-
+            net = all_nets[polyname]
             print("Exploring the tiling %s with the polyhedron %s" % (tilingname, polyname))
 
-            net = all_nets[polyname]
+            # Filter out repetitive faces and orientations to the bare essentials
             faces = set()
             FaceSym = generate_face_sym(net)
             FFOO = generate_FFOO_sym(net)
@@ -176,22 +182,43 @@ if __name__ == "__main__":
                 for orientation in range(len(net[face])):
                     faceori.add(canon_fo(face,orientation,FaceSym, FFOO))
 
+            #Main loop
             for face,orientation in faceori:
                 for case in tiling:
                     counter+=1
                     if(resume_counter>counter-1):
                         continue
+                    if(SKIP_IF_SUCCESSFUL and (tilingname,polyname) in successful_pairs):
+                        continue
+                    #------------Run this with custom values if you want to without FFOO and FaceSym-----------
                     result, visits = (area_explore(tiling,net,case,face,orientation,FFOO=FFOO,FaceSym=FaceSym))
+                    #------------------------------------------------------------------------------------------
+                    # result, visits = (area_explore(tiling,net,case,face,orientation))
+
+                    # Ouptut result
+
                     if(result):
                         #print("Could explore the tiling %s with the polyhedron %s"%(tilingname,polyname))
                         out=""
-                        out+=("-"*16+"Resume counter: %i"%(counter)+"-"*16) + "\n"
+                        out+=("-"*16+make_timestamp()+"Resume counter: %i"%(counter)+"-"*16) + "\n"
                         out+=("Tiling: %s\nPolyhedron: %s"%(tilingname, polyname)) + "\n"
-                        out+=("Cell: %i\nFace: %i\nOrientation: %i orientation"%(case,face,orientation)) + "\n"
+                        out+=("Cell: %i\nFace: %i\nOrientation: %i orientation"%(case,face,orientation))
+                        if(SKIP_IF_SUCCESSFUL):
+                            out+=("\nSkipping possible other positions in this pair")
                         file=open(filename,"a")
                         file.write(out+ "\n")
                         file.close()
                         print(out)
-                    elif not visits is None:
-                        pass
 
+                        successful_pairs.add((tilingname,polyname))
+
+                    elif not visits is None:
+                        out=""
+                        out+=("-"*16+make_timestamp()+"Resume counter: %i"%(counter)+"-"*16) + "\n"
+                        out+=("Tiling: %s\nPolyhedron: %s"%(tilingname, polyname)) + "\n"
+                        out+=("Cell: %i\nFace: %i\nOrientation: %i orientation"%(case,face,orientation)) + "\n"
+                        out+=("Visited cells: %s"%len(visits))
+                        secondfilename = folder + "partially_explored_of_interest" + start_timestamp + ".txt"
+                        file = open(secondfilename, "a")
+                        file.write(out + "\n")
+                        file.close()
