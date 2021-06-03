@@ -1,5 +1,8 @@
 """Roll a shape in a space with a given tiling and starting position
 """
+import os
+import time
+
 from GeometryFunctions import *
 from tiling_dicts.archimedean_tilings import archimedean_tilings
 from tiling_dicts.platonic_tilings import platonic_tilings
@@ -17,9 +20,8 @@ all_tilings_names = list(all_tilings.keys()) #if you want to limit to a few, cha
 all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change this line
 # all_nets_names = ["cube"]
 
-EDGESIZE = 50
-p1 = RollyPoint(300, 300)
-p2 = RollyPoint(300 + EDGESIZE, 300)  # 350 300
+resume_counter = -1
+
 
 from findPolySymmetries import canon_face, canon_fo, generate_FFOO_sym, generate_face_sym
 
@@ -81,12 +83,13 @@ def map_screenspace(tiling, startcell, area, p1, p2, precision):
     return visited_areas
 
 
-def area_explore(tiling, net, startcase, startface, startorientation, visualise=False, FFOO = None, FaceSym = None):
-    area2 = 0, 0, 800, 800
-    area = -100, -100, 900, 900
-    precision = 7
-    p1 = RollyPoint(300, 300)
-    p2 = RollyPoint(300 + EDGESIZE, 300)  # 350 300
+def area_explore(tiling, net, startcase, startface, startorientation, visualise=False,
+                 FFOO = None, FaceSym = None,
+                 area = (-100, -100, 900, 900), area2 = (0, 0, 800, 800), EDGESIZE = 50, precision = 7):
+    xx = (area[0]+area[2])/2
+    yy = (area[1]+area[3])/2
+    p1 = RollyPoint(xx,yy)
+    p2 = RollyPoint(xx + EDGESIZE, yy)  # 350 300
     if(FFOO is None):
         FFOO = generate_FFOO_sym(net)  # Face-Face-Orientation-Orientation symmetries
     if(FaceSym is None):
@@ -140,18 +143,28 @@ def area_explore(tiling, net, startcase, startface, startorientation, visualise=
         #print("Could not visit everything: %s/%i"%(visited,max_visitable))
         if(visited>1):
             print("Could not visit everything: %s/%i"%(visited,max_visitable), "(c%i f%i o%i)"%(startcase,startface,startorientation))
-
-        return False
+            return False, visited_places
+        return False, None
     else:
         print("Visited everything: %s/%i"%(visited,max_visitable))
-        return True
+        return True, visited_places
 
 if __name__ == "__main__":
+    folder = "exploration_results"+os.sep
+    try:os.mkdir(folder)
+    except:pass
+    filename = folder+"exploration_logs"+str(int(time.time()))+".txt"
+    file = open(filename,"w")
+    file.close()
+    counter = 0
+
+
     for tilingname in all_tilings_names:
         tiling = all_tilings[tilingname]
         for polyname in all_nets_names:
-            print()
+
             print("Exploring the tiling %s with the polyhedron %s" % (tilingname, polyname))
+
             net = all_nets[polyname]
             faces = set()
             FaceSym = generate_face_sym(net)
@@ -165,10 +178,20 @@ if __name__ == "__main__":
 
             for face,orientation in faceori:
                 for case in tiling:
-                    if(area_explore(tiling,net,case,face,orientation,FFOO=FFOO,FaceSym=FaceSym)):
+                    counter+=1
+                    if(resume_counter>counter-1):
+                        continue
+                    result, visits = (area_explore(tiling,net,case,face,orientation,FFOO=FFOO,FaceSym=FaceSym))
+                    if(result):
                         #print("Could explore the tiling %s with the polyhedron %s"%(tilingname,polyname))
-                        print("Tiling: %s\nPolyhedron: %s"%(tilingname, polyname))
-                        print("Cell: %i\nFace: %i\nOrientation: %i orientation"%(case,face,orientation))
-
-
+                        out=""
+                        out+=("-"*16+"Resume counter: %i"%(counter)+"-"*16) + "\n"
+                        out+=("Tiling: %s\nPolyhedron: %s"%(tilingname, polyname)) + "\n"
+                        out+=("Cell: %i\nFace: %i\nOrientation: %i orientation"%(case,face,orientation)) + "\n"
+                        file=open(filename,"a")
+                        file.write(out+ "\n")
+                        file.close()
+                        print(out)
+                    elif not visits is None:
+                        pass
 
