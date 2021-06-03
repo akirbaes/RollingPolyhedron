@@ -356,7 +356,7 @@ if __name__ == "__main__":
                             refresh()
                             try:os.mkdir("exploration_results/total")
                             except:pass
-                            pygame.image.save(screen,"exploration_results/total/"+tilingname+" "+polyname+"pretty"+str(counter)+'.png')
+                            pygame.image.save(screen,"exploration_results/total/"+tilingname+" "+polyname+"_pretty_"+str(counter)+'.png')
 
                     elif not visits is None:
                         out=""
@@ -372,6 +372,6 @@ if __name__ == "__main__":
                         file.close()
                         if(PREVIEW):
                             refresh()
-                            pygame.image.save(screen,"exploration_results/partial/"+tilingname+" "+polyname+str(counter)+'.png')
+                            pygame.image.save(screen,"exploration_results/partial/"+tilingname+" "+polyname+"_"+str(counter)+'.png')
                     if(PREVIEW):
                         screen.fill((255,255,255))
