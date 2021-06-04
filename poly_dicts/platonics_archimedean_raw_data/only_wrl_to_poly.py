@@ -322,6 +322,7 @@ def wrl2poly(filename):
     return poly
     
 def main ():
+    missings = list()
     polys = dict()
     path = "./"
     for dirpath, dirnames, filenames in os.walk(path):
@@ -333,8 +334,11 @@ def main ():
                 #namenumber = int(name[1:-4])
                 #namenumber-=44
                 #newname = "j"+str(namenumber)
+                    
                 newname = name[:-4]
                 polys[newname]=poly
+                if(poly==False):
+                    missings.append(newname)
     
     category_name = "plato_archi_nets"
     output = """#dict[face]=[neighbour_face ...]\n"""
@@ -349,5 +353,8 @@ def main ():
     f = open(category_name + ".py", "w")
     f.write(output)
     f.close()
+    
+    print("Missing poly:")
+    print(", ".join(missings))
 
 if __name__ == '__main__': main ()
