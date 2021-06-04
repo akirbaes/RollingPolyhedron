@@ -13,7 +13,7 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2):
         visited_faces.append(face)
         face_poly = xgon(len(polyhedron[face]),p1,p2)
         face_poly = face_poly[orientation:]+face_poly[:orientation] #align
-        pygame.draw.polygon(surface2, (255, 0, 0),convertToTuple(face_poly), width=0)
+        pygame.draw.polygon(surface2, (255, 0, 0),convertToTuple(face_poly), 0)
         surf.blit(surface2, (0, 0))
         for index,nextface in enumerate(polyhedron[face]):
             face_shift = polyhedron[nextface].index(face)
@@ -69,7 +69,7 @@ def draw_answer(tilingname,polyname,visits,grid,polyhedron,p1,p2,startface,start
     surface2.set_alpha(100)
 
     draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2)
-    pygame.draw.polygon(surf, (255,255,0), convertToTuple(face), width=0)
+    pygame.draw.polygon(surf, (255,255,0), convertToTuple(face), 0)
     text = pygame.font.SysFont(None, 30).render(tilingname+" "+polyname, True, (0, 0, 0))
     pygame.draw.rect(surf, (255,255,255),(0,0,text.get_width()+2,text.get_height()+2))
     surf.blit(text, (1,1))
