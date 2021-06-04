@@ -1,0 +1,392 @@
+----------------[01h18m08]Resume counter: 3----------------
+Tiling: 3^6
+Polyhedron: icosahedron
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h18m12]Resume counter: 4----------------
+Tiling: 3^6
+Polyhedron: octahedron
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h18m34]Resume counter: 15----------------
+Tiling: 3^6
+Polyhedron: tetrahedron
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h19m06]Resume counter: 95----------------
+Tiling: 3^6
+Polyhedron: j10
+Cell: 0
+Face: 0
+Orientation: 1 orientation
+Skipping possible other positions in this pair
+----------------[01h19m39]Resume counter: 105----------------
+Tiling: 3^6
+Polyhedron: j11
+Cell: 0
+Face: 0
+Orientation: 1 orientation
+Skipping possible other positions in this pair
+----------------[01h19m43]Resume counter: 115----------------
+Tiling: 3^6
+Polyhedron: j12
+Cell: 0
+Face: 0
+Orientation: 1 orientation
+Skipping possible other positions in this pair
+----------------[01h19m46]Resume counter: 118----------------
+Tiling: 3^6
+Polyhedron: j13
+Cell: 0
+Face: 0
+Orientation: 1 orientation
+Skipping possible other positions in this pair
+----------------[01h20m08]Resume counter: 136----------------
+Tiling: 3^6
+Polyhedron: j17
+Cell: 0
+Face: 0
+Orientation: 1 orientation
+Skipping possible other positions in this pair
+----------------[01h21m07]Resume counter: 663----------------
+Tiling: 3^6
+Polyhedron: j50
+Cell: 0
+Face: 9
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h21m21]Resume counter: 679----------------
+Tiling: 3^6
+Polyhedron: j51
+Cell: 0
+Face: 0
+Orientation: 1 orientation
+Skipping possible other positions in this pair
+----------------[01h21m56]Resume counter: 891----------------
+Tiling: 3^6
+Polyhedron: j62
+Cell: 0
+Face: 4
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h22m25]Resume counter: 2380----------------
+Tiling: 3^6
+Polyhedron: j84
+Cell: 0
+Face: 0
+Orientation: 1 orientation
+Skipping possible other positions in this pair
+----------------[01h22m47]Resume counter: 2389----------------
+Tiling: 3^6
+Polyhedron: j85
+Cell: 0
+Face: 1
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[01h23m19]Resume counter: 2399----------------
+Tiling: 3^6
+Polyhedron: j86
+Cell: 0
+Face: 4
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h24m33]Resume counter: 2421----------------
+Tiling: 3^6
+Polyhedron: j87
+Cell: 0
+Face: 4
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h25m19]Resume counter: 2473----------------
+Tiling: 3^6
+Polyhedron: j88
+Cell: 0
+Face: 4
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h26m02]Resume counter: 2501----------------
+Tiling: 3^6
+Polyhedron: j89
+Cell: 0
+Face: 4
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h26m12]Resume counter: 2534----------------
+Tiling: 3^6
+Polyhedron: j90
+Cell: 0
+Face: 0
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[01h26m19]Resume counter: 2607----------------
+Tiling: 4^4
+Polyhedron: cube
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h26m26]Resume counter: 2685----------------
+Tiling: 4^4
+Polyhedron: j8
+Cell: 0
+Face: 1
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[01h28m17]Resume counter: 3040----------------
+Tiling: 4^4
+Polyhedron: j37
+Cell: 0
+Face: 1
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[01h29m42]Resume counter: 8770----------------
+Tiling: 3^3x4^2
+Polyhedron: j27
+Cell: 0
+Face: 1
+Orientation: 1 orientation
+Skipping possible other positions in this pair
+----------------[01h29m50]Resume counter: 8793----------------
+Tiling: 3^3x4^2
+Polyhedron: j28
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h29m53]Resume counter: 8842----------------
+Tiling: 3^3x4^2
+Polyhedron: j30
+Cell: 0
+Face: 1
+Orientation: 1 orientation
+Skipping possible other positions in this pair
+----------------[01h33m59]Resume counter: 15619----------------
+Tiling: 3^3x4^2
+Polyhedron: square_antiprism
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h34m16]Resume counter: 15748----------------
+Tiling: 3^2x4x3x4
+Polyhedron: j1
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[01h34m59]Resume counter: 17491----------------
+Tiling: 3^2x4x3x4
+Polyhedron: j26
+Cell: 0
+Face: 0
+Orientation: 1 orientation
+Skipping possible other positions in this pair
+----------------[01h35m21]Resume counter: 17629----------------
+Tiling: 3^2x4x3x4
+Polyhedron: j29
+Cell: 0
+Face: 1
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[01h35m30]Resume counter: 17725----------------
+Tiling: 3^2x4x3x4
+Polyhedron: j31
+Cell: 0
+Face: 1
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[01h42m37]Resume counter: 35637----------------
+Tiling: 3x4x6x4
+Polyhedron: j54
+Cell: 0
+Face: 0
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[01h42m58]Resume counter: 35849----------------
+Tiling: 3x4x6x4
+Polyhedron: j56
+Cell: 0
+Face: 0
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[03h21m50]Resume counter: 49706----------------
+Tiling: 3x6x3x6
+Polyhedron: j65
+Cell: 0
+Face: 2
+Orientation: 4 orientation
+Skipping possible other positions in this pair
+----------------[03h53m28]Resume counter: 106724----------------
+Tiling: 3^4x6
+Polyhedron: hexagonal_antiprism
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[03h59m26]Resume counter: 133234----------------
+Tiling: (3^3x4^2;3^2x4x3x4)1
+Polyhedron: j1
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[04h01m47]Resume counter: 138595----------------
+Tiling: (3^3x4^2;3^2x4x3x4)1
+Polyhedron: j27
+Cell: 0
+Face: 1
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[04h16m38]Resume counter: 183525----------------
+Tiling: (3^3x4^2;3^2x4x3x4)2
+Polyhedron: j26
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[04h38m37]Resume counter: 235016----------------
+Tiling: (3^6;3^3x4^2)1
+Polyhedron: j10
+Cell: 0
+Face: 12
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[04h40m01]Resume counter: 235143----------------
+Tiling: (3^6;3^3x4^2)1
+Polyhedron: j14
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[04h40m06]Resume counter: 235168----------------
+Tiling: (3^6;3^3x4^2)1
+Polyhedron: j15
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[04h40m11]Resume counter: 235193----------------
+Tiling: (3^6;3^3x4^2)1
+Polyhedron: j16
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[04h43m31]Resume counter: 237846----------------
+Tiling: (3^6;3^3x4^2)1
+Polyhedron: j50
+Cell: 0
+Face: 0
+Orientation: 1 orientation
+Skipping possible other positions in this pair
+----------------[04h48m23]Resume counter: 246483----------------
+Tiling: (3^6;3^3x4^2)1
+Polyhedron: j85
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[04h48m39]Resume counter: 246534----------------
+Tiling: (3^6;3^3x4^2)1
+Polyhedron: j86
+Cell: 0
+Face: 0
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[04h49m26]Resume counter: 246652----------------
+Tiling: (3^6;3^3x4^2)1
+Polyhedron: j87
+Cell: 0
+Face: 1
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[04h49m47]Resume counter: 246905----------------
+Tiling: (3^6;3^3x4^2)1
+Polyhedron: j88
+Cell: 0
+Face: 0
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[04h50m14]Resume counter: 247047----------------
+Tiling: (3^6;3^3x4^2)1
+Polyhedron: j89
+Cell: 0
+Face: 0
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[04h50m34]Resume counter: 247209----------------
+Tiling: (3^6;3^3x4^2)1
+Polyhedron: j90
+Cell: 0
+Face: 1
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[04h52m51]Resume counter: 248234----------------
+Tiling: (3^6;3^3x4^2)2
+Polyhedron: j10
+Cell: 0
+Face: 12
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[05h03m30]Resume counter: 252198----------------
+Tiling: (3^6;3^3x4^2)2
+Polyhedron: j50
+Cell: 0
+Face: 0
+Orientation: 1 orientation
+Skipping possible other positions in this pair
+----------------[05h13m55]Resume counter: 264289----------------
+Tiling: (3^6;3^3x4^2)2
+Polyhedron: j85
+Cell: 0
+Face: 0
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[05h14m09]Resume counter: 264360----------------
+Tiling: (3^6;3^3x4^2)2
+Polyhedron: j86
+Cell: 0
+Face: 0
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[05h14m47]Resume counter: 264522----------------
+Tiling: (3^6;3^3x4^2)2
+Polyhedron: j87
+Cell: 0
+Face: 1
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[05h15m06]Resume counter: 264879----------------
+Tiling: (3^6;3^3x4^2)2
+Polyhedron: j88
+Cell: 0
+Face: 0
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[05h15m30]Resume counter: 265077----------------
+Tiling: (3^6;3^3x4^2)2
+Polyhedron: j89
+Cell: 0
+Face: 0
+Orientation: 2 orientation
+Skipping possible other positions in this pair
+----------------[05h15m54]Resume counter: 265305----------------
+Tiling: (3^6;3^3x4^2)2
+Polyhedron: j90
+Cell: 0
+Face: 1
+Orientation: 0 orientation
+Skipping possible other positions in this pair
+----------------[06h23m23]Resume counter: 268645----------------
+Tiling: (3^6;3^4x6)1
+Polyhedron: j22
+Cell: 0
+Face: 0
+Orientation: 1 orientation
+Skipping possible other positions in this pair
