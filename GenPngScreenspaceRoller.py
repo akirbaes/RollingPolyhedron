@@ -27,7 +27,7 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2):
 def draw_background(surf,grid):
     for points, cell in grid.values():
         # print(points)
-        pygame.draw.polygon(surf, (0,0,0), convertToTuple(points), width=2)
+        pygame.draw.polygon(surf, (0,0,0), convertToTuple(points), 2)
 
 def draw_polygon(surf,color,points,width):
     pygame.draw.polygon(surf, color, convertToTuple(points), width)

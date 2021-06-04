@@ -14,9 +14,19 @@ from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.johnson_nets import johnson_nets
 from symmetry_classes.poly_symmetries import poly_symmetries
 
-PREVIEW = False
+
+# import sys, getopt
+#
+# args = sys.argv[1:]
+# try:
+#     opts, args = getopt.getopt(args,"Pp:g:c:l:",["forcepreview","preview=","previewgap=","color=","loadprogress="])
+# except getopt.GetoptError:
+#     print("ScreenspaceRoller.py ")
+#     sys.exit(2)
+
+PREVIEW = True
 GRADATION = True
-PREVIEWFREQUENCY=500
+PREVIEWPERIODICITY=500
 # SLOW=False
 OPTIMISE_SYMMETRIES = True
 
@@ -24,13 +34,7 @@ LOAD_PROGRESS = True
 
 progressfile = "exploration_results/PROGRESS_CHECKPOINT.txt"
 
-if(PREVIEW):
-    import pygame
-    pygame.init()
-    screen = pygame.display.set_mode((800, 800), pygame.DOUBLEBUF)
-    screen.fill((255,255,255,255))
-    outlines = pygame.Surface((800, 800), pygame.SRCALPHA)
-    temp = pygame.Surface((800, 800), pygame.SRCALPHA)
+resume_counter = -1
 
 all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings}
 all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
@@ -51,8 +55,43 @@ all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change th
 # all_nets_names = all_nets_names[all_nets_names.index("j10"):]
 #all_nets_names = all_nets_names[all_nets_names.index("j50"):]
 
+# print(all_tilings_names.index("(3^6;3^4x6)1"),"/",len(all_tilings_names),"    ","(3^6;3^4x6)1")
+# print(all_nets_names.index("j87"),"/",len(all_nets_names),"    ","j87")
+# exit()
 
-resume_counter = -1
+import sys
+import argparse
+parser = argparse.ArgumentParser(description="Roll polyhedrons in tilings, report the results")
+parser.add_argument("-p","--preview", type=int, help="En/Disable preview for speed (default="+str(int(PREVIEW))+")")
+parser.add_argument("-l","--load", type=int, help="En/Disable progress loading (default="+str(int(LOAD_PROGRESS))
+    +")\nDon't forget to backup your PROGRESS_CHECKPOINT.txt file before turning this off!")
+parser.add_argument("-c","--color", type=str, help="Choose [single] color or [gradation] for preview (default="
+        +["single","gradation"][GRADATION]+")")
+parser.add_argument("-s","--prevspeed", type=int, help="How many steps of preview are skipped between refreshes. Bigger number makes the app run faster, smaller number makes the animation prettier. (default=%s)"%PREVIEWPERIODICITY)
+args = parser.parse_args()
+
+if(len(sys.argv)==1):
+    parser.print_help()
+
+if args.preview!=None:
+    PREVIEW = args.preview
+if args.color!=None:
+    GRADATION = ["single","gradation"].index(args.color)
+if args.prevspeed!=None:
+    PREVIEWPERIODICITY=args.prevspeed
+if args.load!=None:
+    LOAD_PROGRESS = args.load
+
+print(args)
+
+if(PREVIEW):
+    import pygame
+    pygame.init()
+    screen = pygame.display.set_mode((800, 800), pygame.DOUBLEBUF)
+    screen.fill((255,255,255,255))
+    outlines = pygame.Surface((800, 800), pygame.SRCALPHA)
+    temp = pygame.Surface((800, 800), pygame.SRCALPHA)
+
 
 def canon_fo(polyname,face,orientation):
     symmetries = poly_symmetries[polyname]
@@ -195,7 +234,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
         if(PREVIEW):
             if(GRADATION):
                 grade = len(visited_places[ccenter])
-                color = (min(int(255/grade)+max(0,grade*32-255-128-10*32),255),min(255,max(0,grade*24-192-10*24)),max(0,min(255,grade*16-10*16)))
+                color = (min(int(255/grade)+min(max(0,grade*32-255-128-10*32),128),255),min(255,max(0,grade*16-192-10*16-max(0,grade*2-70*2))),max(0,min(255,grade*12-10*12)-max(0,grade*3-40*3)))
 
                 try:
                     drawtemp(cface,color)
@@ -239,7 +278,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
         # print(visits)
         if(PREVIEW):
             previewcounter+=1
-            if(previewcounter%PREVIEWFREQUENCY==0):
+            if(previewcounter%PREVIEWPERIODICITY==0):
                 refresh()
                 screen.blit(outlines, (0, 0))
         # if(PREVIEW and SLOW):
@@ -315,7 +354,7 @@ if __name__ == "__main__":
                     counter=progress_counter
             #Skip to
             net = all_nets[polyname]
-            print(end="(%i)%sExploring the tiling %s with the polyhedron %s" % (counter,make_timestamp(),tilingname, polyname))
+            print(end="(%i)%sExploring the tiling %s with the polyhedron %s" % (counter,make_timestamp(),tilingname, polyname),flush=True)
 
             # Filter out repetitive faces and orientations to the bare essentials
             #if(polyname!="snub_dodecahedron" and )
@@ -385,7 +424,7 @@ if __name__ == "__main__":
                         file=open(filename,"a")
                         file.write(out+ "\n")
                         file.close()
-                        print(out)
+                        print(out,flush=True)
                         draw_answer(tilingname,polyname,visits,screenspace,net,p1,p2,face,orientation,area2[2],area2[3])
                         successful_pairs.add((tilingname,polyname))
                         if(PREVIEW):
@@ -395,9 +434,11 @@ if __name__ == "__main__":
                             pygame.image.save(screen,"exploration_results/total_coverage/"+tilingname+"@"+polyname+"@full_"+str(counter)+'.png')
 
                     elif not visits is None:
+
                         out=""
-                        out+=("-"*16+make_timestamp()+"Resume counter: %i"%(counter)+"-"*16) + "\n"
-                        out+=("Tiling: %s\nPolyhedron: %s"%(tilingname, polyname)) + "\n"
+                        out+=("-"*16+make_timestamp()+"Resume counter: %i"%(counter)+"-"*16)
+                        print(out,flush=True)
+                        out+=("\nTiling: %s\nPolyhedron: %s"%(tilingname, polyname)) + "\n"
                         out+=("Cell: %i\nFace: %i\nOrientation: %i orientation"%(case,face,orientation)) + "\n"
                         out+=("Visited cells: %s"%len(visits))
                         try:os.mkdir("exploration_results/partial_coverage/")
