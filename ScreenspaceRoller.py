@@ -29,7 +29,7 @@ GRADATION = True
 PREVIEWPERIODICITY=500
 # SLOW=False
 OPTIMISE_SYMMETRIES = True
-
+SKIP_NOTFULL = False
 LOAD_PROGRESS = True
 
 progressfile = "exploration_results/PROGRESS_CHECKPOINT.txt"
@@ -40,9 +40,15 @@ progressfile = "exploration_results/PROGRESS_CHECKPOINT.txt"
 skip_pairs = [("(3^6;3^4x6)1","j87"),
               ("(3^6;3^4x6)1","j88"),
               ("(3^6;3^4x6)1","j89"),
-              ("(3^6;3^4x6)1","j90")
-
-
+              ("(3^6;3^4x6)1","j90"),
+              ("(3^6;3^4x6)2","icosahedron"),
+              ("(3^6;3^4x6)2","j10"),
+              ("(3^6;3^4x6)2","j11"),
+              ("(3^6;3^4x6)2","j13"),
+              ("(3^6;3^4x6)2","j12"),
+              ("(3^6;3^4x6)2","j17"),
+              ("3^6;3^2x4x3x4" ,"j78"),
+              ("3^6;3^2x4x3x4" ,"j81")
               ]
 
 resume_counter = -1
@@ -73,6 +79,9 @@ all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change th
 import sys
 import argparse
 parser = argparse.ArgumentParser(description="Roll polyhedrons in tilings, report the results")
+parser.add_argument("-f","--skipnotfull", type=int, help="Skip looking when one of the face of the tiling is not in the polyhedron (when the space is not fully explorable). Only look for full rolling. (default=%i)"%SKIP_NOTFULL)
+# parser.add_argument("-f","--skippartial", type=int, help="Skip looking when one of the face of the polyhedron is not in the tiling (Partial Roller, when one face of the poly will not be used). (default=%i)"%SKIP_NOTFULL)
+
 parser.add_argument("-p","--preview", type=int, help="En/Disable preview for speed (default="+str(int(PREVIEW))+")")
 parser.add_argument("-l","--load", type=int, help="En/Disable progress loading (default="+str(int(LOAD_PROGRESS))
     +")\nDon't forget to backup your PROGRESS_CHECKPOINT.txt file before turning this off!")
@@ -92,6 +101,8 @@ if args.prevspeed!=None:
     PREVIEWPERIODICITY=args.prevspeed
 if args.load!=None:
     LOAD_PROGRESS = args.load
+if args.skipnotfull!=None:
+    SKIP_NOTFULL = args.skipnotfull
 
 print(args)
 
@@ -365,8 +376,19 @@ if __name__ == "__main__":
                     counter=progress_counter
             #Skip to
             net = all_nets[polyname]
+
+
             print(end="(%i)%sExploring the tiling %s with the polyhedron %s" % (counter,make_timestamp(),tilingname, polyname),flush=True)
 
+            if (SKIP_NOTFULL):
+                skip_pair = False
+                cellsizes = set(len(neigh) for neigh in tiling.values())
+                facesizes = set(len(neigh) for neigh in net.values())
+                for cellsize in cellsizes:
+                    if cellsize not in facesizes:
+                        skip_pair = True
+                        print("\nSkipping as the tiling has a face with %i sides which is not present in the net and --skipnotfull=%i"%(cellsize,SKIP_NOTFULL))
+                        break
             # Filter out repetitive faces and orientations to the bare essentials
             #if(polyname!="snub_dodecahedron" and )
             #else:
@@ -399,7 +421,8 @@ if __name__ == "__main__":
                     outlines.fill((255,255,255,0))
                     draw_background(outlines,screenspace)
                 "screenspace= visited areas[center points: (polygon, cell number)]"
-
+                if(SKIP_NOTFULL and skip_pair):
+                    continue
                 for face,orientation in faceori:
                     counter+=1
                     if(LOAD_PROGRESS and progress_skip>0):
