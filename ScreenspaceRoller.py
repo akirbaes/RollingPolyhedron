@@ -34,6 +34,17 @@ LOAD_PROGRESS = True
 
 progressfile = "exploration_results/PROGRESS_CHECKPOINT.txt"
 
+#Those don't roll in the whole space but roll in a lot of it, enough to slow down the processing
+#Plus they don't have a lot of symmetries to speed things up
+
+skip_pairs = [("(3^6;3^4x6)1","j87"),
+              ("(3^6;3^4x6)1","j88"),
+              ("(3^6;3^4x6)1","j89"),
+              ("(3^6;3^4x6)1","j90")
+
+
+              ]
+
 resume_counter = -1
 
 all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings}
@@ -398,9 +409,11 @@ if __name__ == "__main__":
                         continue
                     if(SKIP_IF_SUCCESSFUL and (tilingname,polyname) in successful_pairs):
                         continue
-
+                    if((tilingname,polyname) in skip_pairs):
+                        continue
                     if (PREVIEW):
                         screen.blit(outlines,(0,0))
+
 
                     #------------Run this with custom values if you want to without FFOO and FaceSym-----------
                     #result, visits = (area_explore(tiling,net,case,face,orientation,FFOO=FFOO,FaceSym=FaceSym))
