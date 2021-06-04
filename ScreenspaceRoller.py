@@ -14,7 +14,7 @@ from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.johnson_nets import johnson_nets
 from symmetry_classes.poly_symmetries import poly_symmetries
 
-PREVIEW = True
+PREVIEW = False
 GRADATION = True
 PREVIEWFREQUENCY=500
 # SLOW=False
@@ -371,7 +371,8 @@ if __name__ == "__main__":
                     # ,FaceSym=FaceSym))
 
                     # Ouptut result
-                    refresh()
+                    if(PREVIEW):
+                        refresh()
 
                     if(result):
                         #print("Could explore the tiling %s with the polyhedron %s"%(tilingname,polyname))
@@ -389,9 +390,9 @@ if __name__ == "__main__":
                         successful_pairs.add((tilingname,polyname))
                         if(PREVIEW):
                             refresh()
-                            try:os.mkdir("exploration_results/total")
+                            try:os.mkdir("exploration_results/total_coverage")
                             except:pass
-                            pygame.image.save(screen,"exploration_results/total/"+tilingname+"@"+polyname+"@full_"+str(counter)+'.png')
+                            pygame.image.save(screen,"exploration_results/total_coverage/"+tilingname+"@"+polyname+"@full_"+str(counter)+'.png')
 
                     elif not visits is None:
                         out=""
@@ -399,15 +400,15 @@ if __name__ == "__main__":
                         out+=("Tiling: %s\nPolyhedron: %s"%(tilingname, polyname)) + "\n"
                         out+=("Cell: %i\nFace: %i\nOrientation: %i orientation"%(case,face,orientation)) + "\n"
                         out+=("Visited cells: %s"%len(visits))
-                        try:os.mkdir("exploration_results/partial/")
+                        try:os.mkdir("exploration_results/partial_coverage/")
                         except:pass
-                        secondfilename = "exploration_results/partial/" + start_timestamp + ".txt"
+                        secondfilename = "exploration_results/partial_coverage/" + start_timestamp + ".txt"
                         file = open(secondfilename, "a")
                         file.write(out + "\n")
                         file.close()
                         if(PREVIEW):
                             refresh()
-                            pygame.image.save(screen,"exploration_results/partial/"+tilingname+"@"+polyname+"@partial_"+str(counter)+'.png')
+                            pygame.image.save(screen,"exploration_results/partial_coverage/"+tilingname+"@"+polyname+"@partial_"+str(counter)+'.png')
                     if(PREVIEW):
                         screen.fill((255,255,255))
                     try:os.mkdir("exploration_results")
