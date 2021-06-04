@@ -73,7 +73,7 @@ def draw_answer(tilingname,polyname,visits,grid,polyhedron,p1,p2,startface,start
     text = pygame.font.SysFont(None, 30).render(tilingname+" "+polyname, True, (0, 0, 0))
     pygame.draw.rect(surf, (255,255,255),(0,0,text.get_width()+2,text.get_height()+2))
     surf.blit(text, (1,1))
-    pygame.image.save(surf,"exploration_results/"+polyname+" rolls the "+tilingname+"tiling"+'.png')
+    pygame.image.save(surf,"exploration_results/"+polyname+" rolls the "+tilingname+" tiling"+'.png')
 
 if __name__ == "__main__":
     pass

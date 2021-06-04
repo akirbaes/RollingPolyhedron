@@ -20,6 +20,10 @@ PREVIEWFREQUENCY=500
 # SLOW=False
 OPTIMISE_SYMMETRIES = True
 
+LOAD_PROGRESS = True
+
+progressfile = "exploration_results/PROGRESS_CHECKPOINT.txt"
+
 if(PREVIEW):
     import pygame
     pygame.init()
@@ -257,7 +261,22 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
         print("Visited everything: %s/%i"%(visited,max_visitable))
         return True, visited_places
 
+progress_tiling = None
+progress_poly = None
+progress_counter = None
+progress_skip = 0
+
 if __name__ == "__main__":
+    if(LOAD_PROGRESS):
+        try:
+            prog=open(progressfile)
+            progress = [x.strip() for x in prog.readlines()]
+            progress_tiling = progress.pop(0)
+            progress_poly = progress.pop(0)
+            progress_counter = int(progress.pop(0))
+            progress_skip = int(progress.pop(0))
+        except:
+            pass
     folder = "exploration_results"+os.sep
     try:os.mkdir(folder)
     except:pass
@@ -279,9 +298,22 @@ if __name__ == "__main__":
 
 
     for tilingname in all_tilings_names:
+        if(LOAD_PROGRESS and progress_tiling!=None):
+            if(progress_tiling!=tilingname):
+                continue
+            else:
+                progress_tiling=None
+        #Skip to
         tiling = all_tilings[tilingname]
 
         for polyname in all_nets_names:
+            if(LOAD_PROGRESS and progress_poly!=None):
+                if(progress_poly!=polyname):
+                    continue
+                else:
+                    progress_poly=None
+                    counter=progress_counter
+            #Skip to
             net = all_nets[polyname]
             print(end="(%i)%sExploring the tiling %s with the polyhedron %s" % (counter,make_timestamp(),tilingname, polyname))
 
@@ -320,6 +352,9 @@ if __name__ == "__main__":
 
                 for face,orientation in faceori:
                     counter+=1
+                    if(LOAD_PROGRESS and progress_skip>0):
+                        progress_skip-=1
+                        continue
                     if(resume_counter>counter-1):
                         continue
                     if(SKIP_IF_SUCCESSFUL and (tilingname,polyname) in successful_pairs):
@@ -356,7 +391,7 @@ if __name__ == "__main__":
                             refresh()
                             try:os.mkdir("exploration_results/total")
                             except:pass
-                            pygame.image.save(screen,"exploration_results/total/"+tilingname+" "+polyname+"_pretty_"+str(counter)+'.png')
+                            pygame.image.save(screen,"exploration_results/total/"+tilingname+"@"+polyname+"@full_"+str(counter)+'.png')
 
                     elif not visits is None:
                         out=""
@@ -372,6 +407,10 @@ if __name__ == "__main__":
                         file.close()
                         if(PREVIEW):
                             refresh()
-                            pygame.image.save(screen,"exploration_results/partial/"+tilingname+" "+polyname+"_"+str(counter)+'.png')
+                            pygame.image.save(screen,"exploration_results/partial/"+tilingname+"@"+polyname+"@partial_"+str(counter)+'.png')
                     if(PREVIEW):
                         screen.fill((255,255,255))
+                    try:os.mkdir("exploration_results")
+                    except:pass
+                    with open("exploration_results/PROGRESS_CHECKPOINT.txt","w") as progress_output:
+                        progress_output.write("%s\n%s\n%i"%(tilingname,polyname,counter))
