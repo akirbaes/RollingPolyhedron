@@ -202,3 +202,5 @@ plato_archi_nets['truncated_tetrahedron'] = \
     6: [7, 3, 4, 2, 5, 1],
     7: [5, 0, 4, 3, 6, 1]}
 
+if __name__ == "__main__":
+    print(", ".join(plato_archi_nets.keys()))

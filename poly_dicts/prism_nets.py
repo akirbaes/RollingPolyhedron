@@ -57,3 +57,6 @@ prism_nets['square_antiprism'] = \
 prism_nets['triangular_prism'] = \
 {0: [2, 1, 3], 1: [0, 2, 4, 3], 2: [0, 3, 4, 1], 3: [0, 1, 4, 2], 4: [2, 3, 1]}
 
+
+if __name__ == "__main__":
+    print(", ".join(prism_nets.keys()))

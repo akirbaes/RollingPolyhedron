@@ -246,3 +246,5 @@ biisogonal_tilings['3^6;3^2x6^2'] = \
     6: [(5, 0), (0, 1), (7, 0)],
     7: [(2, 0), (6, 0), (1, 6)]}
 
+if __name__ == "__main__":
+    print(len(biisogonal_tilings))

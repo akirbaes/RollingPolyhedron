@@ -2511,3 +2511,7 @@ johnson_nets['j92'] = \
     18: [17, 13, 0],
     19: [17, 2, 4, 8, 11, 15]}
 
+
+if __name__ == "__main__":
+    print(", ".join(johnson_nets.keys()))
+    print(len(johnson_nets),"of them")
