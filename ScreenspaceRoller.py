@@ -24,35 +24,46 @@ from symmetry_classes.poly_symmetries import poly_symmetries
 #     print("ScreenspaceRoller.py ")
 #     sys.exit(2)
 
-PREVIEW = True
+PREVIEW = False
 GRADATION = True
 PREVIEWPERIODICITY=500
 # SLOW=False
 OPTIMISE_SYMMETRIES = True
-SKIP_NOTFULL = False
+SKIP_NOTFULL = True
 LOAD_PROGRESS = True
 TAKE_PICTURES = False
 
+CHECK_UNUSED_FACES = False #Will disable symmetry optimisations
 
+QUIT_PREVIEW_EARLY = True
+
+CHEAT_WINNING = False
+
+winning_pairs = {('3^6;3^2x4x3x4', 'j89'), ('3^6', 'j84'), ('3^6', 'j89'), ('3^2x4x3x4', 'j31'), ('(3^6;3^3x4^2)2', 'j87'), ('(3^6;3^3x4^2)2', 'j89'), ('3^6', 'j87'), ('3x4x6x4', 'j54'), ('(3^6;3^3x4^2)2', 'j50'), ('3^6', 'j13'), ('3^6;3^2x4x3x4', 'j87'), ('3^6;3^2x4x3x4', 'j50'), ('3^6', 'j51'), ('3^6', 'j50'), ('3^6', 'j11'), ('(3^6;3^3x4^2)1', 'j90'), ('3^2x4x3x4', 'j26'), ('3^3x4^2', 'j28'), ('(3^6;3^3x4^2)1', 'j14'), ('(3^6;3^4x6)1', 'j22'), ('(3^6;3^3x4^2)1', 'j10'), ('(3^6;3^4x6)2', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j85'), ('(3^6;3^3x4^2)1', 'j88'), ('3^6', 'octahedron'), ('(3^6;3^3x4^2)2', 'j86'), ('3^3x4^2', 'j27'), ('3x4x6x4', 'j56'), ('3^6;3^2x6^2', 'truncated_tetrahedron'), ('3^6', 'j86'), ('4^4', 'j8'), ('3^4x6;3^2x6^2', 'hexagonal_antiprism'), ('3^6;3^2x4x3x4', 'j86'), ('(3^3x4^2;3^2x4x3x4)1', 'j1'), ('(3^6;3^3x4^2)1', 'j16'), ('(3^6;3^3x4^2)1', 'j89'), ('3^3x4^2', 'square_antiprism'), ('4^4', 'j37'), ('3^2x4x3x4', 'j29'), ('(3^6;3^3x4^2)2', 'j90'), ('(3^6;3^3x4^2)1', 'j87'), ('3^6', 'j62'), ('3^6', 'j90'), ('(3^3x4^2;3^2x4x3x4)2', 'j26'), ('(3^6;3^3x4^2)2', 'j10'), ('3^6;3^2x4x3x4', 'j10'), ('3^6;3^2x4x3x4', 'j90'), ('4^4', 'cube'), ('(3^3x4^2;3^2x4x3x4)1', 'j27'), ('3^6', 'j10'), ('(3^6;3^3x4^2)1', 'j50'), ('3^3x4^2', 'j30'), ('(3^6;3^3x4^2)2', 'j85'), ('(3^6;3^3x4^2)2', 'j88'), ('3^6', 'j85'), ('3^6', 'j17'), ('3^2x4x3x4', 'j1'), ('3x6x3x6', 'j65'), ('3^6;3^2x4x3x4', 'j1'), ('3^6', 'j88'), ('3^6;3^2x4x3x4', 'j85'), ('3^6', 'tetrahedron'), ('(3^6;3^3x4^2)1', 'j15'), ('(3^6;3^4x6)1', 'hexagonal_antiprism'), ('3^6', 'icosahedron'), ('3^6', 'j12'), ('3^4x6', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j86')}
+
+# QUIT_SEARCH_EARLY = False
+#
+TEMPORARY_GLOBAL_COUNTER = 0
 
 progressfile = "exploration_results/PROGRESS_CHECKPOINT.txt"
 
 #Those don't roll in the whole space but roll in a lot of it, enough to slow down the processing
 #Plus they don't have a lot of symmetries to speed things up
 
-skip_pairs = [("3^6","j87"),("3^6","j88"),("3^6","j89"),("(3^6;3^4x6)1","j87"),("3x4x6x4","j74"),("3x4x6x4","j76"),("3x4x6x4","j81"),
-              ("(3^6;3^4x6)1","j88"),
-              ("(3^6;3^4x6)1","j89"),("3^4x6","j87"),
-              ("(3^6;3^4x6)1","j90"),
-              ("(3^6;3^4x6)2","icosahedron"),
-              ("(3^6;3^4x6)2","j10"),
-              ("(3^6;3^4x6)2","j11"),
-              ("(3^6;3^4x6)2","j13"),
-              ("(3^6;3^4x6)2","j12"),
-              ("(3^6;3^4x6)2","j17"),
-              ("3^6;3^2x4x3x4" ,"j78"),
-              ("3^6;3^2x4x3x4" ,"j81")
-              ]
+skip_pairs = []
+#    ("3^6","j87"),("3^6","j88"),("3^6","j89"),("(3^6;3^4x6)1","j87"),("3x4x6x4","j74"),("3x4x6x4","j76"),("3x4x6x4","j81"),
+# ("(3^6;3^4x6)1","j88"),
+# ("(3^6;3^4x6)1","j89"),("3^4x6","j87"),
+# ("(3^6;3^4x6)1","j90"),
+# ("(3^6;3^4x6)2","icosahedron"),
+# ("(3^6;3^4x6)2","j10"),
+# ("(3^6;3^4x6)2","j11"),
+# ("(3^6;3^4x6)2","j13"),
+# ("(3^6;3^4x6)2","j12"),
+# ("(3^6;3^4x6)2","j17"),
+# ("3^6;3^2x4x3x4" ,"j78"),
+# ("3^6;3^2x4x3x4" ,"j81")
+# ]
 
 resume_counter = -1
 
@@ -81,6 +92,17 @@ all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change th
 
 import sys
 import argparse
+def str2bool(v):
+    #https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse/43357954#43357954
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 'True', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'False', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 parser = argparse.ArgumentParser(description="Roll polyhedrons in tilings, report the results")
 parser.add_argument("-f","--skipnotfull", type=int, help="Skip looking when one of the face of the tiling is not in the polyhedron (when the space is not fully explorable). Only look for full rolling. (default=%i)"%SKIP_NOTFULL)
 # parser.add_argument("-f","--skippartial", type=int, help="Skip looking when one of the face of the polyhedron is not in the tiling (Partial Roller, when one face of the poly will not be used). (default=%i)"%SKIP_NOTFULL)
@@ -92,6 +114,8 @@ parser.add_argument("-c","--color", type=str, help="Choose [single] color or [gr
         +["single","gradation"][GRADATION]+")")
 parser.add_argument("-s","--prevspeed", type=int, help="How many steps of preview are skipped between refreshes. Bigger number makes the app run faster, smaller number makes the animation prettier. (default=%s)"%PREVIEWPERIODICITY)
 parser.add_argument("-t","--picture", type=int, help="Take pictures for every failed step. (default=%i)"%TAKE_PICTURES)
+parser.add_argument("-u","--check_unused", type=int, help="Check unused faces for successful search. Disables optimisations. (default=%i)"%CHECK_UNUSED_FACES)
+parser.add_argument("-k","--skip_current", action='store_true', help="Skip current face in counter order.")
 args = parser.parse_args()
 
 if(len(sys.argv)==1):
@@ -109,6 +133,10 @@ if args.skipnotfull!=None:
     SKIP_NOTFULL = args.skipnotfull
 if args.picture!=None:
     TAKE_PICTURES = args.picture
+if args.check_unused!=None:
+    CHECK_UNUSED_FACES = args.check_unused
+if(CHECK_UNUSED_FACES):
+        OPTIMISE_SYMMETRIES=False
 
 print(args)
 
@@ -122,11 +150,14 @@ if(PREVIEW):
 
 
 def canon_fo(polyname,face,orientation):
-    symmetries = poly_symmetries[polyname]
-    for sym in symmetries:
-        if (face,orientation) in sym:
-            #print("Found a symmetry!")
-            return min(sym)
+    try:
+        symmetries = poly_symmetries[polyname]
+        for sym in symmetries:
+            if (face,orientation) in sym:
+                #print("Found a symmetry!")
+                return min(sym)
+    except:
+        print("No symmetry info for this poly")
     return face, orientation
 #from findPolySymmetries import canon_face, canon_fo, generate_FFOO_sym, generate_face_sym
 import findPolySymmetries
@@ -157,6 +188,20 @@ def co_orient_face(net, prevface, newface, tiling, prevcase, newcaseid):
     case_shift = case_match(tiling, prevcase, newcaseid)
     common_orientation = face_shift - case_shift
     return common_orientation
+
+def get_unused_faces(result, poly, polyname):
+    faces = set(poly.keys())
+    # for face in poly:
+    #     for ori in range(len(poly[face])):
+    #         faces.add(canon_fo(polyname,face,ori)[0])
+    for res in result.values():
+        for face,orientation in res:
+            # try:faces.remove(canon_fo(polyname,face,orientation)[0])
+            try:faces.remove(face)
+            except:pass
+        if not faces:
+            return faces
+    return faces
 
 
 def map_screenspace(tiling, startcell, area, p1, p2, precision):
@@ -203,6 +248,8 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
     yy = (area[1]+area[3])/2
     p1 = RollyPoint(xx,yy)
     p2 = RollyPoint(xx + EDGESIZE, yy)  # 350 300
+    if(CHECK_UNUSED_FACES and CHEAT_WINNING):
+        faces = set(net.keys())
 
     if(PREVIEW):
         previewcounter=0
@@ -218,11 +265,16 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
     once = True
     while (visits):
         #print(len(visits))
+        if(QUIT_PREVIEW_EARLY):
+            edgeadd = 0
+        else:
+            edgeadd = EDGESIZE/2
         visited = sum(bool(visited_places[ccenter]) for ccenter in visited_places
-            if ((area2[0] < ccenter[0] < area2[2]) and (area2[1] < ccenter[1] < area2[3])))
+            if ((area2[0]-edgeadd < ccenter[0] < area2[2]+edgeadd) and (area2[1]-edgeadd < ccenter[1] < area2[3]+edgeadd)))
         if(visited==max_visitable):
             break
         face, case, orientation, p1, p2 = visits.pop(0)
+
 
         if (len(net[face]) != len(tiling[case])):
         #     if(PREVIEW):
@@ -259,6 +311,12 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
             continue #already visited
 
         visited_places[ccenter].append((face, orientation))
+
+        if(CHECK_UNUSED_FACES and CHEAT_WINNING):
+            faces-= {face}
+            if not(faces):
+                return True, visited_places
+
         if(PREVIEW):
             if(GRADATION):
                 grade = len(visited_places[ccenter])
@@ -309,6 +367,8 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
             if(previewcounter%PREVIEWPERIODICITY==0):
                 refresh()
                 screen.blit(outlines, (0, 0))
+
+
         # if(PREVIEW and SLOW):
            #wait_for_input()
 
@@ -318,7 +378,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
         if ((area2[0] < ccenter[0] < area2[2]) and (area2[1] < ccenter[1] < area2[3])))
     if(visited<max_visitable):
         #print("Could not visit everything: %s/%i"%(visited,max_visitable))
-        if(visited>1):
+        if(visited>2):
             print("Could not visit everything: %s/%i"%(visited,max_visitable), "(c%i f%i o%i)"%(startcase,startface,startorientation))
             visited_places = {center for center,visitors in visited_places.items() if visitors}
             return False, visited_places
@@ -344,13 +404,19 @@ if __name__ == "__main__":
             progress_skip = int(progress.pop(0))
         except:
             pass
+        print("Skip current=",args.skip_current)
+        if (args.skip_current):
+            skip_pairs.append((progress_tiling,progress_poly))
     folder = "exploration_results"+os.sep
     try:os.mkdir(folder)
     except:pass
     start_timestamp = make_timestamp()
     filename = folder+"exploration_logs"+start_timestamp+".txt"
-    file = open(filename,"w")
-    file.close()
+    try:os.mkdir(folder+"/partial_coverage")
+    except:pass
+    secondfilename = "exploration_results/partial_coverage/" + start_timestamp + ".txt"
+    # file = open(filename,"w")
+    # file.close()
     counter = 0
 
     successful_pairs = set()
@@ -379,22 +445,29 @@ if __name__ == "__main__":
                     continue
                 else:
                     progress_poly=None
-                    counter=progress_counter
+                    resume_counter=progress_counter
             #Skip to
             net = all_nets[polyname]
 
 
-            print(end="(%i)%sExploring the tiling %s with the polyhedron %s" % (counter,make_timestamp(),tilingname, polyname),flush=True)
 
+            skip_pair = False
             if (SKIP_NOTFULL):
-                skip_pair = False
                 cellsizes = set(len(neigh) for neigh in tiling.values())
                 facesizes = set(len(neigh) for neigh in net.values())
                 for cellsize in cellsizes:
                     if cellsize not in facesizes:
                         skip_pair = True
-                        print("\nSkipping as the tiling has a face with %i sides which is not present in the net and --skipnotfull=%i"%(cellsize,SKIP_NOTFULL))
+                        print("(%i)"%counter+"Skipping",(tilingname, polyname),"as the tiling has a face with %i sides which is not present in the net and --skipnotfull=%i"%(cellsize,SKIP_NOTFULL))
                         break
+
+            if (CHEAT_WINNING and ((tilingname, polyname) not in winning_pairs)):
+                print("(%i)"%counter+"Skipping not winning pair", (tilingname, polyname))
+                skip_pair = True
+
+            if(skip_pair==False):
+                print("(%i)%sExploring the tiling %s with the polyhedron %s" % (
+                counter, make_timestamp(), tilingname, polyname), flush=True)
             # Filter out repetitive faces and orientations to the bare essentials
             #if(polyname!="snub_dodecahedron" and )
             #else:
@@ -405,7 +478,7 @@ if __name__ == "__main__":
             #     print("...")
             #     print(FaceSym)
             # else:
-            print("...")
+            #print("...")
             # FFOO = generate_FFOO_sym(net)
             # for face in sorted(net):
             #     if(OPTIMISE_SYMMETRIES):
@@ -418,32 +491,35 @@ if __name__ == "__main__":
             faceori = set()
             for face in sorted(net):
                 for orientation in range(len(net[face])):
+                    # if (OPTIMISE_SYMMETRIES): Doesn't change the visited faces thing
                     faceori.add(canon_fo(polyname,face,orientation))
                     # faceori.append((face,orientation))
             #Main loop
             for case in tiling:
-                screenspace =  map_screenspace(tiling,case,area,p1,p2,7)
-                if(PREVIEW):
-                    outlines.fill((255,255,255,0))
-                    draw_background(outlines,screenspace)
-                "screenspace= visited areas[center points: (polygon, cell number)]"
-                if(SKIP_NOTFULL and skip_pair):
-                    continue
+                screenspace = None
                 for face,orientation in faceori:
                     counter+=1
                     if(LOAD_PROGRESS and progress_skip>0):
                         progress_skip-=1
                         continue
-                    if(resume_counter>counter-1):
+                    if(resume_counter>=counter):
                         continue
                     if(SKIP_IF_SUCCESSFUL and (tilingname,polyname) in successful_pairs):
                         continue
                     if((tilingname,polyname) in skip_pairs):
                         continue
+                    if(CHEAT_WINNING and skip_pair):
+                        continue
+                    if(SKIP_NOTFULL and skip_pair):
+                        continue
                     if (PREVIEW):
                         screen.blit(outlines,(0,0))
 
-
+                    if(screenspace==None):
+                        screenspace = map_screenspace(tiling, case, area, p1, p2, 7)
+                        if (PREVIEW):
+                            outlines.fill((255, 255, 255, 0))
+                            draw_background(outlines, screenspace)
                     #------------Run this with custom values if you want to without FFOO and FaceSym-----------
                     #result, visits = (area_explore(tiling,net,case,face,orientation,FFOO=FFOO,FaceSym=FaceSym))
                     #------------------------------------------------------------------------------------------
@@ -456,45 +532,47 @@ if __name__ == "__main__":
                         refresh()
 
                     if(result):
-                        #print("Could explore the tiling %s with the polyhedron %s"%(tilingname,polyname))
+                        if(SKIP_IF_SUCCESSFUL):
+                            print("Skipping possible other positions in this pair")
+                        outputfilename =filename
+                        keyword = "total"
+                        if(CHECK_UNUSED_FACES):
+                            unused = get_unused_faces(visits, net, polyname) or None
+                        else:
+                            unused = None
+                    elif not (visits is None):
+                        outputfilename = secondfilename
+                        keyword = "partial"
+                    if(result):
                         out=""
-                        out+=("-"*16+make_timestamp()+"Resume counter: %i"%(counter)+"-"*16) + "\n"
+                        out+=("-"*16+make_timestamp()+"Resume_counter: %i"%(counter)+"-"*16) + "\n"
                         out+=("Tiling: %s\nPolyhedron: %s"%(tilingname, polyname)) + "\n"
                         out+=("Cell: %i\nFace: %i\nOrientation: %i orientation"%(case,face,orientation))
-                        if(SKIP_IF_SUCCESSFUL):
-                            out+=("\nSkipping possible other positions in this pair")
-                        file=open(filename,"a")
-                        file.write(out+ "\n")
-                        file.close()
+                        outputfile = open(outputfilename,"a")
+                        outputfile.write(out+ "\n")
+                        outputfile.close()
                         print(out,flush=True)
-                        if(TAKE_PICTURES):
-                            draw_answer(tilingname,polyname,visits,screenspace,net,p1,p2,face,orientation,area2[2],area2[3])
+                        if(result and TAKE_PICTURES):
+                            filename="exploration_results/"+str(TEMPORARY_GLOBAL_COUNTER).zfill(2)+" "+polyname+" rolls the "+tilingname+" tiling"+'.png'
+                            TEMPORARY_GLOBAL_COUNTER+=1
+                            draw_answer(filename,tilingname,polyname,visits,screenspace,net,p1,p2,face,orientation,area2[2],area2[3])
                         successful_pairs.add((tilingname,polyname))
-                        if(PREVIEW):
-                            refresh()
-                            try:os.mkdir("exploration_results/total_coverage")
+
+                        outputfile = open("exploration_results/rollers.txt","a")
+                        if(CHECK_UNUSED_FACES):
+                            outputfile.write("%s %s %i %i %i %s\n"%(tilingname,polyname,case,face,orientation,
+                                                                    str(unused).replace(" ","")))
+                        else:
+                            outputfile.write("%s %s %i %i %i\n"%(tilingname,polyname,case,face,orientation))
+                        outputfile.close()
+                    if(PREVIEW):
+                        refresh()
+                        if(visits and TAKE_PICTURES):
+                            try:os.mkdir("exploration_results/%s_coverage/"%keyword)
                             except:pass
-                            if (TAKE_PICTURES):
-                                pygame.image.save(screen,"exploration_results/total_coverage/"+tilingname+"@"+polyname+"@full_"+str(counter)+'.png')
-
-                    elif not visits is None:
-
-                        out=""
-                        out+=("-"*16+make_timestamp()+"Resume counter: %i"%(counter)+"-"*16)
-                        print(out,flush=True)
-                        out+=("\nTiling: %s\nPolyhedron: %s"%(tilingname, polyname)) + "\n"
-                        out+=("Cell: %i\nFace: %i\nOrientation: %i orientation"%(case,face,orientation)) + "\n"
-                        out+=("Visited cells: %s"%len(visits))
-                        try:os.mkdir("exploration_results/partial_coverage/")
-                        except:pass
-                        secondfilename = "exploration_results/partial_coverage/" + start_timestamp + ".txt"
-                        file = open(secondfilename, "a")
-                        file.write(out + "\n")
-                        file.close()
-                        if(PREVIEW):
-                            refresh()
-                            if(TAKE_PICTURES):
-                                pygame.image.save(screen,"exploration_results/partial_coverage/"+tilingname+"@"+polyname+"@partial_"+str(counter)+'.png')
+                            pygame.image.save(screen,"exploration_results/%s_coverage/"%keyword
+                                              +tilingname+"@"+polyname+"@"+keyword
+                                              +"@(%i,%i,%i)"%(case,face,orientation)+'.png')
                     if(PREVIEW):
                         screen.fill((255,255,255))
                     try:os.mkdir("exploration_results")
