@@ -31,15 +31,18 @@ PREVIEWPERIODICITY=500
 OPTIMISE_SYMMETRIES = True
 SKIP_NOTFULL = False
 LOAD_PROGRESS = True
+TAKE_PICTURES = False
+
+
 
 progressfile = "exploration_results/PROGRESS_CHECKPOINT.txt"
 
 #Those don't roll in the whole space but roll in a lot of it, enough to slow down the processing
 #Plus they don't have a lot of symmetries to speed things up
 
-skip_pairs = [("(3^6;3^4x6)1","j87"),
+skip_pairs = [("3^6","j87"),("3^6","j88"),("3^6","j89"),("(3^6;3^4x6)1","j87"),("3x4x6x4","j74"),("3x4x6x4","j76"),("3x4x6x4","j81"),
               ("(3^6;3^4x6)1","j88"),
-              ("(3^6;3^4x6)1","j89"),
+              ("(3^6;3^4x6)1","j89"),("3^4x6","j87"),
               ("(3^6;3^4x6)1","j90"),
               ("(3^6;3^4x6)2","icosahedron"),
               ("(3^6;3^4x6)2","j10"),
@@ -88,6 +91,7 @@ parser.add_argument("-l","--load", type=int, help="En/Disable progress loading (
 parser.add_argument("-c","--color", type=str, help="Choose [single] color or [gradation] for preview (default="
         +["single","gradation"][GRADATION]+")")
 parser.add_argument("-s","--prevspeed", type=int, help="How many steps of preview are skipped between refreshes. Bigger number makes the app run faster, smaller number makes the animation prettier. (default=%s)"%PREVIEWPERIODICITY)
+parser.add_argument("-t","--picture", type=int, help="Take pictures for every failed step. (default=%i)"%TAKE_PICTURES)
 args = parser.parse_args()
 
 if(len(sys.argv)==1):
@@ -103,6 +107,8 @@ if args.load!=None:
     LOAD_PROGRESS = args.load
 if args.skipnotfull!=None:
     SKIP_NOTFULL = args.skipnotfull
+if args.picture!=None:
+    TAKE_PICTURES = args.picture
 
 print(args)
 
@@ -461,13 +467,15 @@ if __name__ == "__main__":
                         file.write(out+ "\n")
                         file.close()
                         print(out,flush=True)
-                        draw_answer(tilingname,polyname,visits,screenspace,net,p1,p2,face,orientation,area2[2],area2[3])
+                        if(TAKE_PICTURES):
+                            draw_answer(tilingname,polyname,visits,screenspace,net,p1,p2,face,orientation,area2[2],area2[3])
                         successful_pairs.add((tilingname,polyname))
                         if(PREVIEW):
                             refresh()
                             try:os.mkdir("exploration_results/total_coverage")
                             except:pass
-                            pygame.image.save(screen,"exploration_results/total_coverage/"+tilingname+"@"+polyname+"@full_"+str(counter)+'.png')
+                            if (TAKE_PICTURES):
+                                pygame.image.save(screen,"exploration_results/total_coverage/"+tilingname+"@"+polyname+"@full_"+str(counter)+'.png')
 
                     elif not visits is None:
 
@@ -485,7 +493,8 @@ if __name__ == "__main__":
                         file.close()
                         if(PREVIEW):
                             refresh()
-                            pygame.image.save(screen,"exploration_results/partial_coverage/"+tilingname+"@"+polyname+"@partial_"+str(counter)+'.png')
+                            if(TAKE_PICTURES):
+                                pygame.image.save(screen,"exploration_results/partial_coverage/"+tilingname+"@"+polyname+"@partial_"+str(counter)+'.png')
                     if(PREVIEW):
                         screen.fill((255,255,255))
                     try:os.mkdir("exploration_results")
