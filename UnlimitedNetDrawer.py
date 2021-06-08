@@ -100,7 +100,7 @@ def loop():
             edge.draw_cursor()
         if(len(visitedfaces)<=1):
             if(not drawn):
-                visualise(poly, p1, p2, startface, poly[startface][0], surf=get_surface(2), screen=screen, shapes=get_surface(3))
+                visualise(poly, p1, p2, startface, poly[startface][0], surf=get_surface(2), screen=screen, shapes=get_surface(3),fill=False,color=0)
                 drawn=True
         else:
             wipe_surface(3)

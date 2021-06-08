@@ -37,7 +37,7 @@ class RollyPoly:
             # self.pid = make_shape(points, (int((id - realid) / len(order))) ,0.7)
             self.pid = make_shape(points, (0, 0, 0), 0)
         else:
-            self.pid = make_shape(points, color, 1)
+            self.pid = make_shape(points, color, 0)
         # print(points)
 
         #number(realid, sum(points, Point(0, 0)) / len(points))
@@ -98,7 +98,7 @@ def get_face_points(shapedict, p1, p2, face, noisy=True):
     return points
 
 
-def visualise(polydict, p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, prints=False,surf=None,screen=None,shapes=None):
+def visualise(polydict, p1, p2, newshape, oldshape, color=(255,0,0), drawnshapes=None, shapespoly=None, fill=True, prints=False,surf=None,screen=None,shapes=None):
     global s
     try:
         print(s)

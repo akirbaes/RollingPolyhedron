@@ -29,6 +29,7 @@ Draw.initialise_drawing(WIDTH, HEIGHT)
 from PolyAndTessNets import polys
 
 from PolyFunctions import RollyPoly, visualise, get_face_points, make_shape, make_cursor
+from findPolySymmetries import canon_face, canon_fo, generate_FFOO_sym, generate_face_sym
 
 """
 def number(id, point):
@@ -63,15 +64,8 @@ def extend(polydict, p1, p2, newshape, oldshape=None, drawnshapes=None, shapespo
         shapespoly = list()
     if(prints):print(end="Draw the")
     realshape = newshape % len(polydict)
-    if (len(polydict[realshape])) == 3:
-        points = triangle(p1, p2)
-        if(prints):print(" triangle ", newshape, "(%d)" % realshape)
-    elif (len(polydict[realshape])) == 4:
-        points = square(p1, p2)
-        if(prints):print(" square ", newshape, "(%d)" % realshape)
-    else:
-        points = hexagon(p1, p2)
-        if(prints):print(" hexagon ", newshape, "(%d)" % realshape)
+    points = xgon(realshape)
+    if(prints):print(" %s "%xname[realshape], newshape, "(%d)" % realshape)
 
     shapespoly.append(RollyPoly(newshape, points, 1, p=len(polydict)))
     current = polydict[realshape]
@@ -234,7 +228,6 @@ else:
 	found (draw it differently)
 """
 
-
 def big_explore(tiling, rolling, p1, p2, case, face,prints=False):
     global big_orientation
     global starting_area
@@ -269,15 +262,7 @@ def exploreA(tiling, rolling, p1, p2, case, face, previouscase=None, previousfac
             previouscase = previouscase % len(tiling) - (previouscase - (previouscase % len(tiling)))
             # print("Had to fix this part for J8...")
     # else same shape
-    if (len(rolling[face]) == 3):
-        points = triangle(p1, p2)
-    # print("triangle de",face,"venant de",previousface)
-    elif (len(rolling[face]) == 4):
-        points = square(p1, p2)
-    # print("carré",face,"venant de",previousface)
-    else:
-        points = hexagon(p1, p2)
-    #if(prints):
+    points = xgon(len(rolling[face]),p1,p2)
     Draw.refresh()
     Draw.empty_cursor()
 

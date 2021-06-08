@@ -31,7 +31,7 @@ if(MODE=="pygame"):
         s.fill((0, 0, 0, 0))
         #print(color + (int(round(256*alpha)),))
         color_alpha = color + (int(alpha*255),)
-        #pygame.draw.polygon(s, color_alpha, [(p.x, p.y) for p in points])
+        pygame.draw.polygon(s, color_alpha, [(p.x, p.y) for p in points])
 
         if(outline):
             pygame.draw.aalines(s, (0,0,0), True, [(p.x, p.y) for p in points], outline)
