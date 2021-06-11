@@ -2,13 +2,16 @@ from sage.all import *
 import os
 import pprint
 from copy import deepcopy
+# sage -python findPolySymmetriesUsingSage.py
 
 from poly_dicts.johnson_nets import johnson_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.prism_nets import prism_nets
 
+MAX_ANTENNAE_AMOUNT = 3
+#None for all
 
-def modify_net(net,face,ori,maxantennae=None):
+def modify_net(net,face,ori):
     n = len(net)
     currentface = n
     sides = len(net[face])
@@ -18,10 +21,10 @@ def modify_net(net,face,ori,maxantennae=None):
     currentface+=1
     size+=1
     # print("Max antennae",maxantennae)
-    antennasides = size if maxantennae==None else maxantennae
+    antennasides = size if MAX_ANTENNAE_AMOUNT==None else (MAX_ANTENNAE_AMOUNT-1)
     # print("sides to mark:",antennasides,"/",sides)
 
-    for i in range(antennasides):
+    for i in range(min(sides,antennasides)):
         index = (i+ori)%sides
         f = net[face][index]
         for k in range(size):
@@ -32,7 +35,7 @@ def modify_net(net,face,ori,maxantennae=None):
         size+=1
 
 
-def generate_classes(net, antennacount=None):
+def generate_classes(net):
     classes = list()
     for face1 in sorted(net):
         classes.append([])
@@ -50,7 +53,7 @@ def generate_classes(net, antennacount=None):
         modified.append([])
         for ori1 in range(len(net[face1])):
             modified_net = deepcopy(net)
-            modify_net(modified_net,face1,ori1,antennacount)
+            modify_net(modified_net,face1,ori1)
             # modified[-1].append((modified_net))
             g = Graph(modified_net)
             modified[-1].append(g)
@@ -75,13 +78,13 @@ def generate_classes(net, antennacount=None):
 
 all_nets = {**johnson_nets, **plato_archi_nets, **prism_nets}
 
-def firstdraft(antennae = None):
+def firstdraft():
     all_symmetries = dict()
     for netname in all_nets:#["snub_cube"]:#['hexagonal_prism']:  # all_nets:
         print(netname)
         net: dict = all_nets[netname]
 
-        classes = generate_classes(net, antennae)
+        classes = generate_classes(net)
         clasp = pprint.pformat(classes)
         print(len(classes), "classes")
         print(clasp)
@@ -89,7 +92,7 @@ def firstdraft(antennae = None):
             os.mkdir("symmetry_classes/SAGE")
         except:
             pass
-        f = open("symmetry_classes/SAGE/" + netname + "_" + "SAGE" +"A%s"%antennae+ ".txt", "w")
+        f = open("symmetry_classes/SAGE/" + netname + "_" + "SAGE" +"A%s"%MAX_ANTENNAE_AMOUNT+ ".txt", "w")
         f.write(clasp)
         f.close()
         all_symmetries[netname] = classes
@@ -97,14 +100,17 @@ def firstdraft(antennae = None):
 
 
     all = pprint.pformat(all_symmetries)
-    f = open("symmetry_classes/" + "_" + "SAGE"  +"A%s"%antennae+ ".py", "w")
+    f = open("symmetry_classes/" + "_" + "SAGE"  +"A%s"%MAX_ANTENNAE_AMOUNT+ ".py", "w")
     f.write(all)
     f.close()
 
 if __name__ == "__main__":
-    for antenna in (0,1,2,None):
-        print("Antenna mode",antenna)
+    # for antenna in (0,1,2,None):
+    #     print("Antenna mode",antenna)
+    #     global MAX_ANTENNAE_AMOUNT
+    #     MAX_ANTENNAE_AMOUNT = antenna
         # input()
-        firstdraft(antenna)
-        print("Done with ",antenna,"antennae modifier")
+
+    firstdraft()
+    # print("Done with ",antenna,"antennae modifier")
     print("All done")
