@@ -34,12 +34,19 @@ LOAD_PROGRESS = True
 TAKE_PICTURES = False
 
 CHECK_UNUSED_FACES = False #Will disable symmetry optimisations
+CHECK_ALL_CELLS = False
 
 QUIT_PREVIEW_EARLY = True
 
 CHEAT_WINNING = False
 
 winning_pairs = {('3^6;3^2x4x3x4', 'j89'), ('3^6', 'j84'), ('3^6', 'j89'), ('3^2x4x3x4', 'j31'), ('(3^6;3^3x4^2)2', 'j87'), ('(3^6;3^3x4^2)2', 'j89'), ('3^6', 'j87'), ('3x4x6x4', 'j54'), ('(3^6;3^3x4^2)2', 'j50'), ('3^6', 'j13'), ('3^6;3^2x4x3x4', 'j87'), ('3^6;3^2x4x3x4', 'j50'), ('3^6', 'j51'), ('3^6', 'j50'), ('3^6', 'j11'), ('(3^6;3^3x4^2)1', 'j90'), ('3^2x4x3x4', 'j26'), ('3^3x4^2', 'j28'), ('(3^6;3^3x4^2)1', 'j14'), ('(3^6;3^4x6)1', 'j22'), ('(3^6;3^3x4^2)1', 'j10'), ('(3^6;3^4x6)2', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j85'), ('(3^6;3^3x4^2)1', 'j88'), ('3^6', 'octahedron'), ('(3^6;3^3x4^2)2', 'j86'), ('3^3x4^2', 'j27'), ('3x4x6x4', 'j56'), ('3^6;3^2x6^2', 'truncated_tetrahedron'), ('3^6', 'j86'), ('4^4', 'j8'), ('3^4x6;3^2x6^2', 'hexagonal_antiprism'), ('3^6;3^2x4x3x4', 'j86'), ('(3^3x4^2;3^2x4x3x4)1', 'j1'), ('(3^6;3^3x4^2)1', 'j16'), ('(3^6;3^3x4^2)1', 'j89'), ('3^3x4^2', 'square_antiprism'), ('4^4', 'j37'), ('3^2x4x3x4', 'j29'), ('(3^6;3^3x4^2)2', 'j90'), ('(3^6;3^3x4^2)1', 'j87'), ('3^6', 'j62'), ('3^6', 'j90'), ('(3^3x4^2;3^2x4x3x4)2', 'j26'), ('(3^6;3^3x4^2)2', 'j10'), ('3^6;3^2x4x3x4', 'j10'), ('3^6;3^2x4x3x4', 'j90'), ('4^4', 'cube'), ('(3^3x4^2;3^2x4x3x4)1', 'j27'), ('3^6', 'j10'), ('(3^6;3^3x4^2)1', 'j50'), ('3^3x4^2', 'j30'), ('(3^6;3^3x4^2)2', 'j85'), ('(3^6;3^3x4^2)2', 'j88'), ('3^6', 'j85'), ('3^6', 'j17'), ('3^2x4x3x4', 'j1'), ('3x6x3x6', 'j65'), ('3^6;3^2x4x3x4', 'j1'), ('3^6', 'j88'), ('3^6;3^2x4x3x4', 'j85'), ('3^6', 'tetrahedron'), ('(3^6;3^3x4^2)1', 'j15'), ('(3^6;3^4x6)1', 'hexagonal_antiprism'), ('3^6', 'icosahedron'), ('3^6', 'j12'), ('3^4x6', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j86')}
+
+#Modes
+#Roller : OPTIMISE_SYMMETRIES = True, CHECK_ALL_CELLS = False, SKIP_NOTFULL = True, CHECK_UNUSED_FACES = False, QUIT_PREVIEW_EARLY = True
+#Perfect Roller: OPTIMISE_SYMMETRIES = False, CHECK_ALL_CELLS = False, SKIP_NOTFULL = True, CHECK_UNUSED_FACES = True, QUIT_PREVIEW_EARLY = False
+#Visitor: OPTIMISE_SYMMETRIES = True, CHECK_ALL_CELLS = True, SKIP_NOTFULL = False, QUIT_PREVIEW_EARLY = False
+
 
 # QUIT_SEARCH_EARLY = False
 #
@@ -495,7 +502,8 @@ if __name__ == "__main__":
                     faceori.add(canon_fo(polyname,face,orientation))
                     # faceori.append((face,orientation))
             #Main loop
-            for case in tiling:
+            for case in (CHECK_ALL_CELLS and tiling or [0]):
+                #make an algo that chooses better the only tile
                 screenspace = None
                 for face,orientation in faceori:
                     counter+=1
