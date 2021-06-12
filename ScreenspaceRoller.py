@@ -166,8 +166,6 @@ def canon_fo(polyname,face,orientation):
     except:
         print("No symmetry info for this poly")
     return face, orientation
-#from findPolySymmetries import canon_face, canon_fo, generate_FFOO_sym, generate_face_sym
-import findPolySymmetries
 
 def cell_match(tiling, previous_case, newcaseid):
     return case_match(tiling, previous_case, newcaseid)
