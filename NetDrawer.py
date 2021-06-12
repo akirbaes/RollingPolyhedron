@@ -230,7 +230,7 @@ class Edge():
 
 
 if __name__ == "__main__":
-    for working_poly in ["j89","j90","j12","j13","j17","j51","j84"]:
+    for working_poly in ["icosahedron","j89","j90","j12","j13","j17","j51","j84"]:
         global polyname
         polyname = working_poly
         poly = polys[working_poly]
