@@ -3,6 +3,7 @@ import os
 import pprint
 from copy import deepcopy
 # sage -python findPolySymmetriesUsingSage.py
+SAVEGRAPHES = False
 
 from poly_dicts.johnson_nets import johnson_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
@@ -35,7 +36,7 @@ def modify_net(net,face,ori):
         size+=1
 
 
-def generate_classes(net):
+def generate_classes(net,netname):
     classes = list()
     for face1 in sorted(net):
         classes.append([])
@@ -57,8 +58,10 @@ def generate_classes(net):
             # modified[-1].append((modified_net))
             g = Graph(modified_net)
             modified[-1].append(g)
-            # p=g.plot()
-            # p.show()
+            if(SAVEGRAPHES):
+                p=g.plot()
+                # p.show()
+                p.save("symmetry_classes/"+netname+"/"+netname+"_"+str(face1)+"-"+str(ori1)+'.png')
 
     for face1 in sorted(net):
         for ori1 in range(len(net[face1])):
@@ -83,8 +86,14 @@ def firstdraft():
     for netname in all_nets:#["snub_cube"]:#['hexagonal_prism']:  # all_nets:
         print(netname)
         net: dict = all_nets[netname]
-
-        classes = generate_classes(net)
+        g = Graph(net)
+        if(SAVEGRAPHES):
+            p=g.plot()
+            try:os.mkdir("symmetry_classes/"+netname)
+            except:pass
+            p.save("symmetry_classes/"+netname+"/"+netname+'.png')
+        # input()
+        classes = generate_classes(net,netname)
         clasp = pprint.pformat(classes)
         print(len(classes), "classes")
         print(clasp)
