@@ -176,6 +176,11 @@ if(MODE=="pygame"):
         text = pygame.transform.smoothscale(text,(text.get_width()//2,text.get_height()//2))
         shapes.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
 
+    def check_one_key_input():
+        for e in pygame.event.get():
+            if e.type == pygame.KEYDOWN:
+                return e.key
+
     def wait_for_input():
         clock = pygame.time.Clock()
         running=True
