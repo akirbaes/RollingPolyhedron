@@ -24,21 +24,25 @@ from symmetry_classes.poly_symmetries import poly_symmetries
 #     print("ScreenspaceRoller.py ")
 #     sys.exit(2)
 
-PREVIEW = False
+PREVIEW = True
 GRADATION = True
-PREVIEWPERIODICITY=500
+PREVIEWPERIODICITY=1
 # SLOW=False
 OPTIMISE_SYMMETRIES = True
-SKIP_NOTFULL = True
-LOAD_PROGRESS = True
-TAKE_PICTURES = False
+SKIP_NOTFULL = False
+
+LOAD_PROGRESS = False
+TAKE_PICTURES = True
 
 CHECK_UNUSED_FACES = False #Will disable symmetry optimisations
 CHECK_ALL_CELLS = False
+# CHECK_ALL_FACEROT = False
 
-QUIT_PREVIEW_EARLY = True
+QUIT_PREVIEW_EARLY = False
 
 CHEAT_WINNING = False
+
+TESSELLATION_POLYHEDRON = True
 
 winning_pairs = {('3^6;3^2x4x3x4', 'j89'), ('3^6', 'j84'), ('3^6', 'j89'), ('3^2x4x3x4', 'j31'), ('(3^6;3^3x4^2)2', 'j87'), ('(3^6;3^3x4^2)2', 'j89'), ('3^6', 'j87'), ('3x4x6x4', 'j54'), ('(3^6;3^3x4^2)2', 'j50'), ('3^6', 'j13'), ('3^6;3^2x4x3x4', 'j87'), ('3^6;3^2x4x3x4', 'j50'), ('3^6', 'j51'), ('3^6', 'j50'), ('3^6', 'j11'), ('(3^6;3^3x4^2)1', 'j90'), ('3^2x4x3x4', 'j26'), ('3^3x4^2', 'j28'), ('(3^6;3^3x4^2)1', 'j14'), ('(3^6;3^4x6)1', 'j22'), ('(3^6;3^3x4^2)1', 'j10'), ('(3^6;3^4x6)2', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j85'), ('(3^6;3^3x4^2)1', 'j88'), ('3^6', 'octahedron'), ('(3^6;3^3x4^2)2', 'j86'), ('3^3x4^2', 'j27'), ('3x4x6x4', 'j56'), ('3^6;3^2x6^2', 'truncated_tetrahedron'), ('3^6', 'j86'), ('4^4', 'j8'), ('3^4x6;3^2x6^2', 'hexagonal_antiprism'), ('3^6;3^2x4x3x4', 'j86'), ('(3^3x4^2;3^2x4x3x4)1', 'j1'), ('(3^6;3^3x4^2)1', 'j16'), ('(3^6;3^3x4^2)1', 'j89'), ('3^3x4^2', 'square_antiprism'), ('4^4', 'j37'), ('3^2x4x3x4', 'j29'), ('(3^6;3^3x4^2)2', 'j90'), ('(3^6;3^3x4^2)1', 'j87'), ('3^6', 'j62'), ('3^6', 'j90'), ('(3^3x4^2;3^2x4x3x4)2', 'j26'), ('(3^6;3^3x4^2)2', 'j10'), ('3^6;3^2x4x3x4', 'j10'), ('3^6;3^2x4x3x4', 'j90'), ('4^4', 'cube'), ('(3^3x4^2;3^2x4x3x4)1', 'j27'), ('3^6', 'j10'), ('(3^6;3^3x4^2)1', 'j50'), ('3^3x4^2', 'j30'), ('(3^6;3^3x4^2)2', 'j85'), ('(3^6;3^3x4^2)2', 'j88'), ('3^6', 'j85'), ('3^6', 'j17'), ('3^2x4x3x4', 'j1'), ('3x6x3x6', 'j65'), ('3^6;3^2x4x3x4', 'j1'), ('3^6', 'j88'), ('3^6;3^2x4x3x4', 'j85'), ('3^6', 'tetrahedron'), ('(3^6;3^3x4^2)1', 'j15'), ('(3^6;3^4x6)1', 'hexagonal_antiprism'), ('3^6', 'icosahedron'), ('3^6', 'j12'), ('3^4x6', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j86')}
 
@@ -76,6 +80,13 @@ resume_counter = -1
 
 all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings}
 all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
+
+if(TESSELLATION_POLYHEDRON):
+    from poly_dicts.TessellationPolyhedronAndTilings import tessellation_polyhedrons, net_tessellations
+    all_tilings=net_tessellations
+    all_nets=tessellation_polyhedrons
+    from symmetry_classes.TessPolySymmetries import TessPoly as poly_symmetries
+
 
 #all_nets = {"testnet":{0:[3,4,5,6],3:[0,3,4],4:[0,3,4,5],5:[0,1,2,3,4],6:[0,9,9,9,9,9]}}
 
@@ -266,21 +277,23 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
     #mapping = map_screenspace(tiling, startcase, area, p1, p2, precision)
     "mapping= visited areas[center points: (polygon, cell number)]"
     visited_places = {coord: [] for coord in mapping.keys()}
-    max_visitable = sum((area2[0] < ccenter[0] < area2[2]) and (area2[1] < ccenter[1] < area2[3]) for ccenter in visited_places)
+    if(QUIT_PREVIEW_EARLY):
+        edgeadd = 0
+    else:
+        edgeadd = EDGESIZE/2
+    max_visitable = sum((area2[0]-edgeadd < ccenter[0] < area2[2]+edgeadd) and (area2[1]-edgeadd < ccenter[1] < area2[3]+edgeadd) for ccenter in visited_places)
     once = True
     while (visits):
         #print(len(visits))
-        if(QUIT_PREVIEW_EARLY):
-            edgeadd = 0
-        else:
-            edgeadd = EDGESIZE/2
         visited = sum(bool(visited_places[ccenter]) for ccenter in visited_places
             if ((area2[0]-edgeadd < ccenter[0] < area2[2]+edgeadd) and (area2[1]-edgeadd < ccenter[1] < area2[3]+edgeadd)))
         if(visited==max_visitable):
+            print("Visited max visitable space")
             break
         face, case, orientation, p1, p2 = visits.pop(0)
 
-
+        # print(len(net[face]),len(tiling[case]))
+        # print(net[face],tiling[case])
         if (len(net[face]) != len(tiling[case])):
         #     if(PREVIEW):
         #         # cface = xgon(len(net[face]), p1, p2)
@@ -308,8 +321,8 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
             # if (PREVIEW):
                 # screen.fill((255,255,255)
                 # drawtemp(cface,(0,255,0),2)
-                #drawdir(p1,p2)
-                #refresh()
+                # # drawdir(p1,p2)
+                # refresh()
                 # screen.blit(outlines, (0, 0))
                 # if(SLOW):
                 #     wait_for_input()
@@ -347,6 +360,8 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
         if(once):
             for index, nextcellid in enumerate(tiling[case]):
                 nextcell, id = nextcellid
+                # print(face,neighbours_faces)
+                # print(case,tiling[case])
                 nextface = neighbours_faces[index]  # aligned with cell
                 if(len(net[nextface])!=len(tiling[nextcell])):
                     continue
@@ -356,14 +371,25 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
                 case_shift = case_match(tiling,case,nextcellid)
                 # Create a stub nface at the edge of the current face
                 nextface_stub = xgon(len(net[nextface]), cface[(index + 1) % len(cface)], cface[index])
-
-                # Reorient it to fit the tile
                 pa, pb = nextface_stub[-case_shift], nextface_stub[(-case_shift + 1) % len(nextface_stub)]
-                visits.append((nextface, nextcell, -case_shift+face_shift, pa, pb))
+
+                visits.append((nextface, nextcell, -case_shift + face_shift, pa, pb))
+
+                # drawtemp(nextface_stub, (255, 255, 0), 10)
+                # refresh()
+                #
+                nextcenter = list(floatcenterpoint(nextface_stub))
+                nextcenter = int(round(nextcenter[0] / precision) * precision), int(round(nextcenter[1] / precision) * precision)
+                if(nextcenter in visited_places and len(visited_places[nextcenter])==0):
+                    drawtemp(nextface_stub, (255, 255, 0), 0)
+                    refresh()
+                #     # Reorient it to fit the tile
+                #     visits.insert(0,(nextface, nextcell, -case_shift+face_shift, pa, pb))
+                # else:
+                #     # Reorient it to fit the tile
+                #     visits.append((nextface, nextcell, -case_shift+face_shift, pa, pb))
 
 
-                # if(PREVIEW):
-                #     drawtemp(nextface_stub,(0,255,255),1)
                     #drawdir(pa,pb)
         # once=False
         # print(visits)
@@ -376,11 +402,12 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
 
         # if(PREVIEW and SLOW):
            #wait_for_input()
-
-
+    # print(visits)
+    # input("%i visits left"%len(visits))
 
     visited = sum(bool(visited_places[ccenter]) for ccenter in visited_places
-        if ((area2[0] < ccenter[0] < area2[2]) and (area2[1] < ccenter[1] < area2[3])))
+        if (((area2[0]-edgeadd < ccenter[0] < area2[2]+edgeadd) and (area2[1]-edgeadd < ccenter[1] < area2[3]+edgeadd))))
+        # if ((area2[0] < ccenter[0] < area2[2]) and (area2[1] < ccenter[1] < area2[3])))
     if(visited<max_visitable):
         #print("Could not visit everything: %s/%i"%(visited,max_visitable))
         if(visited>2):
@@ -434,7 +461,6 @@ if __name__ == "__main__":
     p1 = RollyPoint(xx, yy)
     p2 = RollyPoint(xx + 50, yy)
 
-
     for tilingname in all_tilings_names:
         if(LOAD_PROGRESS and progress_tiling!=None):
             if(progress_tiling!=tilingname):
@@ -443,8 +469,11 @@ if __name__ == "__main__":
                 progress_tiling=None
         #Skip to
         tiling = all_tilings[tilingname]
-
         for polyname in all_nets_names:
+            if (TESSELLATION_POLYHEDRON):
+                if(polyname!=tilingname):
+                    continue
+
             if(LOAD_PROGRESS and progress_poly!=None):
                 if(progress_poly!=polyname):
                     continue
@@ -503,7 +532,7 @@ if __name__ == "__main__":
             for case in (CHECK_ALL_CELLS and tiling or [0]):
                 #make an algo that chooses better the only tile
                 screenspace = None
-                for face,orientation in faceori:
+                for face,orientation in sorted(faceori):
                     counter+=1
                     if(LOAD_PROGRESS and progress_skip>0):
                         progress_skip-=1
@@ -518,14 +547,15 @@ if __name__ == "__main__":
                         continue
                     if(SKIP_NOTFULL and skip_pair):
                         continue
-                    if (PREVIEW):
-                        screen.blit(outlines,(0,0))
 
                     if(screenspace==None):
                         screenspace = map_screenspace(tiling, case, area, p1, p2, 7)
                         if (PREVIEW):
                             outlines.fill((255, 255, 255, 0))
                             draw_background(outlines, screenspace)
+                    if (PREVIEW):
+                        screen.fill((255,255,255))
+                        screen.blit(outlines,(0,0))
                     #------------Run this with custom values if you want to without FFOO and FaceSym-----------
                     #result, visits = (area_explore(tiling,net,case,face,orientation,FFOO=FFOO,FaceSym=FaceSym))
                     #------------------------------------------------------------------------------------------
