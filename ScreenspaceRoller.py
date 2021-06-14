@@ -5,7 +5,7 @@ from datetime import datetime
 def make_timestamp():
     return datetime.now().strftime("[%Hh%Mm%S]")
 from GeometryFunctions import *
-from GenPngScreenspaceRoller import draw_answer, draw_background, draw_polygon, wait_for_input, refresh
+from GenPngScreenspaceRoller import draw_answer, draw_background, draw_polygon, wait_for_input, refresh, draw_tiling
 from tiling_dicts.archimedean_tilings import archimedean_tilings
 from tiling_dicts.platonic_tilings import platonic_tilings
 from tiling_dicts.isogonal_tilings import biisogonal_tilings
@@ -26,7 +26,7 @@ from symmetry_classes.poly_symmetries import poly_symmetries
 
 PREVIEW = True
 GRADATION = True
-PREVIEWPERIODICITY=1
+PREVIEWPERIODICITY=100
 # SLOW=False
 OPTIMISE_SYMMETRIES = True
 SKIP_NOTFULL = False
@@ -606,6 +606,7 @@ if __name__ == "__main__":
                         if(visits and TAKE_PICTURES):
                             try:os.mkdir("exploration_results/%s_coverage/"%keyword)
                             except:pass
+                            draw_tiling(p1, p2, screen, case, 0, tiling, 1, [(255,255,0),(128,128,0)])
                             pygame.image.save(screen,"exploration_results/%s_coverage/"%keyword
                                               +tilingname+"@"+polyname+"@"+keyword
                                               +"@(%i,%i,%i)"%(case,face,orientation)+'.png')
