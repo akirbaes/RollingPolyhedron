@@ -18,15 +18,15 @@ from GeometryFunctions import *
 
 
 pp = pprint.PrettyPrinter(indent=4)
-WIDTH = 900
-HEIGHT = 900
+WIDTH = 1000
+HEIGHT = 1000
 EDGE_SIZE = 60
-p1 = RollyPoint(400, 400)
-p2 = RollyPoint(400 + EDGE_SIZE, 400)
+p1 = RollyPoint(450, 450)
+p2 = RollyPoint(450 + EDGE_SIZE, 450)
 depths = dict()
 
 current_facetype = 3
-facetypes = [3, 4, 6, 12]
+facetypes = [3, 4, 5, 6, 8, 12]
 
 all_objects = [] #all edges
 
@@ -214,7 +214,7 @@ class Edge():
     """Each edge of each polygon is an Edge object that turns into a face with children when deactivated"""
     depth = 0
     numbering = set()
-    shapes_functions = (None, None, None, triangle, square, None, hexagon, None, octagon, None, None, None, dodecagon)
+    shapes_functions = (None, None, None, triangle, square, pentagon, hexagon, None, octagon, None, None, None, dodecagon)
     select_neighbour = None
     cursors = list()
     closest = None
