@@ -129,8 +129,15 @@ def loop():
                 exit()
 
         refresh()
+
         if tiling_result and None not in (a for key in tiling_result for a in tiling_result[key]):
 
+            wipe_surface(2)
+            for edge in all_objects:
+                edge.draw()
+            # wipe_surface(0)
+            # wipe_surface(1)
+            refresh()
             all_neighbours_net = {k: [t[0] for t in v] for k, v in tiling_result.items()}
 
 
@@ -150,6 +157,7 @@ def loop():
             with open(file_name+".py","w") as f:
                 f.write(("poly['%s'] = \\\n"%basename)+pprint.pformat(all_neighbours_net,indent=4,sort_dicts=True))
 
+            pygame.image.save(screen, file_name+".png")
             """
             tiling_result_t = dict()
             for key in tiling_result:
