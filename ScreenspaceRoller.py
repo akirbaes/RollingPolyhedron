@@ -373,7 +373,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
                 nextface_stub = xgon(len(net[nextface]), cface[(index + 1) % len(cface)], cface[index])
                 pa, pb = nextface_stub[-case_shift], nextface_stub[(-case_shift + 1) % len(nextface_stub)]
 
-                visits.append((nextface, nextcell, -case_shift + face_shift, pa, pb))
+                # visits.append((nextface, nextcell, -case_shift + face_shift, pa, pb))
 
                 # drawtemp(nextface_stub, (255, 255, 0), 10)
                 # refresh()
@@ -381,8 +381,12 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
                 nextcenter = list(floatcenterpoint(nextface_stub))
                 nextcenter = int(round(nextcenter[0] / precision) * precision), int(round(nextcenter[1] / precision) * precision)
                 if(nextcenter in visited_places and len(visited_places[nextcenter])==0):
-                    drawtemp(nextface_stub, (255, 255, 0), 0)
-                    refresh()
+                    if(PREVIEW):
+                        drawtemp(nextface_stub, (255, 255, 0), 0)
+                        refresh()
+                    visits.insert(0, (nextface, nextcell, -case_shift + face_shift, pa, pb))
+                else:
+                    visits.append((nextface, nextcell, -case_shift + face_shift, pa, pb))
                 #     # Reorient it to fit the tile
                 #     visits.insert(0,(nextface, nextcell, -case_shift+face_shift, pa, pb))
                 # else:
@@ -565,6 +569,7 @@ if __name__ == "__main__":
 
                     # Ouptut result
                     if(PREVIEW):
+                        screen.blit(outlines,(0,0))
                         refresh()
 
                     if(result):
@@ -606,7 +611,7 @@ if __name__ == "__main__":
                         if(visits and TAKE_PICTURES):
                             try:os.mkdir("exploration_results/%s_coverage/"%keyword)
                             except:pass
-                            draw_tiling(p1, p2, screen, case, 0, tiling, 1, [(255,255,0),(128,128,0)])
+                            draw_tiling(p1, p2, screen, case, 0, tiling, 1, [(255,255,0),(0,0,255)])
                             pygame.image.save(screen,"exploration_results/%s_coverage/"%keyword
                                               +tilingname+"@"+polyname+"@"+keyword
                                               +"@(%i,%i,%i)"%(case,face,orientation)+'.png')
