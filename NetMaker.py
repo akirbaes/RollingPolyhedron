@@ -18,11 +18,11 @@ from GeometryFunctions import *
 
 
 pp = pprint.PrettyPrinter(indent=4)
-WIDTH = 800
-HEIGHT = 800
-EDGE_SIZE = 40
-p1 = RollyPoint(300, 300)
-p2 = RollyPoint(300 + EDGE_SIZE, 300)
+WIDTH = 900
+HEIGHT = 900
+EDGE_SIZE = 60
+p1 = RollyPoint(400, 400)
+p2 = RollyPoint(400 + EDGE_SIZE, 400)
 depths = dict()
 
 current_facetype = 3
@@ -133,10 +133,10 @@ def loop():
         if tiling_result and None not in (a for key in tiling_result for a in tiling_result[key]):
 
             wipe_surface(2)
+            wipe_surface(0)
+            wipe_surface(1)
             for edge in all_objects:
                 edge.draw()
-            # wipe_surface(0)
-            # wipe_surface(1)
             refresh()
             all_neighbours_net = {k: [t[0] for t in v] for k, v in tiling_result.items()}
 
@@ -336,8 +336,8 @@ class Edge():
                                    tuple(int(x) for x in self.p2.as_tuple()), 1)
             if self.is_neighbour() and not self.same_position(self.other):
                 center = centerpoint(self.points[:2])
-                pygame.draw.circle(get_surface(1), (255,160,160), center, EDGE_SIZE/8+1.5)
-                draw_text(1, str(self.other.parent.faceid), *center, (0, 0, 0), EDGE_SIZE / 2)
+                pygame.draw.circle(get_surface(1), (190,190,190), center, EDGE_SIZE/3/4+2)
+                draw_text(1, str(self.other.parent.faceid), *center, (0, 0, 0), EDGE_SIZE / 3)
                 #draw_polygon(1, self.points, (0, 0, 0), 0, 1)
                 # if(not self.same_position(self.other)):
                 #     draw_copy(self.points,self.other)
@@ -346,7 +346,7 @@ class Edge():
                 Edge.cursors.append(self)
         else:
             # surf = get_surface(Edge.depth)
-            draw_polygon(1, self.points, (255, 0, 0), 0.5+self.mouse_inside()/2, 0)
+            draw_polygon(1, self.points, (255, 0, 0), self.mouse_inside()/2, 0)
             draw_polygon(1, self.points, (0, 0, 0), 0, 1)
             # border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
             center = centerpoint(self.points)
