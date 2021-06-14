@@ -26,13 +26,15 @@ from symmetry_classes.poly_symmetries import poly_symmetries
 
 PREVIEW = True
 GRADATION = True
-PREVIEWPERIODICITY=100
+PREVIEWPERIODICITY=1000
 # SLOW=False
 OPTIMISE_SYMMETRIES = True
-SKIP_NOTFULL = False
+SKIP_NOTFULL = True
 
 LOAD_PROGRESS = False
 TAKE_PICTURES = True
+
+PICTURE_TRESHOLD = 0.3
 
 CHECK_UNUSED_FACES = False #Will disable symmetry optimisations
 CHECK_ALL_CELLS = False
@@ -41,8 +43,9 @@ CHECK_ALL_CELLS = False
 QUIT_PREVIEW_EARLY = False
 
 CHEAT_WINNING = False
+INSERT_FILL = True
 
-TESSELLATION_POLYHEDRON = True
+TESSELLATION_POLYHEDRON = False
 
 winning_pairs = {('3^6;3^2x4x3x4', 'j89'), ('3^6', 'j84'), ('3^6', 'j89'), ('3^2x4x3x4', 'j31'), ('(3^6;3^3x4^2)2', 'j87'), ('(3^6;3^3x4^2)2', 'j89'), ('3^6', 'j87'), ('3x4x6x4', 'j54'), ('(3^6;3^3x4^2)2', 'j50'), ('3^6', 'j13'), ('3^6;3^2x4x3x4', 'j87'), ('3^6;3^2x4x3x4', 'j50'), ('3^6', 'j51'), ('3^6', 'j50'), ('3^6', 'j11'), ('(3^6;3^3x4^2)1', 'j90'), ('3^2x4x3x4', 'j26'), ('3^3x4^2', 'j28'), ('(3^6;3^3x4^2)1', 'j14'), ('(3^6;3^4x6)1', 'j22'), ('(3^6;3^3x4^2)1', 'j10'), ('(3^6;3^4x6)2', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j85'), ('(3^6;3^3x4^2)1', 'j88'), ('3^6', 'octahedron'), ('(3^6;3^3x4^2)2', 'j86'), ('3^3x4^2', 'j27'), ('3x4x6x4', 'j56'), ('3^6;3^2x6^2', 'truncated_tetrahedron'), ('3^6', 'j86'), ('4^4', 'j8'), ('3^4x6;3^2x6^2', 'hexagonal_antiprism'), ('3^6;3^2x4x3x4', 'j86'), ('(3^3x4^2;3^2x4x3x4)1', 'j1'), ('(3^6;3^3x4^2)1', 'j16'), ('(3^6;3^3x4^2)1', 'j89'), ('3^3x4^2', 'square_antiprism'), ('4^4', 'j37'), ('3^2x4x3x4', 'j29'), ('(3^6;3^3x4^2)2', 'j90'), ('(3^6;3^3x4^2)1', 'j87'), ('3^6', 'j62'), ('3^6', 'j90'), ('(3^3x4^2;3^2x4x3x4)2', 'j26'), ('(3^6;3^3x4^2)2', 'j10'), ('3^6;3^2x4x3x4', 'j10'), ('3^6;3^2x4x3x4', 'j90'), ('4^4', 'cube'), ('(3^3x4^2;3^2x4x3x4)1', 'j27'), ('3^6', 'j10'), ('(3^6;3^3x4^2)1', 'j50'), ('3^3x4^2', 'j30'), ('(3^6;3^3x4^2)2', 'j85'), ('(3^6;3^3x4^2)2', 'j88'), ('3^6', 'j85'), ('3^6', 'j17'), ('3^2x4x3x4', 'j1'), ('3x6x3x6', 'j65'), ('3^6;3^2x4x3x4', 'j1'), ('3^6', 'j88'), ('3^6;3^2x4x3x4', 'j85'), ('3^6', 'tetrahedron'), ('(3^6;3^3x4^2)1', 'j15'), ('(3^6;3^4x6)1', 'hexagonal_antiprism'), ('3^6', 'icosahedron'), ('3^6', 'j12'), ('3^4x6', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j86')}
 
@@ -339,6 +342,15 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
             if(GRADATION):
                 grade = len(visited_places[ccenter])
                 color = (min(int(255/grade)+min(max(0,grade*32-255-128-10*32),128),255),min(255,max(0,grade*16-192-10*16-max(0,grade*2-70*2))),max(0,min(255,grade*12-10*12)-max(0,grade*3-40*3)))
+                colorlinks = [(256,0,-32),(-128,0,256),(0,256+64,128),(256,64,128),(256,256,0),(28,145,48)]
+                grade-=1
+                steps = 6+18*CHECK_UNUSED_FACES
+
+                delta = (grade%steps)/steps
+                gamma = 1-delta
+                c1 = int(grade//steps)%len(colorlinks)
+                c2 = (c1+1)%len(colorlinks)
+                color = tuple(min(255,max(0,int(value2*delta+value1*gamma))) for value1, value2 in zip(colorlinks[c1],colorlinks[c2]))
 
                 try:
                     drawtemp(cface,color)
@@ -382,9 +394,15 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
                 nextcenter = int(round(nextcenter[0] / precision) * precision), int(round(nextcenter[1] / precision) * precision)
                 if(nextcenter in visited_places and len(visited_places[nextcenter])==0):
                     if(PREVIEW):
-                        drawtemp(nextface_stub, (255, 255, 0), 0)
-                        refresh()
-                    visits.insert(0, (nextface, nextcell, -case_shift + face_shift, pa, pb))
+                        if(CHECK_UNUSED_FACES):
+                            drawtemp(nextface_stub, (0, 0, 0), 0)
+                        else:
+                            drawtemp(nextface_stub, (255, 255, 0), 0)
+                        #refresh() #wait for periodicity
+                    if(INSERT_FILL):
+                        visits.insert(0, (nextface, nextcell, -case_shift + face_shift, pa, pb))
+                    else:
+                        visits.append((nextface, nextcell, -case_shift + face_shift, pa, pb))
                 else:
                     visits.append((nextface, nextcell, -case_shift + face_shift, pa, pb))
                 #     # Reorient it to fit the tile
@@ -409,6 +427,9 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
     # print(visits)
     # input("%i visits left"%len(visits))
 
+    if(PREVIEW):
+        screen.blit(outlines, (0, 0))
+        refresh()
     visited = sum(bool(visited_places[ccenter]) for ccenter in visited_places
         if (((area2[0]-edgeadd < ccenter[0] < area2[2]+edgeadd) and (area2[1]-edgeadd < ccenter[1] < area2[3]+edgeadd))))
         # if ((area2[0] < ccenter[0] < area2[2]) and (area2[1] < ccenter[1] < area2[3])))
@@ -417,7 +438,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping, p
         if(visited>2):
             print("Could not visit everything: %s/%i"%(visited,max_visitable), "(c%i f%i o%i)"%(startcase,startface,startorientation))
             visited_places = {center for center,visitors in visited_places.items() if visitors}
-            return False, visited_places
+            return visited/max_visitable, visited_places
         #print("failure")
         return False, None
     else:
@@ -572,7 +593,7 @@ if __name__ == "__main__":
                         screen.blit(outlines,(0,0))
                         refresh()
 
-                    if(result):
+                    if(result==True):
                         if(SKIP_IF_SUCCESSFUL):
                             print("Skipping possible other positions in this pair")
                         outputfilename =filename
@@ -584,7 +605,7 @@ if __name__ == "__main__":
                     elif not (visits is None):
                         outputfilename = secondfilename
                         keyword = "partial"
-                    if(result):
+                    if(result==True):
                         out=""
                         out+=("-"*16+make_timestamp()+"Resume_counter: %i"%(counter)+"-"*16) + "\n"
                         out+=("Tiling: %s\nPolyhedron: %s"%(tilingname, polyname)) + "\n"
@@ -608,10 +629,10 @@ if __name__ == "__main__":
                         outputfile.close()
                     if(PREVIEW):
                         refresh()
-                        if(visits and TAKE_PICTURES):
+                        if(visits and TAKE_PICTURES and (result>=PICTURE_TRESHOLD)):
                             try:os.mkdir("exploration_results/%s_coverage/"%keyword)
                             except:pass
-                            draw_tiling(p1, p2, screen, case, 0, tiling, 1, [(255,255,0),(0,0,255)])
+                            draw_tiling(p1, p2, screen, case, 0, tiling, 1, [(0,255,0),(192,192,192)])
                             pygame.image.save(screen,"exploration_results/%s_coverage/"%keyword
                                               +tilingname+"@"+polyname+"@"+keyword
                                               +"@(%i,%i,%i)"%(case,face,orientation)+'.png')

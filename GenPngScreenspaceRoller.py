@@ -29,6 +29,7 @@ def draw_tiling(spa,spb,surface,startcell,startorientation,tiling:dict,iterlevel
         return visitedcoords
     # print(visitedcoords)
     tempsurf = pygame.Surface((surface.get_width(),surface.get_height()), pygame.SRCALPHA)
+    tempsurf2 = pygame.Surface((surface.get_width(),surface.get_height()), pygame.SRCALPHA)
     # print(itercolors)
     visitedcoords = visitedcoords[:] #copy
     try:
@@ -79,6 +80,7 @@ def draw_tiling(spa,spb,surface,startcell,startorientation,tiling:dict,iterlevel
                 insidecells.append((pa,pb,nextcell,0)) #oriented at zero!
             else:
                 # pygame.draw.aaline(tempsurf,color,extp1,extp2)
+                pygame.draw.line(tempsurf2,(0,0,0),convertToTuple(extp1),convertToTuple(extp2),width=5)
                 pygame.draw.line(tempsurf,color,convertToTuple(extp1),convertToTuple(extp2),width=3)
 
                 outsidecells.append((pa,pb,nextcell,0))
@@ -93,6 +95,7 @@ def draw_tiling(spa,spb,surface,startcell,startorientation,tiling:dict,iterlevel
                 v = draw_tiling(p1,p2,surface,cell,orientation,tiling,iterlevel-1,itercolors[:],visitedcoords)
                 visitedcoords.extend(v)
                 # print("outside",iterlevel,outsidecells)
+    surface.blit(tempsurf2,(0,0))
     surface.blit(tempsurf,(0,0))
     refresh()
     # input()
