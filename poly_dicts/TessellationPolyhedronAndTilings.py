@@ -583,3 +583,9 @@ net_tessellations = {
                        3: [(0, 0), (2, 3), (1, 1)]}
 }
 
+tesspoly_order = ['tetrahedron', 'cube', 'octahedron', 'icosahedron', 'hexagonal_antiprism', 'j1', 'j8', 'j10', 'j12', 'j13', 'j14', 'j15', 'j16', 'j17', 'j49', 'j50', 'j51', 'j84', 'j86', 'j87', 'j88', 'j89', 'j90']
+
+if __name__ == "__main__":
+    print(", ".join(tessellation_polyhedrons.keys()))
+    print(list(tessellation_polyhedrons.keys()))
+    

@@ -1,9 +1,20 @@
 # from main import *
+import os
+import traceback
+
 import DrawingFunctions as Draw
 from GeometryFunctions import *
 from PolyAndTessNets import *
-from time import sleep
+# from time import sleep
 import pprint
+from poly_dicts.TessellationPolyhedronAndTilings import tessellation_polyhedrons, net_tessellations, tesspoly_order
+for k in tesspoly_order:
+    p=len(net_tessellations[k])
+    for face,neighbours in net_tessellations[k].items():
+        for i in range(len(neighbours)):
+            neighbours[i] = neighbours[i][0]+p*neighbours[i][1]
+    print(net_tessellations[k])
+print(net_tessellations)
 
 pp = pprint.PrettyPrinter(indent=4)
 ext = 35
@@ -594,7 +605,7 @@ def explore_borders(tile, poly):
     return borders
 
 
-def explore_rotations(tile, poly):
+def explore_rotations(tile, poly,polyname):
     if DEBUG1 or DEBUG2 or DEBUG3 or 1: Draw.initialise_drawing(WIDTH, HEIGHT)
     if DEBUG1 or DEBUG2 or DEBUG3: Draw.empty_shapes()
     # Draw.polygon_shape((Point(0,0),Point(150,0),Point(150,150)), (255,0,0), alpha=1, outline=1)
@@ -856,7 +867,12 @@ def explore_rotations(tile, poly):
             ordered[index][index2] = ma[clas][clas2]
 
     print_matrix(ordered)
-    Draw.turn_into_image(ordered)
+    try:os.mkdir("CFO_ajdacency_matrixes/")
+    except:pass
+    try:os.mkdir("CFO_ajdacency_matrixes/tessellation_polyhedron/")
+    except:pass
+
+    Draw.turn_into_image(ordered,"CFO_ajdacency_matrixes/tessellation_polyhedron/"+polyname+".png")
     # pp.pprint(classes)
     # explored_classes = list()
     """"
@@ -875,11 +891,17 @@ def explore_rotations(tile, poly):
                 #for clas in classes:
     """
 
-    Draw.wait_for_input()
+    # Draw.wait_for_input()
 
-
+tesspoly_order = ['tetrahedron', 'cube', 'octahedron', 'icosahedron', 'j1', 'j8', 'j10', 'j12', 'j13', 'j14', 'j15', 'j16', 'j17', 'j49', 'j50', 'j51', 'j84', 'j86', 'j87', 'j88', 'j89', 'j90', 'hexagonal_antiprism']
 if __name__ == "__main__":
-    explore_rotations(nets["octahedron"], polys["octahedron"])
+    for polyname in tesspoly_order:
+        print(polyname)
+        try:explore_rotations(net_tessellations[polyname], tessellation_polyhedrons[polyname], polyname)
+        except Exception as e:
+            traceback.print_exc()
+        # explore_rotations(nets[polyname], polys[polyname], polyname)
+    # explore_rotations(nets["octahedron"], polys["octahedron"], polyname)
     # explore_rotations(nets["tetrahedron"],polys["tetrahedron"])
     # explore_rotations(nets["j1"],polys["j1"])
     #explore_rotations(nets["octahedron"], polys["octahedron"])
