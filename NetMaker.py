@@ -1,12 +1,11 @@
-"""Create a tiling manually based on an image and export it as a dict
+"""Create a net manually based on an image and export it as a dict
 Mousewheel to change shape
 Left click to add a face
 Right click on a face to remove it and its children
 Right click on an edge to link it to another edge
+Space to link all very close edges (centers closer than EDGESIZE/2)
 Once all edges are linked, it will prompt you to save the net under a name."""
 
-# to work on to create a tiling creation software
-# might have some useless functions copied from NetDrawer
 import os
 import pprint
 import tkinter
@@ -120,6 +119,13 @@ def loop():
                     distances = [distance(centerpoint((edge.p1,edge.p2)), pygame.mouse.get_pos()) for edge in mouse_right_triggers]
                     mouse_right_triggers[distances.index(min(distances))].mouse_right_click()
                     tiling_result=get_tiling()
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
+                for edge in all_objects:
+                    if(edge.active and not edge.is_neighbour()):
+                        for edge2 in all_objects:
+                            if (edge2!=edge) and edge2.active and not edge2.is_neighbour():
+                                if(distance(centerpoint((edge.p1,edge.p2)),centerpoint((edge2.p1,edge2.p2)))<EDGE_SIZE/2):
+                                    edge.set_link(edge2)
             if e.type == pygame.KEYDOWN and e.key == pygame.K_RETURN:
                 all_objects = []
                 running = False
@@ -328,7 +334,7 @@ class Edge():
     def draw(self):
         #Draw one edge/face
         if self.active:
-            surf = get_surface(Edge.depth)
+            surf = get_surface(0)
             pygame.draw.circle(surf, (0, 0, 0), tuple(int(x) for x in self.p1.as_tuple()), 2)
             pygame.draw.circle(surf, (0, 0, 0), tuple(int(x) for x in self.p2.as_tuple()), 2)
             pygame.draw.line(surf, (0, 0, 0),
@@ -336,8 +342,8 @@ class Edge():
                                    tuple(int(x) for x in self.p2.as_tuple()), 1)
             if self.is_neighbour() and not self.same_position(self.other):
                 center = centerpoint(self.points[:2])
-                pygame.draw.circle(get_surface(1), (190,190,190), center, EDGE_SIZE/3/4+2)
-                draw_text(1, str(self.other.parent.faceid), *center, (0, 0, 0), EDGE_SIZE / 3)
+                pygame.draw.circle(get_surface(0), (190,190,190), center, EDGE_SIZE/3/4+2)
+                draw_text(0, str(self.other.parent.faceid), *center, (0, 0, 0), EDGE_SIZE / 3)
                 #draw_polygon(1, self.points, (0, 0, 0), 0, 1)
                 # if(not self.same_position(self.other)):
                 #     draw_copy(self.points,self.other)
@@ -346,8 +352,8 @@ class Edge():
                 Edge.cursors.append(self)
         else:
             # surf = get_surface(Edge.depth)
-            draw_polygon(1, self.points, (255, 0, 0), self.mouse_inside()/2, 0)
-            draw_polygon(1, self.points, (0, 0, 0), 0, 1)
+            draw_polygon(0, self.points, (255, 0, 0), self.mouse_inside()/2, 0)
+            draw_polygon(0, self.points, (0, 0, 0), 0, 1)
             # border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
             center = centerpoint(self.points)
 
@@ -355,32 +361,38 @@ class Edge():
             # pygame.draw.line(surf, (250, 250, 250,255), border, center, 3)
 
             if (self.faceid != None):
-                draw_text(1, str(self.faceid), *center, (0, 0, 0), EDGE_SIZE / 2)
+                draw_text(0, str(self.faceid), *center, (0, 0, 0), EDGE_SIZE / 2)
 
     def draw_cursor(self):
         #Draw the cursor (mouse reaction) to one edge/face
         surf = get_surface(2)
         if (self.active):
             if not self.is_neighbour():  # self.face1 not in visitedfaces:
+                #green line
                 pygame.draw.line(surf, (0, 255, 0), tuple(int(x) for x in self.p1.as_tuple()),
                                  tuple(int(x) for x in self.p2.as_tuple()), 1)
                 if(selected_edge==self):
+                    #green transparent cursor (right selected)
                     pygame.draw.polygon(surf, (0, 180, 0, 128), [(int(p.x), int(p.y)) for p in self.points])
                 elif (self.mouse_inside() and self.is_closest_cursor()):
+                    #blue transparent cursor (hover)
                     pygame.draw.polygon(surf, (0, 128, 255, 128), [(int(p.x), int(p.y)) for p in self.points])
                     center = centerpoint(self.points)
                     border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
-                    # pygame.draw.line(surf, (250, 250, 250), border, center, 3)
-                    # draw_text(2,str(self.faceid),*center,(0,0,0),EDGE_SIZE/2)
+                    # pygame.draw.line(surf, (250, 250, 250), border, center, 3) #line to previous
+                    # draw_text(2,str(self.faceid),*center,(0,0,0),EDGE_SIZE/2) #face=None
                 else:
-                    center = centerpoint(self.points)
-                    border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
+                    pass
+                    #grey presence - undone because too busy
+                    # center = centerpoint(self.points)
+                    # border = centerpoint((self.p1.as_tuple(), self.p2.as_tuple()))
                     # pygame.draw.line(surf, (250, 250, 250), border, center, 3)
                     # if(self.faceid!=None):
                     #    draw_text(2,str(self.faceid),*center,(192,192,192),EDGE_SIZE/2)
-                    draw_polygon(1, self.points, (0, 0, 0), 0.1, 0)
+                    # draw_polygon(2, self.points, (200, 200, 200), 1, 1)
                     # pygame.draw.polygon(surf, (0, 0, 0, 16), [(p.x, p.y) for p in self.points])
             elif(self.mouse_inside() and self.is_closest_cursor()):
+                    #red overlay when above
                     pygame.draw.polygon(surf, (255, 0, 0, 32), [(int(p.x), int(p.y)) for p in self.points])
             # else:
             #    pygame.draw.line(surf, (0, 0, 0), self.p1.as_tuple(), self.p2.as_tuple(), 1)
