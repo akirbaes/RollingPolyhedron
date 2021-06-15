@@ -17,15 +17,16 @@ from GeometryFunctions import *
 
 
 pp = pprint.PrettyPrinter(indent=4)
-WIDTH = 1000
+WIDTH = 1800
 HEIGHT = 1000
 EDGE_SIZE = 60
-p1 = RollyPoint(450, 450)
-p2 = RollyPoint(450 + EDGE_SIZE, 450)
+
+p1 = RollyPoint(WIDTH/2-EDGE_SIZE, HEIGHT/2-EDGE_SIZE)
+p2 = RollyPoint(WIDTH/2, HEIGHT/2-EDGE_SIZE)
 depths = dict()
 
 current_facetype = 3
-facetypes = [3, 4, 5, 6, 8, 12]
+facetypes = [3, 4, 5, 6, 8, 10, 12]
 
 all_objects = [] #all edges
 
@@ -103,22 +104,30 @@ def loop():
                 elif (e.button == 5):
                     current_facetype = facetypes[facetypes.index(current_facetype) - 1]
                     # wheel down
-                mouse_right_triggers = list()
+                mouse_click_triggers = list()
                 for edge in all_objects:
                     edge.polysize = current_facetype
                     if(edge.active):edge.update_shape()
                     if(edge.mouse_inside()):
                         if (e.button == 1):
-                            if(edge.mouse_click()):
-                                tiling_result=get_tiling()
-                            break
+                            #left click
+                            mouse_click_triggers.append(edge)
                         elif (e.button == 3):
-                            mouse_right_triggers.append(edge)
-                if(mouse_right_triggers):
+                            #right click
+                            mouse_click_triggers.append(edge)
+                if(mouse_click_triggers):
                     #the issue is that a lot overlap
-                    distances = [distance(centerpoint((edge.p1,edge.p2)), pygame.mouse.get_pos()) for edge in mouse_right_triggers]
-                    mouse_right_triggers[distances.index(min(distances))].mouse_right_click()
-                    tiling_result=get_tiling()
+                    distances = [distance(centerpoint((edge.p1,edge.p2)), pygame.mouse.get_pos()) for edge in mouse_click_triggers]
+                    closest = mouse_click_triggers[distances.index(min(distances))]
+                    if(e.button==1):
+                        print("Click on edge",closest)
+                        if (closest.mouse_click()):
+                            print("Did it")
+                            tiling_result = get_tiling()
+                    elif e.button==3:
+                        closest.mouse_right_click()
+                        tiling_result=get_tiling()
+
             if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
                 for edge in all_objects:
                     if(edge.active and not edge.is_neighbour()):
@@ -220,7 +229,7 @@ class Edge():
     """Each edge of each polygon is an Edge object that turns into a face with children when deactivated"""
     depth = 0
     numbering = set()
-    shapes_functions = (None, None, None, triangle, square, pentagon, hexagon, None, octagon, None, None, None, dodecagon)
+    shapes_functions = (None, None, None, triangle, square, pentagon, hexagon, None, octagon, None, decagon, None, dodecagon)
     select_neighbour = None
     cursors = list()
     closest = None
@@ -406,6 +415,9 @@ class Edge():
         global selected_edge
         selected_edge = None
 
+        print(pygame.mouse.get_pos())
+        print(self.points)
+        print(self.mouse_inside() , self.active , not self.is_neighbour())
         if (self.mouse_inside() and self.active and not self.is_neighbour()):  # and self.face1 not in visitedfaces):
             self.active = False
             self.faceid = self.get_a_faceid()
@@ -433,7 +445,7 @@ class Edge():
         elif (self.mouse_inside()) and self.active and len(all_objects)>1:
             # self.remove_traces()
             if(self.is_neighbour()):
-                if(self.same_position(self.other)):
+                if(self.same_position(self.other) and self!=self.other):
                     try:self.other.parent.remove_traces()
                     except:pass
                 else:
