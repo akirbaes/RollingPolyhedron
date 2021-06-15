@@ -3,3 +3,5 @@
 __pycache__
 *.gif
 venv/
+.archives
+exploration_results*

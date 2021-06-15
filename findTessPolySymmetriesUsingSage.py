@@ -5,9 +5,7 @@ from copy import deepcopy
 # sage -python findPolySymmetriesUsingSage.py
 SAVEGRAPHES = False
 
-from poly_dicts.johnson_nets import johnson_nets
-from poly_dicts.plato_archi_nets import plato_archi_nets
-from poly_dicts.prism_nets import prism_nets
+from poly_dicts.TessellationPolyhedronAndTilings import tessellation_polyhedrons
 
 MAX_ANTENNAE_AMOUNT = 3
 #None for all
@@ -36,7 +34,7 @@ def modify_net(net,face,ori):
         size+=1
 
 
-def generate_classes(net,netname):
+def generate_classes(net,netname,foldername):
     classes = list()
     for face1 in sorted(net):
         classes.append([])
@@ -61,7 +59,7 @@ def generate_classes(net,netname):
             if(SAVEGRAPHES):
                 p=g.plot()
                 # p.show()
-                p.save("symmetry_classes/"+netname+"/"+netname+"_"+str(face1)+"-"+str(ori1)+'.png')
+                p.save(foldername+netname+"/"+netname+"_"+str(face1)+"-"+str(ori1)+'.png')
 
     for face1 in sorted(net):
         for ori1 in range(len(net[face1])):
@@ -79,9 +77,13 @@ def generate_classes(net,netname):
 
 
 
-all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
+all_nets = {**tessellation_polyhedrons}
 
 def firstdraft():
+    identifier = "TessPoly"
+    output_foldername = "symmetry_classes/%s/"%identifier
+    try:os.mkdir(output_foldername)
+    except:pass
     all_symmetries = dict()
     for netname in all_nets:#["snub_cube"]:#['hexagonal_prism']:  # all_nets:
         print(netname)
@@ -89,28 +91,28 @@ def firstdraft():
         g = Graph(net)
         if(SAVEGRAPHES):
             p=g.plot()
-            try:os.mkdir("symmetry_classes/"+netname)
+            try:os.mkdir(output_foldername+netname)
             except:pass
-            p.save("symmetry_classes/"+netname+"/"+netname+'.png')
+            p.save(output_foldername+netname+"/"+netname+'.png')
         # input()
-        classes = generate_classes(net,netname)
+        classes = generate_classes(net,netname,foldername = output_foldername)
         clasp = pprint.pformat(classes)
         print(len(classes), "classes")
         print(clasp)
-        # try:
-            # os.mkdir("symmetry_classes/SAGE")
-        # except:
-            # pass
-        # f = open("symmetry_classes/SAGE/" + netname + "_" + "SAGE" +"A%s"%MAX_ANTENNAE_AMOUNT+ ".txt", "w")
-        # f.write(clasp)
-        # f.close()
+        try:
+            os.mkdir(output_foldername+"SAGE/")
+        except:
+            pass
+        f = open(output_foldername+"SAGE/" + netname + "_" + "SAGE" +"A%s"%MAX_ANTENNAE_AMOUNT+ ".txt", "w")
+        f.write(clasp)
+        f.close()
         all_symmetries[netname] = classes
 
 
 
     all = pprint.pformat(all_symmetries)
-    f = open("symmetry_classes/" + "_" + "SAGE"  +"A%s"%MAX_ANTENNAE_AMOUNT+ ".py", "w")
-    f.write(all)
+    f = open(output_foldername + "TessPoly_"+"A%s"%(MAX_ANTENNAE_AMOUNT-1)+ ".py", "w")
+    f.write(identifier+" = {\n "+all[1:-1]+"\n}\n")
     f.close()
 
 if __name__ == "__main__":

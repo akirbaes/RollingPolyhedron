@@ -17,7 +17,7 @@ from GeometryFunctions import *
 
 
 pp = pprint.PrettyPrinter(indent=4)
-WIDTH = 1800
+WIDTH = 1000
 HEIGHT = 1000
 EDGE_SIZE = 60
 
@@ -29,6 +29,9 @@ current_facetype = 3
 facetypes = [3, 4, 5, 6, 8, 10, 12]
 
 all_objects = [] #all edges
+
+OFFSETX = 0
+OFFSETY = 0
 
 selected_edge = None
 copy_change = "update"
@@ -56,7 +59,7 @@ def initialise_drawing():
 def refresh():
     screen.fill((255, 255, 255))
     for surf in get_all_depths():
-        screen.blit(surf, (0, 0))
+        screen.blit(surf, (OFFSETX, OFFSETY))
     pygame.display.update()
 
 ###Drawing functions
