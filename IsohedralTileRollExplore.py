@@ -895,11 +895,15 @@ def explore_rotations(tile, poly,polyname):
 
 tesspoly_order = ['tetrahedron', 'cube', 'octahedron', 'icosahedron', 'j1', 'j8', 'j10', 'j12', 'j13', 'j14', 'j15', 'j16', 'j17', 'j49', 'j50', 'j51', 'j84', 'j86', 'j87', 'j88', 'j89', 'j90', 'hexagonal_antiprism']
 if __name__ == "__main__":
+    erratum = list()
     for polyname in tesspoly_order:
         print(polyname)
         try:explore_rotations(net_tessellations[polyname], tessellation_polyhedrons[polyname], polyname)
         except Exception as e:
             traceback.print_exc()
+            erratum.append(polyname)
+    print("The following could not work:")
+    print(erratum)
         # explore_rotations(nets[polyname], polys[polyname], polyname)
     # explore_rotations(nets["octahedron"], polys["octahedron"], polyname)
     # explore_rotations(nets["tetrahedron"],polys["tetrahedron"])
