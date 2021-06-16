@@ -37,7 +37,7 @@ output = "#|Tiling|Perfect rollers|Partial rollers|\n"
 output+= "-|------|---------------|---------------|\n"
 
 for category, tilings in categories.items():
-    output += category + "\n"
+    output += "||"+category + "\n"
     for tiling_url in tilings:
         index = tiling_urls.index(tiling_url)
         tiling_name = ordered_tilings[index]

@@ -183,3 +183,4 @@ prism_nets['dodecagonal_antiprism'] = \
 
 if __name__ == "__main__":
     print(", ".join(prism_nets.keys()))
+    print(len(prism_nets))

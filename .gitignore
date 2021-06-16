@@ -5,3 +5,5 @@ __pycache__
 venv/
 .archives
 exploration_results*
+.zip
+*Imgur Album*
