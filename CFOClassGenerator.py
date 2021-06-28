@@ -3,11 +3,14 @@ bits = " ▘▝▀▖▌▞▛▗▚▐▜▄▙▟█"
 def prettyprint_adjacency(matrix):
     print("\n".join(["".join([it and "X" or " " for it in line]) for line in matrix]))
 
-def prettierformat_adjacency(matrix):
+def prettierformat_adjacency(matrix, borders = True):
     w = len(matrix[0])
     h = len(matrix)
     chars = ""
+    if(borders):
+        chars = "┏"+"━"*(w//2)+"┓\n"
     for j in range(0, h, 2):
+        if(borders):chars+= "┃"
         for i in range(0, w, 2):
             number = matrix[i][j]
             try:
@@ -23,7 +26,9 @@ def prettierformat_adjacency(matrix):
             except:
                 pass
             chars += bits[number]
-        chars += "\n"
+        if(borders):chars += "┃"
+        chars+="\n"
+    if(borders):chars+="┗"+"━"*(w//2)+"┛\n"
     return chars[:-1]
 
 def prettierprint_adjacency(matrix):
@@ -42,7 +47,7 @@ def prettierprint_FFOOmatrix(FFOO,borders = True):
             outlines = ["" for line in range(len(line[0])//2)]
         for block in line:
             # prettierprint_adjacency(block)
-            blocklines = prettierformat_adjacency(block).split("\n")
+            blocklines = prettierformat_adjacency(block, borders=False).split("\n")
             for i, seg in enumerate(blocklines):
                 if(borders):
                     outlines[i]=outlines[i]+seg+"┃"
@@ -121,11 +126,10 @@ def explore_inside(tile, poly, polyname, canon_fo=None):
                                 if (newcase, newface, neworientation) not in current_class:
                                     to_explore.add((newcase, newface, neworientation))
                     classes.append(current_class)
-    print(classes)
     return classes
 
 
-def explore_borders(tile, poly):
+def explore_borders(tile, poly, canon_fo):
     borders = dict()
     for case in tile:
         for i, newcaseid in enumerate(tile[case]):
@@ -133,13 +137,15 @@ def explore_borders(tile, poly):
             if newid!=0  or case == newcase:
                 ###For every case pairs at the border
                 startpair = (case, newcase)
-                startsides = len(poly[case])
+                startsides = len(tile[case])
                 nextcases = tile[newcase]
                 nextsides = len(nextcases)
                 # borders[startpair]=dict()
                 for face in poly:
                     if len(tile[case]) == len(poly[face]):
                         for orientation in range(len(poly[face])):
+                            if(canon_fo and (face,orientation)!=canon_fo(face,orientation)):
+                                continue
                             # For  every (C)FO
                             newface = poly[face][(orientation + i) % startsides]
                             nextfaces = poly[newface]
@@ -150,15 +156,30 @@ def explore_borders(tile, poly):
                                 # borders.setdefault((case,face,orientation),set())
                                 borders.setdefault((case, face, orientation), dict())
                                 # borders[(case,face,orientation)].add((newcase%len(tile),newface,neworientation))
+                                if(canon_fo):
+                                    newface,neworientation = canon_fo(newface,neworientation)
                                 borders[(case, face, orientation)][startpair] = (
                                     newcase, newface, neworientation)
     return borders
 
+def add_matr(ma1, ma2):
+    m = len(ma1[0])
+    p = len(ma2)
+    ma3 = [[ma1[i][j] or ma2[i][j] for i in range(m)] for j in range(p)]
+    return ma3
+
+def mul_matr(ma1, ma2):
+    m = len(ma1[0])
+    p = len(ma2)
+    n = len(ma1)  # and len(ma2[0])
+    ma3 = [[bool(sum((ma1[i][k] * ma2[k][j] for k in range(n)))) for i in range(m)] for j in range(p)]
+    return ma3
+
 from pprint import pprint
 
-def CFO_class_adjacency(start_cfo, tile,poly,polyname,canon_fo):
-    classes = explore_inside(tile,poly,polyname,canon_fo)
-    transformations = explore_borders(tile, poly)
+def CFO_class_adjacency(start_cfo, tile,poly,polyname, canon_fo):
+    classes = explore_inside(tile,poly,polyname, canon_fo)
+    transformations = explore_borders(tile, poly, canon_fo)
     borders = set(transformations.keys())
 
     def class_index(cfo):
@@ -167,8 +188,10 @@ def CFO_class_adjacency(start_cfo, tile,poly,polyname,canon_fo):
                 return i
     initial_class = class_index(start_cfo)
 
-    print("Classes:")
+    print("Internal Classes:")
     pprint(classes)
+    print("Borders:")
+    print(transformations)
 
 
     class_transfo = [[False for clas in classes] for clas in classes]
@@ -177,7 +200,7 @@ def CFO_class_adjacency(start_cfo, tile,poly,polyname,canon_fo):
         for bordercase in transformations[cfo]:
             #coordinate = neighbour_coord[bordercase]
             cfo_arrival = transformations[cfo][bordercase]
-            print(cfo,cfo_arrival,flush=True)
+            #print(cfo,cfo_arrival,flush=True)
             class_end = class_index(cfo_arrival)
             # print(transformations[cfo][bordercase])
             # print(cfo,cfo_arrival)
@@ -185,18 +208,94 @@ def CFO_class_adjacency(start_cfo, tile,poly,polyname,canon_fo):
             #     print("C1,C2,coord", class_start, class_end, coordinate)
             #     class_transfo[class_start][class_end].append(coordinate)
             class_transfo[class_start][class_end]=True
-    print("Class transformations:")
 
+    print("Class transformations:")
     prettierprint_adjacency(class_transfo)
+
+
+
+
+
+
+
+
+    all_classes = set(range(len(classes)))
+    all_explored = list()
+    explore = [initial_class]
+    explored = [initial_class]
+    while all_classes:
+        # print(all_classes)
+        while explore:
+            new = explore.pop()
+            for next, elem in enumerate(class_transfo[new]):
+                if elem and not (next in explored):
+                    explore.append(next)
+                    explored.append(next)
+        all_classes = all_classes.difference(set(explored))
+        all_explored.append(explored)
+        if all_classes:
+            explore = [list(all_classes).pop()]
+            explored = [explore[0]]
+
+    print()
+    print("Classes:", len(classes))
+    print("Reachable classes from initial:", len(all_explored[0]))
+    print(all_explored[0])
+    print("Reachability groups:", len(all_explored))
+    print("Their sizes:")
+    print(", ".join(str(len(e)) for e in all_explored if len(e) > 1))
+    print("And", sum(1 for e in all_explored if len(e) == 1), "of size 1")
+
+
+
+    ma = class_transfo
+    size = len(classes)
+
+    for i in range(size):
+        print("Step", i)
+        ma2 = mul_matr(ma, ma)
+        if ma2 == ma:
+            break
+        ma = add_matr(ma2, ma)
+    print("Full form:")
+    prettierprint_adjacency(ma)
+
+    for y, line in enumerate(ma):
+        for x, elem in enumerate(ma):
+            c = ma[y][x]
+            if c:  # or x==y):
+                for index, group in enumerate(all_explored):
+                    # print(x,y,group,x in group or y in group)
+                    if x in group or y in group:
+                        c = index + 1
+                        if len(group) == 1:
+                            c = -1
+            ma[y][x] = c
+
+    print(all_explored)
+    explore_order = list()
+    for x in all_explored:
+        explore_order.extend(x)
+
+    ordered = [[0 for i in range(size)] for j in range(size)]
+    for index, clas in enumerate(explore_order):
+        for index2, clas2 in enumerate(explore_order):
+            ordered[index][index2] = ma[clas][clas2]
+    print(ordered)
+    prettierprint_adjacency(ordered)
+
+
 
 
 if __name__ == "__main__":
     from tiling_dicts.archimedean_tilings import archimedean_tilings
     from tiling_dicts.platonic_tilings import platonic_tilings
+    from tiling_dicts.isogonal_tilings import biisogonal_tilings
     from poly_dicts.plato_archi_nets import plato_archi_nets
     from poly_dicts.johnson_nets import johnson_nets
     tiling = platonic_tilings['4^4']
-    polyname = "j8"
+    tiling = biisogonal_tilings['3^6;3^2x4x3x4']#'4^4']
+    polyname = "j1"##"j8"
     net = johnson_nets[polyname]
 
     from symmetry_classes.poly_symmetries import poly_symmetries
