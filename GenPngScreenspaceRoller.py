@@ -106,8 +106,9 @@ def draw_tiling(spa,spb,surface,startcell,startorientation,tiling:dict,iterlevel
 
 
 
-def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilingname,polyname):
-    unusedfaces = unusedfacesdict.get((tilingname,polyname),None) or []
+def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilingname,polyname,unusedfaces = None):
+    if(unusedfaces==None):
+        unusedfaces = unusedfacesdict.get((tilingname,polyname),None) or []
     visited_faces = list()
     visits = [(startface,startorientation,p1,p2)]
 
@@ -147,7 +148,10 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilin
             visits.insert(0,(nextface,0,pa,pb))
 
 def draw_background(surf,grid):
-    for points, cell in grid.values():
+    for data in grid.values():
+        points = data[0]
+        #cell = data[1]
+        #distance = data[2] #not always available, distance from center
         # print(points)
         pygame.draw.polygon(surf, (0,0,0), convertToTuples(points), 2)
 
@@ -180,7 +184,7 @@ def refresh():
         if e.type == pygame.QUIT:
             exit()
 
-def draw_answer(filename,tilingname,polyname,visits,grid,polyhedron,p1,p2,startface,startorientation,w,h):
+def draw_answer(filename,tilingname,polyname,visits,grid,polyhedron,p1,p2,startface,startorientation,w,h,unusedfaces):
     #no need for startcase because grid and p1,p2 is enough
     surf = pygame.Surface((w,h))
     surf.fill((255,255,255))
@@ -191,7 +195,7 @@ def draw_answer(filename,tilingname,polyname,visits,grid,polyhedron,p1,p2,startf
     surface2.set_alpha(100)
 
     pygame.draw.polygon(surf, (255,255,0), convertToTuples(face), 0)
-    draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilingname, polyname)
+    draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilingname, polyname,unusedfaces)
 
     surface2.set_alpha(255)
     text = pygame.font.SysFont(None, 30).render(tilingname+" with "+polyname, True, (0, 0, 0))
