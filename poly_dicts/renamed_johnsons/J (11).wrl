@@ -1,0 +1,76 @@
+#VRML V2.0 utf8
+WorldInfo{
+	title "gyroelongated pentagonal pyramid (J11)(#55)"
+	info[
+	"Author: Vladimir Bulatov - bulatov@dots.physics.orst.edu"
+	]
+}
+NavigationInfo {
+	type "EXAMINE"
+	headlight TRUE
+}
+Transform {
+  children[
+  Shape{
+    geometry IndexedFaceSet{
+      solid FALSE
+      convex FALSE
+      colorPerVertex FALSE
+      color Color{
+        color [
+        0 0 0,0 0 0,0 0 0,
+        0.0 0.72 0.6, 
+        0.9 0.7 0.3,  
+        0.8 0.8 1.0,  
+        0.5 0.0 0.05, 
+        0.6 0.2 0.9,  
+        0.3 0.2 0.2,  
+        0.4 0.4 1,    
+        0.4 0.4 0.4,  
+        ]
+      }
+    coord Coordinate{
+         point[
+           -0.689545 -0.406333 0.599517,
+           -0.638530 0.593679 0.489720,
+           -0.478964 -0.828353 -0.290560,
+           -0.396419 0.789700 -0.468215,
+           -0.297802 -0.089163 -0.950455,
+           0.128779 0.093186 0.908559,
+           0.227396 -0.785678 0.426319,
+           0.309941 0.832376 0.248664,
+           0.469507 -0.589656 -0.531616,
+           0.520523 0.410356 -0.641413,
+           0.845113 -0.020114 0.209480,
+         ]
+    }
+    coordIndex[
+      6,2,8,-1,
+      8,2,4,-1,
+      8,4,9,-1,
+      9,4,3,-1,
+      9,3,7,-1,
+      7,3,1,-1,
+      7,1,5,-1,
+      5,1,0,-1,
+      5,0,6,-1,
+      6,0,2,-1,
+      6,8,10,-1,
+      8,9,10,-1,
+      9,7,10,-1,
+      7,5,10,-1,
+      5,6,10,-1,
+      1,3,4,2,0,-1,
+    ]
+    colorIndex[
+      3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 
+    ]
+    }
+    appearance Appearance {
+      material Material { 
+        shininess 1
+      }
+    }
+  }
+]
+}

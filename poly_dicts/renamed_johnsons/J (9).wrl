@@ -1,0 +1,71 @@
+#VRML V2.0 utf8
+WorldInfo{
+	title "elongated pentagonal pyramid (J9)(#53)"
+	info[
+	"Author: Vladimir Bulatov - bulatov@dots.physics.orst.edu"
+	]
+}
+NavigationInfo {
+	type "EXAMINE"
+	headlight TRUE
+}
+Transform {
+  children[
+  Shape{
+    geometry IndexedFaceSet{
+      solid FALSE
+      convex FALSE
+      colorPerVertex FALSE
+      color Color{
+        color [
+        0 0 0,0 0 0,0 0 0,
+        0.0 0.72 0.6, 
+        0.9 0.7 0.3,  
+        0.8 0.8 1.0,  
+        0.5 0.0 0.05, 
+        0.6 0.2 0.9,  
+        0.3 0.2 0.2,  
+        0.4 0.4 1,    
+        0.4 0.4 0.4,  
+        ]
+      }
+    coord Coordinate{
+         point[
+           -0.931948 -0.322067 0.166569,
+           -0.684183 0.598374 0.021115,
+           -0.494568 -0.569832 -0.656272,
+           -0.284538 -0.383839 0.878468,
+           -0.246803 0.350609 -0.801727,
+           -0.036772 0.536602 0.733014,
+           0.231037 0.858296 -0.135634,
+           0.423158 -0.784731 -0.452917,
+           0.552964 -0.669781 0.495605,
+           0.670923 0.135710 -0.598371,
+           0.800730 0.250660 0.350150,
+         ]
+    }
+    coordIndex[
+      8,3,0,2,7,-1,
+      1,0,3,5,-1,
+      6,1,5,-1,
+      5,3,8,10,-1,
+      6,5,10,-1,
+      10,8,7,9,-1,
+      6,10,9,-1,
+      9,7,2,4,-1,
+      6,9,4,-1,
+      4,2,0,1,-1,
+      6,4,1,-1,
+    ]
+    colorIndex[
+      5, 4, 3, 4, 3, 4, 3, 4, 3, 4, 3, 
+    ]
+    }
+    appearance Appearance {
+      material Material { 
+        shininess 1
+      }
+    }
+  }
+]
+}

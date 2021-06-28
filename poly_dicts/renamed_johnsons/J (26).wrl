@@ -1,0 +1,65 @@
+#VRML V2.0 utf8
+WorldInfo{
+	title "gyrobifastigium (J26)(#70)"
+	info[
+	"Author: Vladimir Bulatov - bulatov@dots.physics.orst.edu"
+	]
+}
+NavigationInfo {
+	type "EXAMINE"
+	headlight TRUE
+}
+Transform {
+  children[
+  Shape{
+    geometry IndexedFaceSet{
+      solid FALSE
+      convex FALSE
+      colorPerVertex FALSE
+      color Color{
+        color [
+        0 0 0,0 0 0,0 0 0,
+        0.0 0.72 0.6, 
+        0.9 0.7 0.3,  
+        0.8 0.8 1.0,  
+        0.5 0.0 0.05, 
+        0.6 0.2 0.9,  
+        0.3 0.2 0.2,  
+        0.4 0.4 1,    
+        0.4 0.4 0.4,  
+        ]
+      }
+    coord Coordinate{
+         point[
+           -0.500000 0.500000 0.000000,
+           0.500000 0.500000 0.000000,
+           0.500000 -0.500000 0.000000,
+           -0.500000 -0.500000 0.000000,
+           0.000000 0.500000 0.866025,
+           0.000000 -0.500000 0.866025,
+           -0.500000 0.000000 -0.866025,
+           0.500000 0.000000 -0.866025,
+         ]
+    }
+    coordIndex[
+      0,4,5,3,-1,
+      2,5,4,1,-1,
+      0,6,7,1,-1,
+      2,7,6,3,-1,
+      4,0,1,-1,
+      5,2,3,-1,
+      6,0,3,-1,
+      7,2,1,-1,
+    ]
+    colorIndex[
+      4, 4, 4, 4, 3, 3, 3, 3, 
+    ]
+    }
+    appearance Appearance {
+      material Material { 
+        shininess 1
+      }
+    }
+  }
+]
+}

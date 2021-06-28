@@ -1,0 +1,66 @@
+#VRML V2.0 utf8
+WorldInfo{
+	title "triangular cupola (J3)(#47)"
+	info[
+	"Author: Vladimir Bulatov - bulatov@dots.physics.orst.edu"
+	]
+}
+NavigationInfo {
+	type "EXAMINE"
+	headlight TRUE
+}
+Transform {
+  children[
+  Shape{
+    geometry IndexedFaceSet{
+      solid FALSE
+      convex FALSE
+      colorPerVertex FALSE
+      color Color{
+        color [
+        0 0 0,0 0 0,0 0 0,
+        0.0 0.72 0.6, 
+        0.9 0.7 0.3,  
+        0.8 0.8 1.0,  
+        0.5 0.0 0.05, 
+        0.6 0.2 0.9,  
+        0.3 0.2 0.2,  
+        0.4 0.4 1,    
+        0.4 0.4 0.4,  
+        ]
+      }
+    coord Coordinate{
+         point[
+           -0.844676 0.485671 0.225050,
+           -0.694373 0.211572 -0.687810,
+           -0.630253 -0.433918 0.026519,
+           -0.106338 0.523973 0.845070,
+           0.108084 -0.395615 0.646540,
+           0.194266 -0.024224 -0.980650,
+           0.258386 -0.669714 -0.266321,
+           0.782301 0.288177 0.552231,
+           0.932603 0.014078 -0.360629,
+         ]
+    }
+    coordIndex[
+      0,3,7,8,5,1,-1,
+      2,6,4,-1,
+      6,2,1,5,-1,
+      6,5,8,-1,
+      4,6,8,7,-1,
+      4,7,3,-1,
+      2,4,3,0,-1,
+      2,0,1,-1,
+    ]
+    colorIndex[
+      6, 3, 4, 3, 4, 3, 4, 3, 
+    ]
+    }
+    appearance Appearance {
+      material Material { 
+        shininess 1
+      }
+    }
+  }
+]
+}
