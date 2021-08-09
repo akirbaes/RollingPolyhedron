@@ -1,34 +1,40 @@
+# from symmetry_classes.poly_symmetries import poly_symmetries
+# import symmetry_classes.symmetry_functions
+# def canon_fo(polyname,face,orientation):
+#     return symmetry_classes.symmetry_functions.canon_fo(polyname,face,orientation,poly_symmetries)
 bits = " ▘▝▀▖▌▞▛▗▚▐▜▄▙▟█"
+
+
 
 def prettyprint_adjacency(matrix):
     print("\n".join(["".join([it and "X" or " " for it in line]) for line in matrix]))
-
+from math import ceil
 def prettierformat_adjacency(matrix, borders = True):
     w = len(matrix[0])
     h = len(matrix)
     chars = ""
     if(borders):
-        chars = "┏"+"━"*(w//2)+"┓\n"
+        chars = "┏"+"━"*(ceil(w/2))+"┓\n"
     for j in range(0, h, 2):
         if(borders):chars+= "┃"
         for i in range(0, w, 2):
-            number = matrix[i][j]
+            number = bool(matrix[i][j])
             try:
-                number += matrix[i + 1][j] * 2
+                number += bool(matrix[i + 1][j]) * 2
             except:
                 pass
             try:
-                number += matrix[i][j + 1] * 4
+                number += bool(matrix[i][j + 1]) * 4
             except:
                 pass
             try:
-                number += matrix[i + 1][j + 1] * 8
+                number += bool(matrix[i + 1][j + 1]) * 8
             except:
                 pass
             chars += bits[number]
         if(borders):chars += "┃"
         chars+="\n"
-    if(borders):chars+="┗"+"━"*(w//2)+"┛\n"
+    if(borders):chars+="┗"+"━"*ceil(w/2)+"┛\n"
     return chars[:-1]
 
 def prettierprint_adjacency(matrix):
@@ -78,6 +84,7 @@ newcaseid = tuple"""
 
 
 def explore_inside(tile, poly, polyname, canon_fo=None):
+    print("Canons:",canon_fo)
     classes = list()
     for start_case in tile:
         for start_face in poly:
@@ -98,8 +105,6 @@ def explore_inside(tile, poly, polyname, canon_fo=None):
                     while to_explore:
                         case, face, orientation = to_explore.pop()
                         sides = len(poly[face])
-                        if canon_fo:
-                            face, orientation = canon_fo(polyname,face,orientation)
                         if len(tile[case]) != sides:
                             continue
                         if (case, face, orientation) in current_class:
@@ -130,13 +135,15 @@ def explore_inside(tile, poly, polyname, canon_fo=None):
 
 
 def explore_borders(tile, poly, canon_fo):
+    print("Explore borders")
+    print("Canons:",canon_fo)
     borders = dict()
     for case in tile:
         for i, newcaseid in enumerate(tile[case]):
             newcase,newid = newcaseid
             if newid!=0  or case == newcase:
                 ###For every case pairs at the border
-                startpair = (case, newcase)
+                startpair = (case, newcaseid)
                 startsides = len(tile[case])
                 nextcases = tile[newcase]
                 nextsides = len(nextcases)
@@ -144,7 +151,7 @@ def explore_borders(tile, poly, canon_fo):
                 for face in poly:
                     if len(tile[case]) == len(poly[face]):
                         for orientation in range(len(poly[face])):
-                            if(canon_fo and (face,orientation)!=canon_fo(face,orientation)):
+                            if(canon_fo and (face,orientation)!=canon_fo(polyname,face,orientation)):
                                 continue
                             # For  every (C)FO
                             newface = poly[face][(orientation + i) % startsides]
@@ -157,7 +164,7 @@ def explore_borders(tile, poly, canon_fo):
                                 borders.setdefault((case, face, orientation), dict())
                                 # borders[(case,face,orientation)].add((newcase%len(tile),newface,neworientation))
                                 if(canon_fo):
-                                    newface,neworientation = canon_fo(newface,neworientation)
+                                    newface,neworientation = canon_fo(polyname,newface,neworientation)
                                 borders[(case, face, orientation)][startpair] = (
                                     newcase, newface, neworientation)
     return borders
@@ -178,7 +185,14 @@ def mul_matr(ma1, ma2):
 from pprint import pprint
 
 def CFO_class_adjacency(start_cfo, tile,poly,polyname, canon_fo):
+    print("Canons:",canon_fo)
+    allclasses = explore_inside(tile,poly,polyname)
+    print(allclasses)
     classes = explore_inside(tile,poly,polyname, canon_fo)
+    print(classes)
+    print(len(allclasses))
+    print(len(classes))
+
     transformations = explore_borders(tile, poly, canon_fo)
     borders = set(transformations.keys())
 
@@ -190,11 +204,12 @@ def CFO_class_adjacency(start_cfo, tile,poly,polyname, canon_fo):
 
     print("Internal Classes:")
     pprint(classes)
-    print("Borders:")
+    print("Borders:",len(transformations))
     print(transformations)
 
 
     class_transfo = [[False for clas in classes] for clas in classes]
+    class_transfo = [[clas1==clas2 for clas2 in classes] for clas1 in classes] #add level 0 (identity)?  Weirdly shaped
     for cfo in transformations:
         class_start = class_index(cfo)
         for bordercase in transformations[cfo]:
@@ -211,12 +226,6 @@ def CFO_class_adjacency(start_cfo, tile,poly,polyname, canon_fo):
 
     print("Class transformations:")
     prettierprint_adjacency(class_transfo)
-
-
-
-
-
-
 
 
     all_classes = set(range(len(classes)))
@@ -237,6 +246,8 @@ def CFO_class_adjacency(start_cfo, tile,poly,polyname, canon_fo):
             explore = [list(all_classes).pop()]
             explored = [explore[0]]
 
+
+
     print()
     print("Classes:", len(classes))
     print("Reachable classes from initial:", len(all_explored[0]))
@@ -245,7 +256,7 @@ def CFO_class_adjacency(start_cfo, tile,poly,polyname, canon_fo):
     print("Their sizes:")
     print(", ".join(str(len(e)) for e in all_explored if len(e) > 1))
     print("And", sum(1 for e in all_explored if len(e) == 1), "of size 1")
-
+    print("Max:",max(len(grp) for grp in all_explored))
 
 
     ma = class_transfo
@@ -257,6 +268,7 @@ def CFO_class_adjacency(start_cfo, tile,poly,polyname, canon_fo):
         if ma2 == ma:
             break
         ma = add_matr(ma2, ma)
+
     print("Full form:")
     prettierprint_adjacency(ma)
 
@@ -293,10 +305,14 @@ if __name__ == "__main__":
     from tiling_dicts.isogonal_tilings import biisogonal_tilings
     from poly_dicts.plato_archi_nets import plato_archi_nets
     from poly_dicts.johnson_nets import johnson_nets
+    from poly_dicts.TessellationPolyhedronAndTilings import net_tessellations
     tiling = platonic_tilings['4^4']
-    tiling = biisogonal_tilings['3^6;3^2x4x3x4']#'4^4']
-    polyname = "j1"##"j8"
-    net = johnson_nets[polyname]
+    # tiling = net_tessellations["cube"]
+    net = plato_archi_nets["cube"]
+    polyname = "cube"
+    # tiling = biisogonal_tilings['3^6;3^2x4x3x4']#'4^4']
+    # polyname = "j1"##"j8"
+    # net = johnson_nets[polyname]
 
     from symmetry_classes.poly_symmetries import poly_symmetries
     import symmetry_classes.symmetry_functions
