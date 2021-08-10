@@ -81,12 +81,12 @@ print(winning_pairs)
 all_tilings_names = list(all_tilings.keys()) #if you want to limit to a few, change this line
 # all_tilings_names=all_tilings_names[all_tilings_names.index("(3^6;3^3x4^2)1"):]
 #all_tilings_names = ["4^4"]
-# all_tilings_names = ["3^6"]
+#all_tilings_names = ["3^6"]
 
 all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change this line
 #all_nets_names = all_nets_names[all_nets_names.index("j50"):]
 #all_nets_names = ["cube"]
-# all_nets_names = ["snub_cube"]
+#all_nets_names = ["snub_cube"]
 
 import sys
 import argparse
@@ -706,7 +706,7 @@ if __name__ == "__main__":
                             mapping = map_screenspace(tiling, case, area, p1, p2, precision)
                         else:
                             N=determine_n(tiling,net,polyname)#,case,face,orientation)
-                            continue
+                            #continue
                             mapping = map_nspace(tiling, case, area, p1, p2, precision, N)
                         if (PREVIEW):
                             outlines.fill((255, 255, 255, 0))
