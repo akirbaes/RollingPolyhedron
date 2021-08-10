@@ -242,7 +242,7 @@ if(MODE=="pygame"):
         image.fill((0,0,0))
         for y,line in enumerate(matrice):
             for x,elem in enumerate(line):
-                c=colors[int(elem)]
+                c=colors[int(elem)%len(colors)]
                 image.set_at((x,y),c)
         pygame.image.save(image, filename)
 

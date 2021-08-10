@@ -2,6 +2,8 @@
 # import symmetry_classes.symmetry_functions
 # def canon_fo(polyname,face,orientation):
 #     return symmetry_classes.symmetry_functions.canon_fo(polyname,face,orientation,poly_symmetries)
+import DrawingFunctions
+
 bits = " ▘▝▀▖▌▞▛▗▚▐▜▄▙▟█"
 
 
@@ -84,7 +86,7 @@ newcaseid = tuple"""
 
 
 def explore_inside(tile, poly, polyname, canon_fo=None):
-    print("Canons:",canon_fo)
+    #print("Canons:",canon_fo)
     classes = list()
     for start_case in tile:
         for start_face in poly:
@@ -135,8 +137,8 @@ def explore_inside(tile, poly, polyname, canon_fo=None):
 
 
 def explore_borders(tile, poly, canon_fo):
-    print("Explore borders")
-    print("Canons:",canon_fo)
+    #print("Explore borders")
+    #print("Canons:",canon_fo)
     borders = dict()
     for case in tile:
         for i, newcaseid in enumerate(tile[case]):
@@ -163,10 +165,14 @@ def explore_borders(tile, poly, canon_fo):
                                 # borders.setdefault((case,face,orientation),set())
                                 borders.setdefault((case, face, orientation), dict())
                                 # borders[(case,face,orientation)].add((newcase%len(tile),newface,neworientation))
+
+                                #print("%s:%s; %s%s"%(case,tile[case],face,poly[face]),"\nto \n","%s:%s; %s%s"%(newcase,tile[newcase],newface,poly[newface]))
+                                if(len(nextfaces)!=len(tile[newcase])):
+                                    print("Issue",(case, face, orientation),startpair,(newcase, newface, neworientation))
                                 if(canon_fo):
                                     newface,neworientation = canon_fo(polyname,newface,neworientation)
-                                borders[(case, face, orientation)][startpair] = (
-                                    newcase, newface, neworientation)
+                                borders[(case, face, orientation)][startpair] = \
+                                    (newcase, newface, neworientation)
     return borders
 
 def add_matr(ma1, ma2):
@@ -182,83 +188,7 @@ def mul_matr(ma1, ma2):
     ma3 = [[bool(sum((ma1[i][k] * ma2[k][j] for k in range(n)))) for i in range(m)] for j in range(p)]
     return ma3
 
-from pprint import pprint
-
-def CFO_class_adjacency(start_cfo, tile,poly,polyname, canon_fo):
-    print("Canons:",canon_fo)
-    allclasses = explore_inside(tile,poly,polyname)
-    print(allclasses)
-    classes = explore_inside(tile,poly,polyname, canon_fo)
-    print(classes)
-    print(len(allclasses))
-    print(len(classes))
-
-    transformations = explore_borders(tile, poly, canon_fo)
-    borders = set(transformations.keys())
-
-    def class_index(cfo):
-        for i, clas in enumerate(classes):
-            if cfo in clas:
-                return i
-    initial_class = class_index(start_cfo)
-
-    print("Internal Classes:")
-    pprint(classes)
-    print("Borders:",len(transformations))
-    print(transformations)
-
-
-    class_transfo = [[False for clas in classes] for clas in classes]
-    class_transfo = [[clas1==clas2 for clas2 in classes] for clas1 in classes] #add level 0 (identity)?  Weirdly shaped
-    for cfo in transformations:
-        class_start = class_index(cfo)
-        for bordercase in transformations[cfo]:
-            #coordinate = neighbour_coord[bordercase]
-            cfo_arrival = transformations[cfo][bordercase]
-            #print(cfo,cfo_arrival,flush=True)
-            class_end = class_index(cfo_arrival)
-            # print(transformations[cfo][bordercase])
-            # print(cfo,cfo_arrival)
-            # if coordinate:
-            #     print("C1,C2,coord", class_start, class_end, coordinate)
-            #     class_transfo[class_start][class_end].append(coordinate)
-            class_transfo[class_start][class_end]=True
-
-    print("Class transformations:")
-    prettierprint_adjacency(class_transfo)
-
-
-    all_classes = set(range(len(classes)))
-    all_explored = list()
-    explore = [initial_class]
-    explored = [initial_class]
-    while all_classes:
-        # print(all_classes)
-        while explore:
-            new = explore.pop()
-            for next, elem in enumerate(class_transfo[new]):
-                if elem and not (next in explored):
-                    explore.append(next)
-                    explored.append(next)
-        all_classes = all_classes.difference(set(explored))
-        all_explored.append(explored)
-        if all_classes:
-            explore = [list(all_classes).pop()]
-            explored = [explore[0]]
-
-
-
-    print()
-    print("Classes:", len(classes))
-    print("Reachable classes from initial:", len(all_explored[0]))
-    print(all_explored[0])
-    print("Reachability groups:", len(all_explored))
-    print("Their sizes:")
-    print(", ".join(str(len(e)) for e in all_explored if len(e) > 1))
-    print("And", sum(1 for e in all_explored if len(e) == 1), "of size 1")
-    print("Max:",max(len(grp) for grp in all_explored))
-
-
+def draw_CFO_distance_matrix(classes,class_transfo,all_explored,polyname,tilingname):
     ma = class_transfo
     size = len(classes)
 
@@ -296,26 +226,166 @@ def CFO_class_adjacency(start_cfo, tile,poly,polyname, canon_fo):
     print(ordered)
     prettierprint_adjacency(ordered)
 
+    #DrawingFunctions.turn_into_image(ordered,"CFO_ajdacency_matrixes/n-uniform/"+polyname+"@"+tilingname+".png")
+
+from pprint import pprint
+#CFO_class_adjacency
+def print_ordered_reachability(all_explored,classes):
+    size=len(classes)
+
+    print(all_explored)
+    explore_order = list()
+    for x in all_explored:
+        explore_order.extend(x)
+
+    ma = [[any(tuple(clas1 in g and clas2 in g for g in all_explored)) for clas2 in range(len(classes))] for clas1 in range(len(classes))]
 
 
+    ordered = [[0 for i in range(size)] for j in range(size)]
+    for index, clas in enumerate(explore_order):
+        for index2, clas2 in enumerate(explore_order):
+            ordered[index][index2] = ma[clas][clas2]
+    prettierprint_adjacency(ordered)
+
+def print_report(classes,all_explored):
+    print("Classes:", len(classes))
+    max_size = max(len(grp) for grp in all_explored)
+    if(max_size!=1):
+        print("Reachability groups:", len(all_explored))
+        print("Their sizes:")
+        print(", ".join(str(len(e)) for e in all_explored if len(e) > 1))
+        print("And", sum(1 for e in all_explored if len(e) == 1), "of size 1")
+        print("Max:",max(len(grp) for grp in all_explored))
+    else:
+        print("of size 1")
+        print("No transformations between classes")
+    print()
+
+def generate_CFO_classes(tile,poly,polyname,tilingname, canon_fo):
+    #print("Canons:",canon_fo)
+    allclasses = explore_inside(tile,poly,polyname)
+    #print(allclasses)
+    classes = explore_inside(tile,poly,polyname, canon_fo)
+    #print(classes)
+    #print(len(allclasses))
+    #print(len(classes))
+
+    transformations = explore_borders(tile, poly, canon_fo)
+    borders = set(transformations.keys())
+
+    def class_index(cfo):
+        for i, clas in enumerate(classes):
+            if cfo in clas:
+                return i
+
+    initial_class = 0
+    #print("Internal Classes:")
+    #pprint(classes)
+    #print("Borders:",len(transformations))
+    #print(transformations)
+
+
+    class_transfo = [[False for clas in classes] for clas in classes]
+    class_transfo = [[clas1==clas2 for clas2 in classes] for clas1 in classes] #add level 0 (identity)?  Weirdly shaped
+    for cfo in transformations:
+        class_start = class_index(cfo)
+        for bordercase in transformations[cfo]:
+            #coordinate = neighbour_coord[bordercase]
+            cfo_arrival = transformations[cfo][bordercase]
+            #print(cfo,cfo_arrival,flush=True)
+            class_end = class_index(cfo_arrival)
+            # print(transformations[cfo][bordercase])
+            # print(cfo,cfo_arrival)
+            # if coordinate:
+            #     print("C1,C2,coord", class_start, class_end, coordinate)
+            #     class_transfo[class_start][class_end].append(coordinate)
+            class_transfo[class_start][class_end]=True
+
+    if(len(class_transfo)==0):
+        print("No compatibility")
+        return 0, 0, 0
+
+
+    all_classes = set(range(len(classes)))
+    all_explored = list()
+    explore = [initial_class]
+    explored = [initial_class]
+    while all_classes:
+        # print(all_classes)
+        while explore:
+            new = explore.pop()
+            for next, elem in enumerate(class_transfo[new]):
+                if elem and not (next in explored):
+                    explore.append(next)
+                    explored.append(next)
+        all_classes = all_classes.difference(set(explored))
+        all_explored.append(explored)
+        if all_classes:
+            explore = [list(all_classes).pop()]
+            explored = [explore[0]]
+
+    return classes, transformations, all_explored
+
+
+    #draw_CFO_distance_matrix(classes,class_transfo,all_explored, polyname, tilingname)
+
+def has_all_tiles(connex,clas,tiling):
+    tiles = set(tiling.keys())
+    reached = set()
+    for index in connex:
+        for c,f,o in clas[index]:
+            reached.add(c)
+    return len(tiles.difference(reached))==0
+
+def cfo_class_index(classes,cfo):
+    for index,clas in enumerate(classes):
+        if cfo in clas:
+            return index
 
 if __name__ == "__main__":
+    from tiling_dicts.archimedean_tilings import archimedean_tilings
+    from tiling_dicts.platonic_tilings import platonic_tilings
+    from tiling_dicts.isogonal_tilings import biisogonal_tilings
+    all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings}
+
+    from poly_dicts.prism_nets import prism_nets
+    from poly_dicts.plato_archi_nets import plato_archi_nets
+    from poly_dicts.johnson_nets import johnson_nets
+    all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
+    print(list(all_nets.keys()))
     from tiling_dicts.archimedean_tilings import archimedean_tilings
     from tiling_dicts.platonic_tilings import platonic_tilings
     from tiling_dicts.isogonal_tilings import biisogonal_tilings
     from poly_dicts.plato_archi_nets import plato_archi_nets
     from poly_dicts.johnson_nets import johnson_nets
     from poly_dicts.TessellationPolyhedronAndTilings import net_tessellations
-    tiling = platonic_tilings['4^4']
+    tilingname = '3^6'
     # tiling = net_tessellations["cube"]
-    net = plato_archi_nets["cube"]
     polyname = "cube"
     # tiling = biisogonal_tilings['3^6;3^2x4x3x4']#'4^4']
-    # polyname = "j1"##"j8"
+    polyname = "j1"##"j8"
     # net = johnson_nets[polyname]
+
+    tiling = platonic_tilings[tilingname]
+    print(list(platonic_tilings.keys()))
+    net = all_nets[polyname]
 
     from symmetry_classes.poly_symmetries import poly_symmetries
     import symmetry_classes.symmetry_functions
     def canon_fo(polyname, face, orientation):
         return symmetry_classes.symmetry_functions.canon_fo(polyname, face, orientation, poly_symmetries)
-    CFO_class_adjacency((0,0,0),tiling,net,polyname,None)
+
+
+    #CFO_class_adjacency(tiling,net,polyname,tilingname,None)
+    for tilingname,tiling in all_tilings.items():
+        for polyname, net in all_nets.items():
+            print(tilingname,polyname)
+            classes,transformations,groups = generate_CFO_classes(tiling, net, polyname, tilingname, None)
+            if(groups):
+                roller_potential = False
+                for connex in groups:
+                    could_fill = has_all_tiles(connex,classes,tiling)
+                    roller_potential = roller_potential or could_fill
+                if(roller_potential):
+                    print("Potential roller")
+                    print_report(classes, groups)

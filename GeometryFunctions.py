@@ -152,3 +152,9 @@ def xgon(sides,p1,p2):
     except Exception as e:
         print("Asked to make",sides)
         raise e
+
+
+def roundedcenter(polygon,precision):
+    ccenter = tuple(floatcenterpoint(polygon))
+    ccenter = int(round(ccenter[0] / precision) * precision), int(round(ccenter[1] / precision) * precision)
+    return ccenter

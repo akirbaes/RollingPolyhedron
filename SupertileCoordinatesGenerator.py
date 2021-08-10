@@ -1,7 +1,23 @@
-from GeometryFunctions import xgon
-from RollyPoint import RollyPoint
-from ScreenspaceRoller import roundedcenter, cell_match
+from statistics import mean
 
+from GeometryFunctions import xgon, roundedcenter
+from RollyPoint import RollyPoint
+def cell_match(tiling, previous_case, newcaseid):
+    """tiling = dict
+previous_case = int
+newcaseid = tuple"""
+    current_case, id = newcaseid
+    # Match mirror id first
+    for index, pc in enumerate(tiling[current_case]):
+        pcc, pid = pc
+        if (pcc == previous_case and pid == -id):
+            return index
+    # Match same id
+    for index, pc in enumerate(tiling[current_case]):
+        pcc, pid = pc
+        if (pcc == previous_case and pid == id):
+            return index
+    print(previous_case,newcaseid,tiling)
 
 def yield_borders(tiling, startcell, p1, p2, precision=7):
     visited_areas = list()
@@ -114,7 +130,7 @@ def generate_supertile_coordinate_helpers(tiling, tilingname):
     borders = set()
     cx, cy = supertile_center(tiling, 0, p1, p2, precision=7)
 
-    for cell, nextcellid, cellgon, nextgon, pa, pb in yield_borders(tile, 0, p1, p2):
+    for cell, nextcellid, cellgon, nextgon, pa, pb in yield_borders(tiling, 0, p1, p2):
         nextcell, nextid = nextcellid
         neigh = supertile_center(tiling, nextcell, pa, pb, precision=7)
         neighbours[(cell, nextcellid)] = neigh
@@ -177,6 +193,4 @@ def generate_supertile_coordinate_helpers(tiling, tilingname):
             print(tcoords)
 
         neighbours[bordercells] = new_coords
-    print("Borders coordinates system:")
-    print(neighbours)
     return neighbours
