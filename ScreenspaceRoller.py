@@ -194,10 +194,6 @@ def get_unused_faces(result, poly, polyname):
             return faces
     return faces
 
-def roundedcenter(polygon,precision):
-    ccenter = tuple(floatcenterpoint(polygon))
-    ccenter = int(round(ccenter[0] / precision) * precision), int(round(ccenter[1] / precision) * precision)
-    return ccenter
 
 def map_nspace(tiling,startcell,area,p1,p2,precision,N):
     "visited areas[center points: (polygon, cell number)]"
@@ -710,6 +706,7 @@ if __name__ == "__main__":
                             mapping = map_screenspace(tiling, case, area, p1, p2, precision)
                         else:
                             N=determine_n(tiling,net,polyname)#,case,face,orientation)
+                            continue
                             mapping = map_nspace(tiling, case, area, p1, p2, precision, N)
                         if (PREVIEW):
                             outlines.fill((255, 255, 255, 0))
