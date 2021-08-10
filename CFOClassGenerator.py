@@ -39,8 +39,8 @@ def prettierformat_adjacency(matrix, borders = True):
     if(borders):chars+="┗"+"━"*ceil(w/2)+"┛\n"
     return chars[:-1]
 
-def prettierprint_adjacency(matrix):
-    print(prettierformat_adjacency(matrix))
+def prettierprint_adjacency(matrix, borders=True):
+    print(prettierformat_adjacency(matrix, borders))
 
 def prettierprint_FFOOmatrix(FFOO,borders = True):
     #Matrix of matrices
