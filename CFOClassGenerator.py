@@ -8,6 +8,9 @@ bits = " ▘▝▀▖▌▞▛▗▚▐▜▄▙▟█"
 
 
 
+def prettyprint_012(matrix):
+    print("\n".join(["".join(["_X█"[it] for it in line]) for line in matrix]))
+
 def prettyprint_adjacency(matrix):
     print("\n".join(["".join([it and "X" or "_" for it in line]) for line in matrix]))
 from math import ceil

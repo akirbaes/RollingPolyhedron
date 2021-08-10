@@ -135,11 +135,16 @@ def is_roller(tiling,tilingname,net,polyname):
                         if (next_st,x+dx,y+dy) not in explored and -N<=x+dx<=N and -N<=y+dy<=N:
                             to_explore.insert(0,(next_st,x+dx,y+dy,s+1))
 
+                    if([-1,0]in min_symmetries or [1,0] in min_symmetries)and([0,1] in min_symmetries or [0,-1] in min_symmetries):
+                        print("Break early found minimal symmetry")
+                        to_explore = []
+                        break
             # print("Symmetries:",symmetries)
             print("Min Symmetries:",min_symmetries)
 
             if(len(min_symmetries)<=1):
-                return 0,0,0
+                print("Not enough symmetries to cover the plane")
+                return False
             #symmetries+=[[sum(x for x,y in symmetries),sum(y for x,y in symmetries)]]
             # min_symmetries+=[[-x,-y] for (x,y) in symmetries]
             #symmetries+=[[2*x,2*y] for (x,y) in symmetries]
@@ -244,8 +249,8 @@ def is_roller(tiling,tilingname,net,polyname):
                 print(tilingname,polyname,"%i/%i"%(groupindex+1,len(groups)),"is not a roller in -%i:%i"%(N,N))
 
                 if(N):
-                    graph = [[(i, j) in filled_supertiles for i in range(-N, N + 1, 1)] for j in range(-N, N+1, 1)]
-                    CFOClassGenerator.prettyprint_adjacency(graph)
+                    graph = [[bool((i, j) in filled_supertiles)+bool(coordinates[(i,j)]) for i in range(-N, N + 1, 1)] for j in range(-N, N+1, 1)]
+                    CFOClassGenerator.prettyprint_012(graph)
                     #input()
         #redo but with symmetries
         return False
