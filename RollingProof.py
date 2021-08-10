@@ -74,12 +74,13 @@ def is_roller(tiling,tilingname,net,polyname):
         print("ctsd",ctsd)
 
         for groupindex,group in enumerate(groups):
+            #print(group)
             startingstate = group[0]
 
             if startingstate not in ctsd:
                 continue
             N=len(group)
-            print("N=",N)
+            print("Group %i/%i"%(groupindex,len(groups)),"N=",N)
 
             symmetries = []
             min_symmetries = []
@@ -90,7 +91,7 @@ def is_roller(tiling,tilingname,net,polyname):
                 st,x,y,s=to_explore.pop(0)
                 #print(len(explored),N*N*N)
                 #print(N,s,x,y)
-                if(s>N):
+                if(s>N+1):
                     continue
                 next = ctsd[st]
                 if (st,x,y) not in explored:
@@ -144,7 +145,7 @@ def is_roller(tiling,tilingname,net,polyname):
 
             if(len(min_symmetries)<=1):
                 print("Not enough symmetries to cover the plane")
-                return False
+                continue
             #symmetries+=[[sum(x for x,y in symmetries),sum(y for x,y in symmetries)]]
             # min_symmetries+=[[-x,-y] for (x,y) in symmetries]
             #symmetries+=[[2*x,2*y] for (x,y) in symmetries]
@@ -272,6 +273,7 @@ if __name__ == "__main__":
 # ["(3^3x4^2;3^2x4x3x4)1", "j27"]
 #         ]:
     for tilingname, polyname in ((t,p) for t in all_tilings.keys() for p in all_nets.keys()):
+    # for tilingname, polyname in [["3^6;3^2x4x3x4","j89"]]:
         tiling = all_tilings[tilingname]
         net = all_nets[polyname]
         print(tilingname,polyname)
@@ -281,4 +283,4 @@ if __name__ == "__main__":
     print()
     for tilingname,polyname in rollers:
         print(tilingname,polyname)
-    print(len(all_tilings))
+    print(len(rollers))
