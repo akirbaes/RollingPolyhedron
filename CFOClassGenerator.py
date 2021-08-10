@@ -9,7 +9,7 @@ bits = " ▘▝▀▖▌▞▛▗▚▐▜▄▙▟█"
 
 
 def prettyprint_adjacency(matrix):
-    print("\n".join(["".join([it and "X" or " " for it in line]) for line in matrix]))
+    print("\n".join(["".join([it and "X" or "_" for it in line]) for line in matrix]))
 from math import ceil
 def prettierformat_adjacency(matrix, borders = True):
     w = len(matrix[0])
