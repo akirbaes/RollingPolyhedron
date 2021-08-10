@@ -27,7 +27,7 @@ DEBUG2 = False
 DEBUG3 = False
 DEBUG4 = False
 DEBUG5 = False
-DEBUG6 = False
+DEBUG6 = True
 DEBUG7 = True
 
 
@@ -351,6 +351,7 @@ def create_neighbour_coordinates(tile):
 
     coordinates_system = create_coordinates_system(adjacent_matches, centrosymmetries, translations,
                                                    translation_pairing)
+
     pair_axis = dict()
     for neighbour in neighbours_coords:
         tag = neighbour_tags[neighbour]
@@ -365,6 +366,9 @@ def evaluate(rules, formula, centrosymmetries, translation_get_pair):
     res = [0] * lenbase
     sign = +1
     i = 0
+    print("rules:",rules)
+    print("formula:",formula)
+    print("transation_get_pair=",translation_get_pair)
     while i < len(formula):
         sym = formula[i]
         if sym == "-":
@@ -693,7 +697,7 @@ def explore_rotations(tile, poly,polyname):
     print("Done exploring everything!")
     # Draw.wait_for_input()
     # Next: explore the space!
-
+    #def CFO_adjacency_matrix(tile,poly,polyname):
     classes = explore_inside(tile, poly)
     # print(len(classes),"classes found:")
     # pp.pprint(classes)
@@ -711,6 +715,9 @@ def explore_rotations(tile, poly,polyname):
         for i, clas in enumerate(classes):
             if cfo in clas:
                 return i
+    print("Classes:")
+    pp.pprint(classes)
+    # input()
 
     class_transfo = [[list() for clas in classes] for clas in classes]
     for cfo in transformations:
@@ -726,7 +733,8 @@ def explore_rotations(tile, poly,polyname):
                 class_transfo[class_start][class_end].append(coordinate)
     print("Class transformations:")
 
-    # pp.pprint(class_transfo)
+    pp.pprint(class_transfo)
+    # input()
 
     def print_matrix(mat, explored=None):
         if explored is None:
@@ -894,6 +902,9 @@ def explore_rotations(tile, poly,polyname):
     # Draw.wait_for_input()
 
 tesspoly_order = ['tetrahedron', 'cube', 'octahedron', 'icosahedron', 'j1', 'j8', 'j10', 'j12', 'j13', 'j14', 'j15', 'j16', 'j17', 'j49', 'j50', 'j51', 'j84', 'j86', 'j87', 'j88', 'j89', 'j90', 'hexagonal_antiprism']
+
+# tesspoly_order = ["hexagonal_antiprism","j10","j88"] #fails to create a base for these three, too many removed
+tesspoly_order = ['cube']
 if __name__ == "__main__":
     erratum = list()
     for polyname in tesspoly_order:
