@@ -1,9 +1,13 @@
 import copy
+import os
 from statistics import mean
 
 import numpy
+import pygame
 import sympy
 
+from GeometryFunctions import centerpoint
+from RollyPoint import RollyPoint
 from symmetry_classes.poly_symmetries import poly_symmetries
 from symmetry_classes.symmetry_functions import canon_fo
 from tiling_dicts.archimedean_tilings import archimedean_tilings
@@ -17,6 +21,148 @@ all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
 
 
 import CFOClassGenerator
+
+
+def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,hexborders,symmetries,explored):
+    p1 = RollyPoint(0, 0)
+    EDGESIZE = 100
+    p2 = RollyPoint(0 + EDGESIZE, 0)
+    startcell = list(classes[group[0]])[0][0]
+    cx,cy = supertile_center(tiling, startcell, p1, p2, precision=7)
+
+    faces_withsides = [[]]*13
+    for face,neigh in polyhedron.items():
+        faces_withsides[len(neigh)]=face
+
+    #1: determine the position of every cell IRT the supertile center
+    cells_pos = dict()
+    for cell, pa, pb, cgon, ccenter in yield_insides(tiling,startcell,p1,p2,precision=7):
+        cells_pos[cell]=[(x-cx,y-cy) for (x,y) in cgon]
+
+    neighbour_pos = dict()
+    supertile_border_segments = list()
+    # 2: determine the position of neighbouring supertiles in order to create the coords
+    # and the borders of the supertile IRT the supertile center
+    for cell, nextcellid, cgon, nextcgon, pa, pb in yield_borders(tiling, startcell, p1, p2, precision=7):
+        nextcell, nextid = nextcellid
+        neigh = supertile_center(tiling, nextcell, pa, pb, precision=3)
+        neighcoord = hexborders[(cell,nextcellid)]
+        neighbour_pos[neighcoord]=neigh
+        supertile_border_segments.append([(x-cx,y-cy) for (x,y) in nextcgon[0:2]])
+
+    dx = neighbour_pos[(1,0)]
+    dx = [dx[0]-cx,dx[1]-cy]
+    dy = neighbour_pos[(0,1)]
+    dy = [dy[0]-cx,dy[1]-cy]
+    symmetrylines = [[None,None],[None,None]]
+
+
+    drawn_tiles = list()
+    drawn_supertiles = list()
+    filled_tiles = list()
+    facefull_tiles = list()
+    faceorifull_tiles = list()
+
+    min_x=0
+    min_y=0
+    max_x=0
+    max_y=0
+
+    for coordinates,eclasses in explored.items():
+        hcoordx,hcoordy = coordinates
+        x0 = cx + hcoordx*dx[0] + hcoordy*dy[0]
+        y0 = cy + hcoordx*dx[1] + hcoordy*dy[1]
+        #cx, cy unnecessary
+        #coloration? count compatible faces in advance and decide from there
+        #symmetries: draw a line from the center of a tile to another
+
+        faces = set()
+        faceori = set()
+
+        for clas in eclasses:
+            #for c1 in cells, for cfo where c==c1, then save faces
+            for c,f,o in classes[clas]:
+                polygon = [(x0+x,y0+y) for (x,y) in cells_pos[c]]
+                center = centerpoint(polygon)
+                if c==startcell and coordinates == (0,0):
+                    symmetrylines[0][0]=center
+                    symmetrylines[1][0]=center
+                if c==startcell and list(coordinates) == list(symmetries[0]):
+                    symmetrylines[0][1]=center
+                if c==startcell and list(coordinates) == list(symmetries[1]):
+                    symmetrylines[1][1]=center
+
+                drawn_tiles.append(polygon)
+
+                min_x = min(min_x, min(x for (x, y) in polygon))
+                min_y = min(min_y, min(y for (x, y) in polygon))
+                max_x = max(max_x, max(x for (x, y) in polygon))
+                max_y = max(max_y, max(y for (x, y) in polygon))
+
+        for segment in supertile_border_segments:
+            seg = [(x0+x,y0+y) for (x,y) in segment]
+            drawn_supertiles.append(seg)
+
+            min_x = min(min_x,min(x for (x,y) in segment))
+            min_y = min(min_y,min(y for (x,y) in segment))
+            max_x = max(max_x,max(x for (x,y) in segment))
+            max_y = max(max_y,max(y for (x,y) in segment))
+    # print(supertile_border_segments)
+    # print(explored)
+    # print(max_x,max_y,min_x,min_y)
+    width = max_x-min_x
+    height = max_y-min_y
+    print("Width=",width)
+    if(width>height):
+        final_width = 980
+        ratio = final_width/width
+        final_height = int((max_y-min_y)*ratio)
+    else:
+        final_height = 980
+        ratio = final_height/height
+        final_width = int((max_x-min_x)*ratio)
+    ratio = ratio**0.5
+    def coord_adapt(shape):
+        return [((x-min_x)*final_width/width+10, (y-min_y)*final_width/width+10) for (x,y) in shape]
+
+    drawn_supertiles = [coord_adapt(segment) for segment in drawn_supertiles]
+    print("b",symmetrylines)
+    symmetrylines = [coord_adapt(line) for line in symmetrylines]
+    print("a",symmetrylines)
+    drawn_tiles = [coord_adapt(poly) for poly in drawn_tiles]
+
+
+    pygame.init()
+    surf = pygame.Surface((final_width+20, final_height+20), pygame.SRCALPHA)
+    surf.fill((255,255,255))
+    for poly in drawn_tiles:
+        # print("poly:",poly)
+        pygame.draw.polygon(surf,(128,128,128),poly,width=0)
+    for poly in drawn_tiles:
+        pygame.draw.lines(surf,(192,192,192),1,poly,width=int(6*ratio))
+    for line in drawn_supertiles:
+        pygame.draw.line(surf,(0,0,0),*line,width=int(8*ratio))
+    for index,line in enumerate(symmetrylines):
+        b=(255,255,0,0)
+        pygame.draw.line(surf,(0,128,b[index]),*line,width=int(9*ratio))
+        pygame.draw.circle(surf,(0,128,b[index]),line[0],12*ratio*ratio)
+        pygame.draw.circle(surf,(0,128,b[index]),line[1],12*ratio*ratio)
+    if(width<height):
+        surf=pygame.transform.rotate(surf,90)
+    totalsurf = pygame.Surface((1000, surf.get_height()+50), pygame.SRCALPHA)
+    totalsurf.fill((0,0,0))
+    totalsurf.blit(surf,(0,50))
+    text = pygame.font.SysFont(None, 70).render(
+        polyname+"    "+tilingname+" %i/%i"%(groups.index(group),len(groups)), True, (255, 255, 255))
+    # surf.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
+    totalsurf.blit(text, (2,2))
+
+    try:os.mkdir("_proofimages")
+    except:pass
+    pygame.image.save(totalsurf,"_proofimages/"+polyname+"@"+tilingname+" %i"%(groups.index(group))+".png")
+
+
+
 def determine_n(tiling,net,polyname):#,startcase,startface,startorientation):
     # classes = CFOClassGenerator.explore_inside(tiling,net,polyname,canon_fo)
     # borders = CFOClassGenerator.explore_borders(tiling,net)
@@ -43,7 +189,8 @@ def determine_n(tiling,net,polyname):#,startcase,startface,startorientation):
 def sqrdist(tupl):
     return tupl[0]*tupl[0]+tupl[1]*tupl[1]
 
-from SupertileCoordinatesGenerator import generate_supertile_coordinate_helpers
+from SupertileCoordinatesGenerator import generate_supertile_coordinate_helpers, supertile_center, yield_insides, \
+    yield_borders
 
 
 def is_roller(tiling,tilingname,net,polyname):
@@ -243,6 +390,7 @@ def is_roller(tiling,tilingname,net,polyname):
             for coord,states in coordinates.items():
                 if not(CFOClassGenerator.has_all_tiles(states, classes, tiling)):
                     is_roller = False
+            generate_image(tiling, net, tilingname, polyname, classes, group, groups, borders, min_symmetries, coordinates)
             if(is_roller):
                 print(tilingname,polyname,"%i/%i"%(groupindex+1,len(groups)),"is a roller in -%i:%i"%(N,N))
                 return True
