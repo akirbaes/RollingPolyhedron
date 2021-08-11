@@ -30,9 +30,9 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
     startcell = list(classes[group[0]])[0][0]
     cx,cy = supertile_center(tiling, startcell, p1, p2, precision=7)
 
-    faces_withsides = [[]]*13
+    faces_withsides = [[] for x in range(13)]
     for face,neigh in polyhedron.items():
-        faces_withsides[len(neigh)]=face
+        faces_withsides[len(neigh)].append(face)
 
     #1: determine the position of every cell IRT the supertile center
     cells_pos = dict()
@@ -62,6 +62,7 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
     filled_tiles = list()
     facefull_tiles = list()
     faceorifull_tiles = list()
+    unused_tiles = list()
 
     min_x=0
     min_y=0
@@ -79,25 +80,41 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
         faces = set()
         faceori = set()
 
-        for clas in eclasses:
-            #for c1 in cells, for cfo where c==c1, then save faces
-            for c,f,o in classes[clas]:
-                polygon = [(x0+x,y0+y) for (x,y) in cells_pos[c]]
-                center = centerpoint(polygon)
-                if c==startcell and coordinates == (0,0):
-                    symmetrylines[0][0]=center
-                    symmetrylines[1][0]=center
-                if c==startcell and list(coordinates) == list(symmetries[0]):
-                    symmetrylines[0][1]=center
-                if c==startcell and list(coordinates) == list(symmetries[1]):
-                    symmetrylines[1][1]=center
+        for c1 in tiling:
+            reached_faces = set()
+            reached_fo = set()
 
-                drawn_tiles.append(polygon)
+            polygon = [(x0 + x, y0 + y) for (x, y) in cells_pos[c1]]
+            center = centerpoint(polygon)
+            if c1 == startcell and coordinates == (0, 0):
+                symmetrylines[0][0] = center
+                symmetrylines[1][0] = center
+            if c1 == startcell and list(coordinates) == list(symmetries[0]):
+                symmetrylines[0][1] = center
+            if c1 == startcell and list(coordinates) == list(symmetries[1]):
+                symmetrylines[1][1] = center
 
-                min_x = min(min_x, min(x for (x, y) in polygon))
-                min_y = min(min_y, min(y for (x, y) in polygon))
-                max_x = max(max_x, max(x for (x, y) in polygon))
-                max_y = max(max_y, max(y for (x, y) in polygon))
+            drawn_tiles.append(polygon)
+
+            min_x = min(min_x, min(x for (x, y) in polygon))
+            min_y = min(min_y, min(y for (x, y) in polygon))
+            max_x = max(max_x, max(x for (x, y) in polygon))
+            max_y = max(max_y, max(y for (x, y) in polygon))
+
+            for clas in eclasses:
+                for c,f,o in classes[clas]:
+                    if c == c1:
+                        reached_faces.add(f)
+                        reached_fo.add((f,o))
+            if(reached_faces):
+                filled_tiles.append(polygon)
+            if(len(reached_faces)==len(faces_withsides[len(polygon)])):
+                facefull_tiles.append(polygon)
+            if(len(reached_fo)==len(faces_withsides[len(polygon)]*len(polygon))):
+                faceorifull_tiles.append(polygon)
+            # print("Faces with",len(polygon),"sides:",faces_withsides[len(polygon)])
+            if len(faces_withsides[len(polygon)])==0:
+                unused_tiles.append(polygon)
 
         for segment in supertile_border_segments:
             seg = [(x0+x,y0+y) for (x,y) in segment]
@@ -130,14 +147,25 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
     symmetrylines = [coord_adapt(line) for line in symmetrylines]
     print("a",symmetrylines)
     drawn_tiles = [coord_adapt(poly) for poly in drawn_tiles]
-
+    filled_tiles = [coord_adapt(poly) for poly in filled_tiles]
+    facefull_tiles = [coord_adapt(poly) for poly in facefull_tiles]
+    faceorifull_tiles = [coord_adapt(poly) for poly in faceorifull_tiles]
+    unused_tiles = [coord_adapt(poly) for poly in unused_tiles]
 
     pygame.init()
     surf = pygame.Surface((final_width+20, final_height+20), pygame.SRCALPHA)
     surf.fill((255,255,255))
-    for poly in drawn_tiles:
+    for poly in filled_tiles:
         # print("poly:",poly)
-        pygame.draw.polygon(surf,(128,128,128),poly,width=0)
+        if(poly in faceorifull_tiles):
+            color = (255,0,0)
+        elif(poly in facefull_tiles):
+            color = (128,0,0)
+        else:
+            color = (128,128,128)
+        pygame.draw.polygon(surf,color,poly,width=0)
+    for poly in unused_tiles:
+        pygame.draw.polygon(surf,(0,0,64),poly,width=0)
     for poly in drawn_tiles:
         pygame.draw.lines(surf,(192,192,192),1,poly,width=int(6*ratio))
     for line in drawn_supertiles:
@@ -422,6 +450,7 @@ if __name__ == "__main__":
 #         ]:
     for tilingname, polyname in ((t,p) for t in all_tilings.keys() for p in all_nets.keys()):
     # for tilingname, polyname in [["3^6;3^2x4x3x4","j89"]]:
+    # for tilingname, polyname in [["3^2x4x3x4;3x4x6x4","j29"]]:
         tiling = all_tilings[tilingname]
         net = all_nets[polyname]
         print(tilingname,polyname)
