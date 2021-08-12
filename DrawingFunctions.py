@@ -235,14 +235,16 @@ if(MODE=="pygame"):
         pygame.image.save(screen, filename)
 
 
-    def turn_into_image(matrice,filename="default.png"):
-        width = len(matrice)
-        height=len(matrice[1])
+    def turn_into_image(matrice,filename="default.png",colors_table=None):
+        if(colors_table==None):
+            colors_table=colors
+        height = len(matrice)
+        width=len(matrice[0])
         image = pygame.Surface((width, height))
         image.fill((0,0,0))
         for y,line in enumerate(matrice):
             for x,elem in enumerate(line):
-                c=colors[int(elem)%len(colors)]
+                c=colors_table[int(elem)%len(colors_table)]
                 image.set_at((x,y),c)
         pygame.image.save(image, filename)
 

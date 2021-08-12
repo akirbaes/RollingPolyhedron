@@ -1,5 +1,6 @@
 import copy
 import os
+import pickle
 from math import ceil
 from statistics import mean
 
@@ -8,6 +9,7 @@ import pygame
 import sympy
 
 from GeometryFunctions import centerpoint
+from LatexOutput import output_table
 from RollyPoint import RollyPoint
 from symmetry_classes.poly_symmetries import poly_symmetries
 from symmetry_classes.symmetry_functions import canon_fo
@@ -136,8 +138,8 @@ def generate_stability_image(tilingname,polyname,tiling,polyhedron,hexborders,ty
     if(width<height):
         surf=pygame.transform.rotate(surf,90)
 
-    path = "_stabilityimages/"+type+"/"
-    try:os.mkdir("_stabilityimages/")
+    path = "_proofimages/"+type+"_stability/"
+    try:os.mkdir("_proofimages/")
     except:pass
     try:os.mkdir(path)
     except:pass
@@ -360,6 +362,10 @@ from SupertileCoordinatesGenerator import generate_supertile_coordinate_helpers,
 
 
 def is_roller(tiling,tilingname,net,polyname):
+
+    if not any(len(n) == len(ne) for n in tiling.values() for ne in net.values()):
+        return
+
     borders=generate_supertile_coordinate_helpers(tiling,tilingname)
     #print(borders)
     classes, transformations, groups = CFOClassGenerator.generate_CFO_classes(tiling, net, polyname, tilingname, None)
@@ -466,7 +472,7 @@ def is_roller(tiling,tilingname,net,polyname):
             all_data[groupindex]["symmetry_vectors"]=min_symmetries
             if(len(min_symmetries)<=1):
                 print("Not enough symmetries to cover the plane")
-                if(min_symmetries)==1:
+                if len(min_symmetries)==1:
                     all_data[groupindex]["type"]="band"
                 else:
                     all_data[groupindex]["type"]="area"
@@ -549,7 +555,7 @@ def is_roller(tiling,tilingname,net,polyname):
                 print(tilingname,polyname,"%i/%i"%(groupindex+1,len(groups)),"is a roller in -%i:%i"%(N,N))
                 stability[groupindex]=True
                 type = "roller"
-                all_data[groupindex]["type"]= "plane roller"
+                all_data[groupindex]["type"]= type
             else:
                 is_quasi_roller = True
                 for coord,states in coordinates.items():
@@ -559,10 +565,10 @@ def is_roller(tiling,tilingname,net,polyname):
                 print(tilingname,polyname,"%i/%i"%(groupindex+1,len(groups)),"is not a roller in -%i:%i"%(N,N))
                 if(is_quasi_roller):
                     type="quasi_roller"
-                    all_data[groupindex]["type"]= "quasi plane"
+                    all_data[groupindex]["type"]= type
                 else:
                     type="non-roller"
-                    all_data[groupindex]["type"]= "hollow plane"
+                    all_data[groupindex]["type"]= "hollow"
                 if(N):
                     graph = [[bool((i, j) in filled_supertiles)+bool(coordinates[(i,j)]) for i in range(-N, N + 1, 1)] for j in range(-N, N+1, 1)]
                     CFOClassGenerator.prettyprint_012(graph)
@@ -572,15 +578,22 @@ def is_roller(tiling,tilingname,net,polyname):
         """Done with all the groups"""
         is_stable = not False in stability
         results = dict()
+        results["all_data"]=all_data
         results["stability"]=is_stable
         if True in stability and not incompatible:
             results["type"]="roller"
         elif True in stability and incompatible:
             results["type"]="quasi_roller"
-        elif "band" in (result["type"] for result in all_data.values()):
+        elif "hollow" in (result["type"] for result in all_data if "type" in result.keys()):
+            results["type"]="hollow"
+        elif "band" in (result["type"] for result in all_data if "type" in result.keys()):
             results["type"]="band"
-        elif "area" in (result["type"] for result in all_data.values()):
+        elif "area" in (result["type"] for result in all_data if "type" in result.keys()):
             results["type"]="area"
+        elif len(groups)==0:
+            results["type"]="area"
+        else:
+            results["type"]="unknown"
         #for now, let's ignore hollow plane that are not quasi?
         results["polyhedron"]=polyname
         results["tiling"]=tilingname
@@ -620,17 +633,24 @@ def is_roller(tiling,tilingname,net,polyname):
 
             stable_spots = {pos:[counter == maxfo[cell] for cell,counter in enumerate(celldata)] for pos,celldata in fill_area.items()}
             stable_spots = {pos:[cell_stability[cell]==maxfo[cell] and maxfo[cell]!=0 for cell in range(len(tiling))] for pos in fill_area}
-            type=("roller","quasi-roller")[incompatible]
+            type=("roller","quasi-roller")[bool(incompatible)]
             # generate_stability_image(tilingname,polyname,tiling,net,borders,type,stable_spots)
 
             results["stability"]=all(cell_stability[cell]==maxfo[cell] for cell in range(len(tiling)))
         return results
+    else:
+        if(classes):
+            results = {"type":"area"}
+            return results
+
+    #else no cmpatibility
 
 
 if __name__ == "__main__":
     rollers = list()
     quasirollers = list()
     rollersdata = dict()
+    all_results = dict()
     from symmetry_classes.poly_symmetries import poly_symmetries
     import symmetry_classes.symmetry_functions
     def canon_fo(polyname, face, orientation):
@@ -654,26 +674,37 @@ if __name__ == "__main__":
         net = all_nets[polyname]
         print(tilingname,polyname)
         results = is_roller(tiling,tilingname,net,polyname)
-
-        if(results["type"]=="roller"):
+        all_results[(tilingname,polyname)]=results
+        if(results==None):
+            rollersdata[(tilingname,polyname)]=" "
+        elif(results["type"]=="roller"):
             if((tilingname,polyname) not in rollers):
                 rollers.append((tilingname,polyname))
             if results["stability"]:
-                rollersdata[(tilingname,polyname)]="SR"
+                rollersdata[(tilingname,polyname)]="SPR"
             else:
-                rollersdata[(tilingname,polyname)]="R"
+                rollersdata[(tilingname,polyname)]="PR"
         elif(results["type"]=="quasi_roller"):
             quasirollers.append((tilingname,polyname))
             if results["stability"]:
-                rollersdata[(tilingname,polyname)]="SQR"
+                rollersdata[(tilingname,polyname)]="SQPR"
             else:
-                rollersdata[(tilingname,polyname)]="QR"
+                rollersdata[(tilingname,polyname)]="QPR"
+        elif(results["type"]=="hollow"):
+            rollersdata[(tilingname,polyname)]="HPR"
         elif(results["type"]=="band"):
-            rollersdata[(tilingname,polyname)]="b"
+            rollersdata[(tilingname,polyname)]="br"
         elif(results["type"]=="area"):
-            rollersdata[(tilingname,polyname)]="a"
+            rollersdata[(tilingname,polyname)]="ar"
+        else:
+            rollersdata[(tilingname,polyname)]="x"
     print()
+
+    with open('rolling_results.pickle', 'wb') as handle:
+        pickle.dump(all_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open('rollersdata.pickle', 'wb') as handle:
+        pickle.dump((rollersdata,tuple(all_tilings.keys()),tuple(all_nets.keys())), handle, protocol=pickle.HIGHEST_PROTOCOL)
+    #output_table(all_nets,all_tilings,rollersdata)
     for tilingname,polyname in rollers:
         print(tilingname,polyname)
-
     print(len(rollers))
