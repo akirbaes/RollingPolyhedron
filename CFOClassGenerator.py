@@ -340,6 +340,15 @@ def has_all_tiles(connex,clas,tiling):
             reached.add(c)
     return len(tiles.difference(reached))==0
 
+def has_all_compatible_tiles(connex,clas,tiling,net):
+    compatible_face_sizes = set(len(n) for n in net.values())
+    tiles = set(c for c,n in tiling.items() if len(n) in compatible_face_sizes)
+    reached = set()
+    for index in connex:
+        for c,f,o in clas[index]:
+            reached.add(c)
+    return len(tiles.difference(reached))==0
+
 def cfo_class_index(classes,cfo):
     for index,clas in enumerate(classes):
         if cfo in clas:
