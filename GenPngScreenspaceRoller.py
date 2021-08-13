@@ -107,6 +107,8 @@ def draw_tiling(spa,spb,surface,startcell,startorientation,tiling:dict,iterlevel
 
 
 def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilingname,polyname,unusedfaces = None):
+    xx,yy,XX,YY = 9999,9999,0,0
+
     if(unusedfaces==None):
         unusedfaces = unusedfacesdict.get((tilingname,polyname),None) or []
     visited_faces = list()
@@ -122,6 +124,7 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilin
         textsize = int(((p1.x-p2.x)**2+(p1.y-p2.y)**2)**0.5/2)
         center = centerpoint(face_poly)
         x,y = int(center[0]),int(center[1])
+
         if(face not in unusedfaces):
             color1 = (0,0,255)
             color2 = (0,0,128)
@@ -138,6 +141,11 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilin
         text = pygame.font.SysFont(None, textsize).render(str(face), True, (0,0,0))
         surf.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
 
+        for x,y in face_poly:
+            x=int(x)
+            y=int(y)
+            xx, yy, XX, YY = min(x, xx), min(y, yy), max(XX, x), max(YY, y)
+
         for index,nextface in enumerate(polyhedron[face]):
             face_shift = polyhedron[nextface].index(face)
             # Create a stub nextface at the edge of the current face
@@ -146,6 +154,7 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilin
             pa, pb = nextface_stub[-face_shift], nextface_stub[(-face_shift+1)%len(nextface_stub)]
             orientation = polyhedron[nextface].index(face)
             visits.insert(0,(nextface,0,pa,pb))
+    return xx,yy,XX,YY
 
 def draw_background(surf,grid):
     for data in grid.values():
@@ -195,14 +204,21 @@ def draw_answer(filename,tilingname,polyname,visits,grid,polyhedron,p1,p2,startf
     surface2.set_alpha(100)
 
     pygame.draw.polygon(surf, (255,255,0), convertToTuples(face), 0)
-    draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilingname, polyname,unusedfaces)
-
+    xx,yy,XX,YY = draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilingname, polyname,unusedfaces)
     surface2.set_alpha(255)
     text = pygame.font.SysFont(None, 30).render(tilingname+" with "+polyname, True, (0, 0, 0))
-    pygame.draw.rect(surf, (255,255,255),(100+25+50,100+25+50,text.get_width()+2,text.get_height()+2))
-    surf.blit(text, (101+25+50,101+25+50))
+    xx-=10
+    XX+=10
+    yy-=10+text.get_height()
+    YY+=10
+    if XX-xx<text.get_width()+2:
+        xx-=int(text.get_width()-(XX-xx)+2)/2
+        XX+=int(text.get_width()-(XX-xx)+2)
+    pygame.draw.rect(surf, (255,255,255),(xx,yy,text.get_width()+2,text.get_height()+2))
+    surf.blit(text, (xx+1,yy+1))
     # sub = screen.subsurface(rect)
-    pygame.image.save(surf.subsurface([100+25+50,100+25+50,600-25,600-25]),filename)
+    print(xx,yy,XX,YY,w,h)
+    pygame.image.save(surf.subsurface([xx,yy,XX-xx,YY-yy]),filename)
 
 if __name__ == "__main__":
     pass
