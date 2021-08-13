@@ -8,6 +8,9 @@ import numpy
 import pygame
 import sympy
 
+GENERATE_PROOF = True
+GENERATE_STAB = True
+
 from GeometryFunctions import centerpoint
 from LatexOutput import output_table
 from RollyPoint import RollyPoint
@@ -570,11 +573,11 @@ def is_roller(tiling,tilingname,net,polyname):
                     type="non-roller"
                     all_data[groupindex]["type"]= "hollow"
                 if(N):
-                    graph = [[bool((i, j) in filled_supertiles)+bool(coordinates[(i,j)]) for i in range(-N, N + 1, 1)] for j in range(-N, N+1, 1)]
+                    graph = [[bool((i, j) in filled_supertiles)+bool(coordinates[(i,j)]) for i in range(-N//2, N//2 + 1, 1)] for j in range(-N//2, N//2+1, 1)]
                     CFOClassGenerator.prettyprint_012(graph)
                     #input()
-
-            # generate_image(tiling, net, tilingname, polyname, classes, group, groups, borders, min_symmetries, coordinates,type)
+            if(GENERATE_PROOF):
+                generate_image(tiling, net, tilingname, polyname, classes, group, groups, borders, min_symmetries, coordinates,type)
         """Done with all the groups"""
         is_stable = not False in stability
         results = dict()
@@ -634,7 +637,8 @@ def is_roller(tiling,tilingname,net,polyname):
             stable_spots = {pos:[counter == maxfo[cell] for cell,counter in enumerate(celldata)] for pos,celldata in fill_area.items()}
             stable_spots = {pos:[cell_stability[cell]==maxfo[cell] and maxfo[cell]!=0 for cell in range(len(tiling))] for pos in fill_area}
             type=("roller","quasi-roller")[bool(incompatible)]
-            # generate_stability_image(tilingname,polyname,tiling,net,borders,type,stable_spots)
+            if(GENERATE_STAB):
+                generate_stability_image(tilingname,polyname,tiling,net,borders,type,stable_spots)
 
             results["stability"]=all(cell_stability[cell]==maxfo[cell] for cell in range(len(tiling)))
         return results
