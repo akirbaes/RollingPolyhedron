@@ -79,6 +79,8 @@ def loop():
     global copy_change
     clock = pygame.time.Clock()
     running = True
+    tiling_result = {None: (None,)}
+
     while running:
         clock.tick(30)
         wipe_surface(2)
@@ -94,6 +96,34 @@ def loop():
             edge.draw_cursor()
         refresh()
         copy_change = "no change"
+
+
+        if tiling_result and None not in (a for key in tiling_result for a in tiling_result[key]):
+            top = tkinter.Tk()
+            top.withdraw()  # hide window
+            #filetypes=("Text txt",)
+            file_name = tkinter.filedialog.asksaveasfilename(parent=top)
+            basename = os.path.basename(file_name)
+            top.destroy()
+            try:
+                f=open(file_name+'.py',"w")
+                f.write(("all_tilings['%s'] = \\\n"%basename)+pprint.pformat(tiling_result,indent=4,sort_dicts=True))
+                #f.write(pprint.pformat(tiling_result,indent=4,sort_dicts=True))
+                f.close()
+            except:
+                traceback.print_exc()
+
+            tiling_result_p = dict()
+            for key in tiling_result:
+                tiling_result_p[key] = [((isinstance(x,tuple) and x[0]+x[1]*len(tiling_result))) or (isinstance(x,int) and x) for x in tiling_result[key]]
+            pprint.pprint(tiling_result_p,indent=4,sort_dicts=True)
+            try:
+                f=open(file_name+".oldformat","w")
+                f.write(("all_tilings['%s'] = \\\n"%basename)+pprint.pformat(tiling_result_p,indent=4,sort_dicts=True))
+                f.close()
+            except:
+                traceback.print_exc()
+
         tiling_result  = {None:(None,)}
         for e in pygame.event.get():
             if e.type == pygame.MOUSEBUTTONDOWN:
@@ -120,6 +150,20 @@ def loop():
                     distances = [distance(centerpoint((edge.p1,edge.p2)), pygame.mouse.get_pos()) for edge in mouse_right_triggers]
                     mouse_right_triggers[distances.index(min(distances))].mouse_right_click()
                     tiling_result=get_tiling()
+            global firstEdge
+            global p2
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_RIGHT:
+                print("Rotate+")
+                all_objects = []
+                p2 = (p2-p1).rotate(15/180*pi)+p1
+                firstEdge = Edge((p1, p2), current_facetype, None)
+                all_objects.append(firstEdge)
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_LEFT:
+                print("Rotate-")
+                all_objects = []
+                p2 = (p2-p1).rotate(-15/180*pi)+p1
+                firstEdge = Edge((p1, p2), current_facetype, None)
+                all_objects.append(firstEdge)
             if e.type == pygame.KEYDOWN and e.key == pygame.K_RETURN:
                 all_objects = []
                 running = False
@@ -128,32 +172,7 @@ def loop():
                 print("Quit!", flush=True)
                 exit()
 
-        refresh()
-        if tiling_result and None not in (a for key in tiling_result for a in tiling_result[key]):
-            top = tkinter.Tk()
-            top.withdraw()  # hide window
-            #filetypes=("Text txt",)
-            file_name = tkinter.filedialog.asksaveasfilename(parent=top)
-            basename = os.path.basename(file_name)
-            top.destroy()
-            try:
-                f=open(file_name+'.py',"w")
-                f.write(("all_tilings['%s'] = \\\n"%basename)+pprint.pformat(tiling_result,indent=4,sort_dicts=True))
-                #f.write(pprint.pformat(tiling_result,indent=4,sort_dicts=True))
-                f.close()
-            except:
-                traceback.print_exc()
-
-            tiling_result_p = dict()
-            for key in tiling_result:
-                tiling_result_p[key] = [((isinstance(x,tuple) and x[0]+x[1]*len(tiling_result))) or (isinstance(x,int) and x) for x in tiling_result[key]]
-            pprint.pprint(tiling_result_p,indent=4,sort_dicts=True)
-            try:
-                f=open(file_name+".oldformat","w")
-                f.write(("all_tilings['%s'] = \\\n"%basename)+pprint.pformat(tiling_result_p,indent=4,sort_dicts=True))
-                f.close()
-            except:
-                traceback.print_exc()
+            # refresh()
 
             """
             tiling_result_t = dict()
