@@ -156,13 +156,13 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilin
             visits.insert(0,(nextface,0,pa,pb))
     return xx,yy,XX,YY
 
-def draw_background(surf,grid):
+def draw_background(surf,grid,color=(0,0,0),width=2):
     for data in grid.values():
         points = data[0]
         #cell = data[1]
         #distance = data[2] #not always available, distance from center
         # print(points)
-        pygame.draw.polygon(surf, (0,0,0), convertToTuples(points), 2)
+        pygame.draw.polygon(surf, color, convertToTuples(points), width)
 
 def draw_polygon(surf,color,points,width):
     pygame.draw.polygon(surf, color, convertToTuples(points), width)

@@ -4,11 +4,12 @@
 """
 import os
 import pprint
+import sys
 
+from GenPngScreenspaceRoller import draw_background, refresh, wait_for_input
 from GeometryFunctions import *
 from sys import setrecursionlimit
 import DrawingFunctions as Draw
-
 
 from tilings_oldformat import *
 
@@ -127,7 +128,7 @@ def get_face_points(p1, p2, face, noisy=True):
 
 
 def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=None, fill=True, ord=None,
-              prints=False):
+              prints=False, refresh = False):
     realshape = newshape % len(order)
     if (drawnshapes == None):
         drawnshapes = list()
@@ -148,8 +149,8 @@ def visualise(p1, p2, newshape, oldshape, color=0, drawnshapes=None, shapespoly=
     current = current[index:] + current[:index]
     shapespoly[-1].fill(current)
     drawnshapes.append(realshape)
-
-    Draw.refresh()
+    if(refresh):
+        Draw.refresh()
     # sleep(0.1)
     # print("I have",len(points),"points")
     # if(newshape==realshape):
@@ -174,6 +175,51 @@ def point_outside(point):
     if (x < 0 or y < 0 or x > WIDTH or y > HEIGHT):
         return True
 
+def case_match(tiling, previous_case, newcaseid):
+    """tiling = dict
+previous_case = int
+newcaseid = tuple"""
+    current_case, id = newcaseid
+    # Match mirror id first
+    for index, pc in enumerate(tiling[current_case]):
+        pcc, pid = pc
+        if (pcc == previous_case and pid == -id):
+            return index
+    # Match same id
+    for index, pc in enumerate(tiling[current_case]):
+        pcc, pid = pc
+        if (pcc == previous_case and pid == id):
+            return index
+    print(previous_case,newcaseid,tiling)
+cell_match=case_match
+
+def map_screenspace(tiling, startcell, area, p1, p2, precision, limit=False):
+    "visited areas[center points: (polygon, cell number)]"
+    visited_areas = dict()
+    visits = [(startcell, p1, p2)]
+    while (visits):
+        cell, p1, p2 = visits.pop()
+        cface = xgon(len(tiling[cell]), p1, p2)
+        ccenter = tuple(floatcenterpoint(cface))
+        ccenter = int(round(ccenter[0] / precision) * precision), int(round(ccenter[1] / precision) * precision)
+
+        if not (area[0] < ccenter[0] < area[2]) or not (area[1] < ccenter[1] < area[3]):
+            continue
+        if (ccenter in visited_areas):
+            continue
+
+        visited_areas[ccenter] = (cface, cell)  # later for drawing
+
+        for index, nextcellid in enumerate(tiling[cell]):
+            cell_shift = cell_match(tiling, cell, nextcellid)
+            nextcell, id = nextcellid
+            # Create a stub ncface at the edge of the current cface
+            nextface_stub = xgon(len(tiling[nextcell]), cface[(index + 1) % len(cface)], cface[index])
+            # Reorient it
+            pa, pb = nextface_stub[-cell_shift], nextface_stub[(-cell_shift + 1) % len(nextface_stub)]
+            if(not limit or id==0 and nextcell!=cell):
+                visits.append((nextcell, pa, pb))
+    return visited_areas
 
 def points_outside(points):
     for point in points:
@@ -203,7 +249,7 @@ from random import randint
 tempshape = []
 
 
-def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=None, color=None, prints=False):
+def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=None, color=None, prints=False, refresh=True):
     global tempshape
 
     if (exploredpoints == None):
@@ -236,7 +282,7 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
     except:
         # Maybe the -P +P formula is not respected
         index = current.index(-oldshape + 2 * (oldshape % len(order)))
-        print("Exception matching", oldshape % len(order), "+%dP" % (oldshape // len(order)))
+        # print("Exception matching", oldshape % len(order), "+%dP" % (oldshape // len(order)))
     current = current[index:] + current[:index]
     # print("Previous:",oldshape,"Next:",current)
     # screen.fill((255,255,255))
@@ -253,10 +299,10 @@ def fill_screen(p1, p2, newshape, oldshape=None, exploredpoints=None, drawnpoly=
         if (color == None):
             c = randint(0, 100)
             c = -1
-            drawnpoly += visualise(p1, p2, newshape, oldshape, c, fill=False)
+            drawnpoly += visualise(p1, p2, newshape, oldshape, c, fill=False, refresh=refresh)
         else:
-            visualise(p1, p2, newshape, oldshape, color, fill=False)
-        print("Drawn")
+            visualise(p1, p2, newshape, oldshape, color, fill=False, refresh=refresh)
+        # print("Drawn")
     # print(drawnpoly[-1])
     # color+=1
     # print("Finished drawing")
@@ -310,67 +356,115 @@ if __name__ == "__main__":
     global shape_name
     global net
     global order
-    # for shape_name in missing:
-    # for shape_name in shapes_names:
-    # convert_all_tiling(platonics, "platonic_tilings")
-    # convert_all_tiling(archimedeans, "archimedean_tilings")
-    # convert_all_tiling(isogonals, "isogonal_tilings")
+    if len(sys.argv)>1 and sys.argv[1].endswith(".oldformat"):
+        with open(sys.argv[1],"r") as codefile:
+            code = codefile.read()
+            all_tilings = dict()
+            dictpart = code[code.index("{"):]
+            namepart = code[code.index("'")+1:code.index("]")-1]
+            print(namepart)
+            shape_name = namepart
+            print(dictpart)
+            all_tilings[namepart]=eval(dictpart)
+            for tilingname, tiling in all_tilings.items():
+                net = tiling
+                shape = net
+                tilename = tilingname
+                order = list(tiling.keys())
+                drawn = visualise(p1, p2, 0, net[0][0], 2)
+                fill_screen(p1, p2, order[0], color=3,refresh=False)
+            Draw.refresh()
+            Draw.wait_for_input()
+    elif len(sys.argv)>1 and sys.argv[1].endswith(".py"):
+        with open(sys.argv[1],"r") as codefile:
+            code = codefile.read()
+            dictpart = code[code.index("{"):]
+            namepart = code[code.index("'")+1:code.index("]")-1]
+            print(namepart)
+            print(dictpart)
+            tiling=eval(dictpart)
 
-    for tilename in platonics:
-        net = platonics[tilename]
-        tilename = "platonics_" + tilename
-        print("]" * 50 + tilename)
-        Draw.text_topleftalign(tilename, 2, 2, (0, 0, 0), 30)
-        shape = net
-        order = sorted(net.keys())
-        visualise(p1, p2, 0, net[0][0], 2)
-        fill_screen(p1, p2, order[0], color=None)
-        Draw.text_topleftalign(tilename, 2, 2, (255, 0, 0), 30, bgcolor=(255, 255, 255))
-        Draw.refresh()
 
-        try:os.mkdir("platonic_tilings_images")
-        except:pass
-        Draw.save_screen("platonic_tilings_images/" + tilename + ".png")
-        # Draw.wait_for_input()
-        Draw.empty_shapes()
-    isogonals['3.4^2.6;3.6.3.6)_2'] = \
-        {0: [2, 8, 1, 13],
-         1: [False, 29, 17, 3, 22, 34],
-         2: [False, 16, 21],
-         3: [1, 10, 4, 5],
-         4: [3, 31, 26]}
+        import pygame
+        pygame.init()
+        screen = pygame.display.set_mode((800, 800), pygame.DOUBLEBUF)
+        screen.fill((255, 255, 255, 255))
+        outlines = pygame.Surface((800, 800), pygame.SRCALPHA)
+        area = (0,0,1000,1000)
 
-    for tilename in isogonals:
-        net = isogonals[tilename]
-        tilename = "isogonal_" + tilename
-        print("]" * 50 + tilename)
-        Draw.text_topleftalign(tilename, 2, 2, (0, 0, 0), 30)
-        shape = net
-        order = sorted(net.keys())
-        visualise(p1, p2, 0, net[0][0], 2)
-        fill_screen(p1, p2, order[0], color=None)
-        Draw.text_topleftalign(tilename, 2, 2, (255, 0, 0), 30, bgcolor=(255, 255, 255))
-        Draw.refresh()
-        try:os.mkdir("isogonal_tilings_images")
-        except:pass
-        Draw.save_screen("isogonal_tilings_images/" + tilename + ".png")
-        # Draw.wait_for_input()
-        Draw.empty_shapes()
-    # exit()
+        mapping = map_screenspace(tiling, 0, area, p1, p2, 1)
+        single = map_screenspace(tiling, 0, area, p1, p2, 1,limit=True)
+        outlines = pygame.Surface((800, 800), pygame.SRCALPHA)
+        outlines.fill((255, 0, 255, 0))
+        print(mapping)
+        draw_background(screen, mapping, (0,0,0))
+        draw_background(screen, single, (0,0,0),6
+                        )
+        draw_background(screen, single, (255,0,0))
+        refresh()
+        wait_for_input()
+    else:
+        # for shape_name in missing:
+        # for shape_name in shapes_names:
+        # convert_all_tiling(platonics, "platonic_tilings")
+        # convert_all_tiling(archimedeans, "archimedean_tilings")
+        # convert_all_tiling(isogonals, "isogonal_tilings")
 
-    for tilename in archimedeans:
-        net = archimedeans[tilename]
-        tilename = "archimedean_" + tilename
-        print("]" * 50 + tilename)
-        Draw.text_topleftalign(tilename, 2, 2, (0, 0, 0), 30)
-        shape = net
-        order = sorted(net.keys())
-        visualise(p1, p2, 0, net[0][0], 2)
-        fill_screen(p1, p2, order[0], color=None)
-        Draw.text_topleftalign(tilename, 2, 2, (255, 0, 0), 30, bgcolor=(255, 255, 255))
-        Draw.refresh()
-        try:os.mkdir("archimedean_tilings_images")
-        except:pass
-        Draw.save_screen("archimedean_tilings_images/" + tilename + ".png")
-        # Draw.wait_for_input()
-        Draw.empty_shapes()
+        for tilename in platonics:
+            net = platonics[tilename]
+            tilename = "platonics_" + tilename
+            print("]" * 50 + tilename)
+            Draw.text_topleftalign(tilename, 2, 2, (0, 0, 0), 30)
+            shape = net
+            order = sorted(net.keys())
+            visualise(p1, p2, 0, net[0][0], 2)
+            fill_screen(p1, p2, order[0], color=None)
+            Draw.text_topleftalign(tilename, 2, 2, (255, 0, 0), 30, bgcolor=(255, 255, 255))
+            Draw.refresh()
+
+            try:os.mkdir("platonic_tilings_images")
+            except:pass
+            Draw.save_screen("platonic_tilings_images/" + tilename + ".png")
+            # Draw.wait_for_input()
+            Draw.empty_shapes()
+        isogonals['3.4^2.6;3.6.3.6)_2'] = \
+            {0: [2, 8, 1, 13],
+             1: [False, 29, 17, 3, 22, 34],
+             2: [False, 16, 21],
+             3: [1, 10, 4, 5],
+             4: [3, 31, 26]}
+
+        for tilename in isogonals:
+            net = isogonals[tilename]
+            tilename = "isogonal_" + tilename
+            print("]" * 50 + tilename)
+            Draw.text_topleftalign(tilename, 2, 2, (0, 0, 0), 30)
+            shape = net
+            order = sorted(net.keys())
+            visualise(p1, p2, 0, net[0][0], 2)
+            fill_screen(p1, p2, order[0], color=None)
+            Draw.text_topleftalign(tilename, 2, 2, (255, 0, 0), 30, bgcolor=(255, 255, 255))
+            Draw.refresh()
+            try:os.mkdir("isogonal_tilings_images")
+            except:pass
+            Draw.save_screen("isogonal_tilings_images/" + tilename + ".png")
+            # Draw.wait_for_input()
+            Draw.empty_shapes()
+        # exit()
+
+        for tilename in archimedeans:
+            net = archimedeans[tilename]
+            tilename = "archimedean_" + tilename
+            print("]" * 50 + tilename)
+            Draw.text_topleftalign(tilename, 2, 2, (0, 0, 0), 30)
+            shape = net
+            order = sorted(net.keys())
+            visualise(p1, p2, 0, net[0][0], 2)
+            fill_screen(p1, p2, order[0], color=None)
+            Draw.text_topleftalign(tilename, 2, 2, (255, 0, 0), 30, bgcolor=(255, 255, 255))
+            Draw.refresh()
+            try:os.mkdir("archimedean_tilings_images")
+            except:pass
+            Draw.save_screen("archimedean_tilings_images/" + tilename + ".png")
+            # Draw.wait_for_input()
+            Draw.empty_shapes()
