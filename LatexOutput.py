@@ -44,6 +44,7 @@ def find_roller_withname(tilename,polyname):
         for name in filenames:
             if (name.endswith(".png")) and name.startswith(polyname+"@"+tilename):
                 return name
+    raise FileNotFoundError
 
 def find_roller_face_withname(tilename,polyname):
     path = "_proofimages_backup/rollers_withfaces"
@@ -106,6 +107,65 @@ def output_condensedtable(all_nets,all_tilings,rollersdata):
             f.write("\\\\ \n\hline\n")
         f.write("\end{xltabular}\n")
     print("Condensed table output")
+
+
+def find_quasiroller_withname(tilename,polyname):
+    path = "_proofimages/quasi_roller"
+    for dirpath, dirnames, filenames in os.walk(path):
+        for name in filenames:
+            if (name.endswith(".png")) and name.startswith(polyname+"@"+tilename):
+                return name
+    raise FileNotFoundError(polyname+"@"+tilename)
+
+def output_quasirollerstable(all_nets,all_tilings,rollingresults):
+    stablelines = list()
+    otherlines = list()
+    all_rollers = list()
+    for (tilename,polyname),results in rollingresults.items():
+        linedata = []
+        if results and results["type"]=="quasi_roller":
+            hypertarget = "poly"+str(all_nets.index(polyname))+"tile"+str(all_tilings.index(tilename))
+            hyperlink = (tilename in platonic_tilings and "platonic_tiling_quasirollers") or (tilename in archimedean_tilings and "archimedean_tiling_quasirollers") or (tilename in biisogonal_tilings and "2isogonal_tiling_quasirollers") or "unknown quasi tiling group"
+            linedata.append("\hypertarget{%s}{"%hypertarget+"\makecell{%s \\\\ $%s$ \\\\ \hyperlink{%s}{back}}}"%(polyname.replace("_"," \\\\ "),tilename,hyperlink))
+            filename = find_quasiroller_withname(tilename,polyname)
+            all_rollers.append(tilename+" "+polyname)
+            # print(tilename+" "+polyname)
+            linedata.append("\\raisebox{-.5\height}{\includegraphics[width=100pt]{rolls/proofrolls/quasiroller/%s}}"%filename)
+            if (results["stability"] and False):
+                linedata.append("All tiles")
+            else:
+                linedata.append(
+                    "\\raisebox{-.5\height}{\includegraphics[width=100pt]{rolls/proofrolls/quasirollerstability/%s}}" %
+                    (polyname+"@"+tilename+" stability.png"))
+            if(results["stability"]):
+                stablelines.append(linedata)
+            else:
+                otherlines.append(linedata)
+    with open(".latex_output/stable_quasirollerstable.txt","w") as f:
+        f.write("""\makegapedcells 
+\\begin{xltabular}{\columnwidth}{|c|%s|}
+\hline
+"""%("|".join("X" for x in stablelines[0])))
+        f.write("Pair & Roll & Stability \\\\\n\hline\n")
+        f.write("\n")
+        for line in stablelines:
+            f.write(" & ".join(line))
+            f.write("\\\\\n\hline\n")
+        f.write("""\hline
+\end{xltabular}\n""")
+
+    with open(".latex_output/unstable_quasirollerstable.txt","w") as f:
+        f.write("""\makegapedcells 
+\\begin{xltabular}{\columnwidth}{|c|%s|}
+\hline
+"""%("|".join("X" for x in otherlines[0])))
+        f.write("Pair & Roll & Stability \\\\\n\hline\n")
+        f.write("\n")
+        for line in otherlines:
+            f.write(" & ".join(line))
+            f.write("\\\\\n\hline\n")
+        f.write("""\hline
+\end{xltabular}\n""")
 
 
 
@@ -237,3 +297,4 @@ if __name__ == "__main__":
     with open("rolling_results.pickle", "rb") as handle:
         rollingresults = pickle.load(handle)
     output_rollerstable(all_nets,all_tilings,rollingresults)
+    output_quasirollerstable(all_nets, all_tilings, rollingresults)
