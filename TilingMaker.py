@@ -483,6 +483,7 @@ class Edge():
         if (self.mouse_inside()) and not self.active:
             selected_edge=None
             self.remove_traces()
+            self.update_shape()
         elif (self.mouse_inside()) and self.active and len(all_objects)>1:
             # self.remove_traces()
             if(self.is_neighbour()):
@@ -517,6 +518,7 @@ class Edge():
             self.forget_faceid()
         self.children = []
         self.active = True
+        self.polysize=current_facetype
         # delete the edges that were created by this, and its descendance
 
 
