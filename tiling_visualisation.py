@@ -382,9 +382,7 @@ if __name__ == "__main__":
             namepart = code[code.index("'")+1:code.index("]")-1]
             print(namepart)
             print(dictpart)
-            tiling=eval(dictpart)
-
-
+        tiling=eval(dictpart)
         import pygame
         pygame.init()
         screen = pygame.display.set_mode((800, 800), pygame.DOUBLEBUF)
@@ -398,10 +396,11 @@ if __name__ == "__main__":
         outlines.fill((255, 0, 255, 0))
         print(mapping)
         draw_background(screen, mapping, (0,0,0))
-        draw_background(screen, single, (0,0,0),6
-                        )
+        draw_background(screen, single, (0,0,0),6)
         draw_background(screen, single, (255,0,0))
         refresh()
+        pygame.image.save(screen, os.path.dirname(sys.argv[1])+os.sep+namepart+".png")
+
         wait_for_input()
     else:
         # for shape_name in missing:
