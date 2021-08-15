@@ -154,18 +154,18 @@ def loop():
             global p2
             if e.type == pygame.KEYDOWN and e.key == pygame.K_RIGHT:
                 print("Rotate+")
-                all_objects = []
                 p2 = (p2-p1).rotate(15/180*pi)+p1
-                firstEdge = Edge((p1, p2), current_facetype, None)
-                all_objects.append(firstEdge)
+                all_objects[0].remove_traces()
+                all_objects[0].__init__((p1,p2), current_facetype, None)
+                # p2 = (p2-p1).rotate(15/180*pi)+p1
+                # firstEdge = Edge((p1, p2), current_facetype, None)
+                # all_objects.append(firstEdge)
             if e.type == pygame.KEYDOWN and e.key == pygame.K_LEFT:
                 print("Rotate-")
-                all_objects = []
                 p2 = (p2-p1).rotate(-15/180*pi)+p1
-                firstEdge = Edge((p1, p2), current_facetype, None)
-                all_objects.append(firstEdge)
+                all_objects[0].remove_traces()
+                all_objects[0].__init__((p1,p2), current_facetype, None)
             if e.type == pygame.KEYDOWN and e.key == pygame.K_RETURN:
-                all_objects = []
                 running = False
             if e.type == pygame.QUIT:
                 running = False
@@ -277,6 +277,13 @@ class Edge():
     select_neighbour = None
     cursors = list()
     closest = None
+    def reset(ignore):
+        depth = 0
+        numbering = set()
+        select_neighbour = None
+        cursors = list()
+        closest = None
+
 
     def update_shape(self):
         if(self.is_neighbour()):
