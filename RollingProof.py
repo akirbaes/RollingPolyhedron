@@ -1,6 +1,8 @@
 import copy
 import os
 import pickle
+import time
+from datetime import datetime
 from math import ceil
 from statistics import mean
 
@@ -8,21 +10,24 @@ import numpy
 import pygame
 import sympy
 
-GENERATE_PROOF = True
-GENERATE_STAB = True
+GENERATE_PROOF = False
+GENERATE_STAB = False
+UPDATE_RESULTS = False
+DUPLICATE_IMAGES = False
 
 from GeometryFunctions import centerpoint
-from LatexOutput import output_table
 from RollyPoint import RollyPoint
 from symmetry_classes.poly_symmetries import poly_symmetries
 from symmetry_classes.symmetry_functions import canon_fo
 from tiling_dicts.archimedean_tilings import archimedean_tilings
 from tiling_dicts.platonic_tilings import platonic_tilings
 from tiling_dicts.isogonal_tilings import biisogonal_tilings
+from tiling_dicts.triisogonal_vertex_homogeneous import triisogonal_vertex_homogeneous
 from poly_dicts.prism_nets import prism_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.johnson_nets import johnson_nets
-all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings}
+all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings, **triisogonal_vertex_homogeneous}
+# all_tilings = {**triisogonal_vertex_homogeneous}
 all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
 
 
@@ -577,7 +582,8 @@ def is_roller(tiling,tilingname,net,polyname):
                     CFOClassGenerator.prettyprint_012(graph)
                     #input()
             if(GENERATE_PROOF):
-                generate_image(tiling, net, tilingname, polyname, classes, group, groups, borders, min_symmetries, coordinates,type)
+                if not any(stability[:groupindex]) or DUPLICATE_IMAGES:
+                    generate_image(tiling, net, tilingname, polyname, classes, group, groups, borders, min_symmetries, coordinates,type)
         """Done with all the groups"""
         is_stable = not False in stability
         results = dict()
@@ -649,8 +655,23 @@ def is_roller(tiling,tilingname,net,polyname):
 
     #else no cmpatibility
 
+start_time = time.time()
+def timer():
+    global start_time
+    old_time = start_time
+    start_time=time.time()
+    return start_time-old_time
+def timerstring():
+    s=str(timer())
+    if("." in s):
+        s=s[:s.index(".")+2]
+    return s.ljust(5)+"s "
+def timestamp():
+    return datetime.now().strftime("%H:%M:%S")
 
 if __name__ == "__main__":
+    timer()
+    print(timestamp())
     rollers = list()
     quasirollers = list()
     rollersdata = dict()
@@ -668,7 +689,6 @@ if __name__ == "__main__":
 # ["(3^3x4^2;3^2x4x3x4)1", "j1"],
 # ["(3^3x4^2;3^2x4x3x4)1", "j27"]
 #         ]:
-
 
     for tilingname, polyname in ((t,p) for t in all_tilings.keys() for p in all_nets.keys()):
     # for tilingname, polyname in [["3^6;3^2x4x3x4","j89"]]:
@@ -703,12 +723,15 @@ if __name__ == "__main__":
         else:
             rollersdata[(tilingname,polyname)]="x"
     print()
-
-    with open('rolling_results.pickle', 'wb') as handle:
-        pickle.dump(all_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    with open('rollersdata.pickle', 'wb') as handle:
-        pickle.dump((rollersdata,tuple(all_tilings.keys()),tuple(all_nets.keys())), handle, protocol=pickle.HIGHEST_PROTOCOL)
+    if(UPDATE_RESULTS):
+        with open('rolling_results.pickle', 'wb') as handle:
+            pickle.dump(all_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        with open('rollersdata.pickle', 'wb') as handle:
+            pickle.dump((rollersdata,tuple(all_tilings.keys()),tuple(all_nets.keys())), handle, protocol=pickle.HIGHEST_PROTOCOL)
     #output_table(all_nets,all_tilings,rollersdata)
     for tilingname,polyname in rollers:
         print(tilingname,polyname)
     print(len(rollers))
+    print("Tilings:",len(all_tilings))
+    print(timestamp())
+    print("Total duration:",timerstring())
