@@ -7,6 +7,8 @@ Once all edges are linked, it will prompt you to save the net under a name."""
 
 # to work on to create a tiling creation software
 # might have some useless functions copied from NetDrawer
+
+#Issues: when saving, numbering is not checked, sometimes leaving big gaps
 import os
 import pprint
 import tkinter
