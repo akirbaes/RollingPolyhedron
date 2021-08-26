@@ -7,3 +7,9 @@ venv/
 exploration_results*
 .zip
 *Imgur Album*
+tiling_dicts/3-isogonal
+*polyhedron_images*
+.gal
+Showing off
+.latex_output
+*_backup
