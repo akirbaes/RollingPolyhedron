@@ -230,6 +230,7 @@ def draw_CFO_distance_matrix(classes,class_transfo,all_explored,polyname,tilingn
     prettierprint_adjacency(ordered)
 
     #DrawingFunctions.turn_into_image(ordered,"CFO_ajdacency_matrixes/n-uniform/"+polyname+"@"+tilingname+".png")
+    DrawingFunctions.turn_into_image(ordered,"CFO_ajdacency_matrixes/tessellation_polyhedron/"+polyname+"@"+tilingname+".png")
 
 from pprint import pprint
 #CFO_class_adjacency
@@ -327,6 +328,7 @@ def generate_CFO_classes(tile,poly,polyname,tilingname, canon_fo):
             explore = [list(all_classes).pop()]
             explored = [explore[0]]
 
+    #draw_CFO_distance_matrix(classes, class_transfo, all_explored, polyname, tilingname)
     return classes, transformations, all_explored
 
 
@@ -365,22 +367,22 @@ if __name__ == "__main__":
     from poly_dicts.johnson_nets import johnson_nets
     all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
     print(list(all_nets.keys()))
-    from tiling_dicts.archimedean_tilings import archimedean_tilings
-    from tiling_dicts.platonic_tilings import platonic_tilings
-    from tiling_dicts.isogonal_tilings import biisogonal_tilings
-    from poly_dicts.plato_archi_nets import plato_archi_nets
-    from poly_dicts.johnson_nets import johnson_nets
-    from poly_dicts.TessellationPolyhedronAndTilings import net_tessellations
-    tilingname = '3^6'
-    # tiling = net_tessellations["cube"]
-    polyname = "cube"
-    # tiling = biisogonal_tilings['3^6;3^2x4x3x4']#'4^4']
-    polyname = "j1"##"j8"
-    # net = johnson_nets[polyname]
 
-    tiling = platonic_tilings[tilingname]
-    print(list(platonic_tilings.keys()))
-    net = all_nets[polyname]
+    from poly_dicts.TessellationPolyhedronAndTilings import tessellation_polyhedrons
+    from poly_dicts.TessellationPolyhedronAndTilings import net_tessellations
+    all_nets = tessellation_polyhedrons
+    all_tilings = net_tessellations
+
+    # tilingname = '3^6'
+    # # tiling = net_tessellations["cube"]
+    # polyname = "cube"
+    # # tiling = biisogonal_tilings['3^6;3^2x4x3x4']#'4^4']
+    # polyname = "j1"##"j8"
+    # # net = johnson_nets[polyname]
+    #
+    # tiling = platonic_tilings[tilingname]
+    # print(list(platonic_tilings.keys()))
+    # net = all_nets[polyname]
 
     from symmetry_classes.poly_symmetries import poly_symmetries
     import symmetry_classes.symmetry_functions
@@ -391,6 +393,8 @@ if __name__ == "__main__":
     #CFO_class_adjacency(tiling,net,polyname,tilingname,None)
     for tilingname,tiling in all_tilings.items():
         for polyname, net in all_nets.items():
+            if(polyname!=tilingname):
+                continue
             print(tilingname,polyname)
             classes,transformations,groups = generate_CFO_classes(tiling, net, polyname, tilingname, None)
             if(groups):
