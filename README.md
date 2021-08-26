@@ -1,18 +1,24 @@
-# This readme is currently in restructuration to reflect recent developments. Please be patient.
-----
-----
+# Rolling Regular-faced Polyhedron in N-Uniform Tilings
+
+A polyhedron with a regular face can sit on a tiling using the same polygon.
+
+This work explores such polyhedron rolling on various tilings with matching faces, and what area can be reached.
+
+## ScreenspaceRoller.py
+
+Generates a rolling space that fits in the screen/in a given area and explores it. Various options and output types. Color explored tiles by number of face/tile/orientation combinations.
+
+## RollingProof.py
+
+Generates a proof of rolling area by using the symmetries in the rolling structure. Outputs images and pickled dictionaries.
 
 ----
-
-----
-
-# Interesting for everyone
-
- ----
+ 
+# Other tools
 
 ## Unlimited Net Drawer
 
-### Useful for: checking the path of a polyhedron
+**Useful for: checking the path of a polyhedron**
 
 Left and Right to choose a poly out of Johnsons, Platonics, most Archimedeans and some Prisms
 
@@ -24,7 +30,7 @@ Enter to take a screenshot
 
 ## tiling_drawer.py
 
-### Useful for: creating a tiling dict manually based on an image
+**Useful for: creating a tiling dict manually based on an image**
 
 Mousewheel to change shape
 
@@ -38,11 +44,15 @@ Once all edges are linked, it will prompt you to save the net under a name.
 
 ## tiling_visualisation.py
 
-### Useful for: visualising a tiling
+**Useful for: visualising a tiling**
 
 Plots tilings and makes a screenshot
 
 Might need to change the default values
+
+----
+
+# Resources
 
 ## tiling_dicts
 
@@ -56,9 +66,10 @@ A folder with net dictionaries for a lot of polyhedrons!
 
  ----
 
-# My stuff
+# Legacy files 
 
- ----
+**to delete or archive**
+
 
 ## NetDrawer
 
@@ -71,9 +82,3 @@ Rolls whatever shape I chose in the space, with marks for orientation. Very unre
 ## IsohedralTileRollExplore
 
 Turns a tiling into a coordinates system and explores it while coloring based on coordinates. Work in Progress!
-
-## Tilenet explorer
-
-Just a concept, nothing written yet. Work in progress...
-
-Roll a shape on a tiling, decide where to start, keep track of symmetries... Nice ideas.
