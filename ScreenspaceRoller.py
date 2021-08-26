@@ -9,6 +9,7 @@ from GenPngScreenspaceRoller import draw_answer, draw_background, draw_polygon, 
 from tiling_dicts.archimedean_tilings import archimedean_tilings
 from tiling_dicts.platonic_tilings import platonic_tilings
 from tiling_dicts.isogonal_tilings import biisogonal_tilings
+from tiling_dicts.triisogonal_vertex_homogeneous import triisogonal_vertex_homogeneous
 from poly_dicts.prism_nets import prism_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.johnson_nets import johnson_nets
@@ -17,11 +18,11 @@ import symmetry_classes.symmetry_functions
 def canon_fo(polyname,face,orientation):
     return symmetry_classes.symmetry_functions.canon_fo(polyname,face,orientation,poly_symmetries)
 
-PREVIEW = True
+PREVIEW = False
 GRADATION = True
 PREVIEWPERIODICITY=20
 # SLOW=False
-OPTIMISE_SYMMETRIES = True
+OPTIMISE_SYMMETRIES = False
 SKIP_NOTFULL = True
 
 LOAD_PROGRESS = False
@@ -31,9 +32,9 @@ PICTURE_TRESHOLD = 0.03
 
 SCREENSPACE = 1
 NSPACE = 2
-EXPLORATION_SPACE = NSPACE
+EXPLORATION_SPACE = SCREENSPACE
 
-CHECK_UNUSED_FACES = False #Will disable symmetry optimisations
+CHECK_UNUSED_FACES = True  #Will disable symmetry optimisations
 CHECK_ALL_CELLS = False #Only checking rollers: will go everywhere eventually
 # CHECK_ALL_FACEROT = False
 
@@ -59,7 +60,8 @@ progressfile = "exploration_results/PROGRESS_CHECKPOINT.txt"
 skip_pairs = []
 resume_counter = -1
 
-all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings}
+all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings, **triisogonal_vertex_homogeneous}
+all_tilings = {**triisogonal_vertex_homogeneous}
 all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
 
 if(TESSELLATION_POLYHEDRON):
@@ -82,11 +84,15 @@ all_tilings_names = list(all_tilings.keys()) #if you want to limit to a few, cha
 # all_tilings_names=all_tilings_names[all_tilings_names.index("(3^6;3^3x4^2)1"):]
 #all_tilings_names = ["4^4"]
 #all_tilings_names = ["3^6"]
+#all_tilings_names=["3^6;3^2x4x3x4"]
+all_tilings_names=["02-(3^6;3^4x6;3^2x6^2)2"]
 
 all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change this line
 #all_nets_names = all_nets_names[all_nets_names.index("j50"):]
 #all_nets_names = ["cube"]
 #all_nets_names = ["snub_cube"]
+#all_nets_names=["j89"]
+all_nets_names=["hexagonal_antiprism"]
 
 import sys
 import argparse
@@ -608,9 +614,9 @@ if __name__ == "__main__":
     xx = (area[0] + area[2]) / 2
     yy = (area[1] + area[3]) / 2
     p1 = RollyPoint(xx, yy)
-    EDGESIZE = 50 /2
+    EDGESIZE = 50
     p2 = RollyPoint(xx + EDGESIZE, yy)
-    precision = 7/2
+    precision = 7
 
     for tilingname in all_tilings_names:
         if(LOAD_PROGRESS and progress_tiling!=None):
