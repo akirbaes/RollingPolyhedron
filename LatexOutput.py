@@ -1,8 +1,12 @@
 import os
 import pickle
+
+import GenPngScreenspaceRoller
 from tiling_dicts.platonic_tilings import platonic_tilings
 from tiling_dicts.archimedean_tilings import archimedean_tilings
 from tiling_dicts.isogonal_tilings import biisogonal_tilings
+from tiling_dicts.triisogonal_vertex_homogeneous import triisogonal_vertex_homogeneous
+all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings, **triisogonal_vertex_homogeneous}
 
 from DrawingFunctions import turn_into_image
 tileurl = """https://i.imgur.com/0NvVetj.png
@@ -35,7 +39,46 @@ https://i.imgur.com/WdThPkO.png
 https://i.imgur.com/W6DaIXo.png
 https://i.imgur.com/Qjqeo0Z.png
 https://i.imgur.com/onomQdI.png
-https://i.imgur.com/8xbc2uw.png""".split()
+https://i.imgur.com/8xbc2uw.png
+https://i.imgur.com/Xf51OOa.png
+https://i.imgur.com/EIshIi3.png
+https://i.imgur.com/Xw0TiuP.png
+https://i.imgur.com/04RFAi4.png
+https://i.imgur.com/7BsKbSN.png
+https://i.imgur.com/G2zlHYt.png
+https://i.imgur.com/ICtYQ54.png
+https://i.imgur.com/Ye5e7T3.png
+https://i.imgur.com/y7K63i8.png
+https://i.imgur.com/oyP65JS.png
+https://i.imgur.com/E06cGnX.png
+https://i.imgur.com/J7Trahc.png
+https://i.imgur.com/aZGEdNv.png
+https://i.imgur.com/fg8gUOV.png
+https://i.imgur.com/EO2MDBD.png
+https://i.imgur.com/4IQOe3I.png
+https://i.imgur.com/6uYGA78.png
+https://i.imgur.com/E1CfT4o.png
+https://i.imgur.com/o2VM5qE.png
+https://i.imgur.com/ragnfbp.png
+https://i.imgur.com/9ZPDs3o.png
+https://i.imgur.com/SMNF4s0.png
+https://i.imgur.com/0qFXuWn.png
+https://i.imgur.com/IQgKp70.png
+https://i.imgur.com/CNpAjhe.png
+https://i.imgur.com/44o1BpV.png
+https://i.imgur.com/0fcht32.png
+https://i.imgur.com/xHTgCGe.png
+https://i.imgur.com/oXXut5a.png
+https://i.imgur.com/rYN8pBq.png
+https://i.imgur.com/cWrJj6w.png
+https://i.imgur.com/5GZ8gzX.png
+https://i.imgur.com/SzWlfz5.png
+https://i.imgur.com/Wu6THrL.png
+https://i.imgur.com/xIMJ5V9.png
+https://i.imgur.com/SNJ9Ix5.png
+https://i.imgur.com/Ubo4SVS.png
+https://i.imgur.com/ead6MaS.png
+https://i.imgur.com/QWeVUSi.png""".split()
 
 
 def find_roller_withname(tilename,polyname):
@@ -44,42 +87,45 @@ def find_roller_withname(tilename,polyname):
         for name in filenames:
             if (name.endswith(".png")) and name.startswith(polyname+"@"+tilename):
                 return name
-    raise FileNotFoundError
+    raise FileNotFoundError(polyname+" @ "+tilename)
 
 def find_roller_face_withname(tilename,polyname):
     path = "_proofimages_backup/rollers_withfaces"
     for dirpath, dirnames, filenames in os.walk(path):
+
         for name in filenames:
             if (name.endswith(polyname+" rolls the "+tilename+" tiling.png")):
                 return name
-    raise FileNotFoundError
+    raise FileNotFoundError(polyname+" rolls the "+tilename+" tiling.png")
 
 def output_condensedtable(all_nets,all_tilings,rollersdata):
     values = ["SPR","PR","SQPR","QPR"]#,"HPR","br","ar","x"]
     values = ["SPR","PR"]#,"SQPR","QPR"]#,"HPR","br","ar","x"]
 
-    line0= "  Tiling & \multicolumn{2}{|l|}{Plane roller}"
-    # line1= "  & Stable & Unstable & Stable & Unstable"
-    line1= "  & Stable & Unstable "
 
-    lines = []
+    sectionnames = ("Platonic Tilings (3)","Archimedean Tilings (8)","2-isogonals Tilings (20)","3-isogonal vertex homogeneous (39)")
 
-    for i in range(3):
-        sectionname = ("Platonics","Archimedeans","2-isogonals")[i]
-        hypertarget = ("platonic_tiling_rollers","platonic_tiling_rollers","2isogonal_tiling_rollers")[i]
-        lines.append("  \multicolumn{3}{|l|}{\hypertarget{%s}{%s}} "%(hypertarget,sectionname))
+    f=open(".latex_output/condensed_rollerstable.txt", "w")
 
-        tilinglist = (platonic_tilings,archimedean_tilings,biisogonal_tilings)[i]
+    for i in range(len(sectionnames)):
+        sectionname = sectionnames[i]
+        hypertarget = ("platonic_tiling_rollers","archimedean_tiling_rollers","2isogonal_tiling_rollers","3isogonal_tiling_rollers")[i]
 
+        tilinglist = (platonic_tilings,archimedean_tilings,biisogonal_tilings,triisogonal_vertex_homogeneous)[i]
+
+        lines = []
         waitinglist = list()
-
+        rollerslist = list()
         for tile in tilinglist:
             rollers = [[],[]]
             for (tilename,polyname),value in rollersdata.items():
                 if tile == tilename: #n², a better way would be sorting them by the first list first
-                    url = tileurl[all_tilings.index(tilename)]
-                    tileref = "\href{%s}{$%s$}"%(url,tilename)
-
+                    try:
+                        url = tileurl[all_tilings.index(tilename)]
+                        tileref = "\href{%s}{$%s$}"%(url,tilename)
+                    except:
+                        print(tilename,"has no url")
+                        tileref = "$%s$"%tilename
                     hyperlink = "poly"+str(all_nets.index(polyname))+"tile"+str(all_tilings.index(tilename))
                     if(value in values):
                         sublist = rollers[values.index(value)]
@@ -90,22 +136,30 @@ def output_condensedtable(all_nets,all_tilings,rollersdata):
             if(sum(len(sublist) for sublist in rollers) == 0):
                 waitinglist.append(tileref)
             else:
-                lines.append(tileref+" & "+" & ".join(", ".join(elem) for elem in rollers))
+                rollerslist.append((tileref,rollers))
+        titles = ["Stable Plane Roller","Unstable Plane Roller"]
+        kepttitles = list()
+        keptelements = list()
+        for index in range(len(values)):
+            counter = any(sublist[index] for tiling,sublist in rollerslist)
+            if(counter):
+                kepttitles.append(titles[index])
+                keptelements.append(index)
 
-        if(waitinglist):
-            lines.append(" No roller & \multicolumn{2}{|l|}{%s} "%", ".join(waitinglist))
+        lines.append( ("\hypertarget{%s}{%s} "%(hypertarget,sectionname), *kepttitles ))
 
-    with open(".latex_output/condensed_rollerstable.txt", "w") as f:
-        f.write("\makegapedcells\n\\begin{xltabular}{\columnwidth}{|X|X|X|}")
+        for tilename, data in rollerslist:
+            keptrollers = [item for index,item in enumerate(data) if index in keptelements]
+            lines.append((tilename, *[", ".join(category)  for category in keptrollers] ))
+
+        f.write("\makegapedcells\n\\begin{xltabular}{\columnwidth}{|%s}"%("X|"*(len(kepttitles)+1)))
         f.write(" \n\hline\n")
-        f.write(line0)
-        f.write("\\\\ \n")
-        f.write(line1)
-        f.write("\\\\ \n\hline\n")
         for line in lines:
-            f.write(line)
-            f.write("\\\\ \n\hline\n")
+            f.write(" & ".join(line)+ "\\\\\n\\hline\n")
+        # rollers = [item for item in rollers if item]
         f.write("\end{xltabular}\n")
+        if(waitinglist):
+            f.write("No roller: "+", ".join(waitinglist)+"\n")
     print("Condensed table output")
 
 
@@ -125,7 +179,11 @@ def output_quasirollerstable(all_nets,all_tilings,rollingresults):
         linedata = []
         if results and results["type"]=="quasi_roller":
             hypertarget = "poly"+str(all_nets.index(polyname))+"tile"+str(all_tilings.index(tilename))
-            hyperlink = (tilename in platonic_tilings and "platonic_tiling_quasirollers") or (tilename in archimedean_tilings and "archimedean_tiling_quasirollers") or (tilename in biisogonal_tilings and "2isogonal_tiling_quasirollers") or "unknown quasi tiling group"
+            hyperlink = (tilename in platonic_tilings and "platonic_tiling_quasirollers") \
+                        or (tilename in archimedean_tilings and "archimedean_tiling_quasirollers") \
+                        or (tilename in biisogonal_tilings and "2isogonal_tiling_quasirollers") \
+                        or (tilename in triisogonal_vertex_homogeneous and "3isogonal_tiling_quasirollers")\
+                        or "unknown quasi tiling group"
             linedata.append("\hypertarget{%s}{"%hypertarget+"\makecell{%s \\\\ $%s$ \\\\ \hyperlink{%s}{back}}}"%(polyname.replace("_"," \\\\ "),tilename,hyperlink))
             filename = find_quasiroller_withname(tilename,polyname)
             all_rollers.append(tilename+" "+polyname)
@@ -177,7 +235,11 @@ def output_rollerstable(all_nets,all_tilings,rollingresults):
         linedata = []
         if results and results["type"]=="roller":
             hypertarget = "poly"+str(all_nets.index(polyname))+"tile"+str(all_tilings.index(tilename))
-            hyperlink = (tilename in platonic_tilings and "platonic_tiling_rollers") or (tilename in archimedean_tilings and "archimedean_tiling_rollers") or (tilename in biisogonal_tilings and "2isogonal_tiling_rollers") or "unknown tiling group"
+            hyperlink = (tilename in platonic_tilings and "platonic_tiling_rollers") \
+                        or (tilename in archimedean_tilings and "archimedean_tiling_rollers") \
+                        or (tilename in biisogonal_tilings and "2isogonal_tiling_rollers") \
+                        or (tilename in triisogonal_vertex_homogeneous and "3isogonal_tiling_rollers") \
+                        or "unknown tiling group"
             linedata.append("\hypertarget{%s}{"%hypertarget+"\makecell{%s \\\\ $%s$ \\\\ \hyperlink{%s}{back}}}"%(polyname.replace("_"," \\\\ "),tilename,hyperlink))
             filename = find_roller_withname(tilename,polyname)
             all_rollers.append(tilename+" "+polyname)
@@ -189,6 +251,7 @@ def output_rollerstable(all_nets,all_tilings,rollingresults):
                 linedata.append(
                     "\\raisebox{-.5\height}{\includegraphics[width=100pt]{rolls/proofrolls/rollerstability/%s}}" %
                     (polyname+"@"+tilename+" stability.png"))
+            print(tilename,polyname)
             filename = find_roller_face_withname(tilename,polyname)
             linedata.append(
                 "\\raisebox{-.5\height}{\includegraphics[width=100pt]{rolls/proofrolls/rollerswithfaces/%s}}" %filename)
@@ -250,6 +313,33 @@ def output_table(all_nets,all_tilings,rollersdata):
 \end{center}""")
         f.write("\n")
 
+def output_usedfaces(rollersdata,all_nets,all_tilings):
+
+    GenPngScreenspaceRoller.draw_answer(filename, tilingname, polyname, visits, grid, polyhedron, p1, p2, startface, startorientation, w, h,
+                unusedfaces)
+
+
+def output_whitematrix(all_nets,all_tilings,rollersdata):
+    import pygame
+    tiles = list()
+    for i in range(8):
+        tiles.append(pygame.image.load(".latex_output/matrixcolors9000%i.png"%i))
+    values = ["SPR","PR","SQPR","QPR","HPR","br","ar","x"," "]
+    tilewidth = 10
+    width = len(all_tilings)
+    height = len(all_nets)
+
+    image = pygame.Surface((width*tilewidth, height*tilewidth))
+    image.fill((255,255,255))
+
+    for i,net in enumerate(all_nets):
+        for j,tile in enumerate(all_tilings):
+            type = values.index(rollersdata[(tile,net)])
+            if(type!=len(tiles)):
+                image.blit(tiles[type],(j*tilewidth,i*tilewidth))
+    pygame.image.save(image,".latex_output/whitematrix.png")
+
+
 def output_matrix(all_nets,all_tilings,rollersdata):
     all_rollers = list()
     values = [" ","SPR","PR","SQPR","QPR","HPR","br","ar","x"]
@@ -282,7 +372,47 @@ def output_matrix(all_nets,all_tilings,rollersdata):
     for value,counter  in counters.items():
         print(names[values.index(value)],":",counter)
 
+
+def write_tilings_list():
+    tilings = platonic_tilings, archimedean_tilings, biisogonal_tilings, triisogonal_vertex_homogeneous
+    tiling_markers = list()
+    for tiling in tilings:
+        tiling_markers.append(list(tiling)[0])
+        tiling_markers.append(list(tiling)[-1])
+    with open(".latex_output/tilingnames.txt","w") as f:
+        for tilingname in all_tilings:
+            if(tilingname in tiling_markers):
+                f.write(".")
+            else:
+                f.write("|")
+            f.write(tilingname+"\n")
+
+from poly_dicts.plato_archi_nets import plato_archi_nets
+from poly_dicts.johnson_nets import johnson_nets
+from poly_dicts.prism_nets import prism_nets
+all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
+
+def write_polyherons_list():
+    nets = plato_archi_nets, johnson_nets, prism_nets
+    net_markers=list()
+    for net in nets:
+        net_markers.append(list(net)[0])
+        net_markers.append(list(net)[-1])
+
+    net_markers.append("truncated_tetrahedron")
+    net_markers.append("icosahedron")
+
+    with open(".latex_output/polynames.txt","w") as f:
+        for polyname in all_nets:
+            f.write(polyname)
+            if(polyname in net_markers):
+                f.write("."+"\n")
+            else:
+                f.write("|"+"\n")
+
 if __name__ == "__main__":
+    write_tilings_list()
+    write_polyherons_list()
 
     with open('rollersdata.pickle', 'rb') as handle:
         rollersdata,all_tilings,all_nets = pickle.load(handle)
@@ -291,10 +421,26 @@ if __name__ == "__main__":
         # for net in all_nets:
         #     print(net)
         # print(rollersdata)
+
+    with open("rolling_results.pickle", "rb") as handle:
+        rollingresults = pickle.load(handle)
+
+    output_whitematrix(all_nets,all_tilings,rollersdata)
+
+
+
+
+
+    # print(len(all_tilings))
+    # for tiling in all_tilings:
+    #     print(tiling)
     output_table(all_nets,all_tilings,rollersdata)
     output_matrix(all_nets,all_tilings,rollersdata)
     output_condensedtable(all_nets, all_tilings, rollersdata)
-    with open("rolling_results.pickle", "rb") as handle:
-        rollingresults = pickle.load(handle)
+
+
+
     output_rollerstable(all_nets,all_tilings,rollingresults)
     output_quasirollerstable(all_nets, all_tilings, rollingresults)
+
+
