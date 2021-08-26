@@ -10,9 +10,9 @@ import numpy
 import pygame
 import sympy
 
-GENERATE_PROOF = False
-GENERATE_STAB = False
-UPDATE_RESULTS = False
+GENERATE_PROOF = True
+GENERATE_STAB = True
+UPDATE_RESULTS = True
 DUPLICATE_IMAGES = False
 
 from GeometryFunctions import centerpoint
