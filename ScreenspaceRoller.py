@@ -2,6 +2,7 @@
 """
 import os
 from datetime import datetime
+from time import time
 def make_timestamp():
     return datetime.now().strftime("[%Hh%Mm%S]")
 from GeometryFunctions import *
@@ -18,29 +19,34 @@ import symmetry_classes.symmetry_functions
 def canon_fo(polyname,face,orientation):
     return symmetry_classes.symmetry_functions.canon_fo(polyname,face,orientation,poly_symmetries)
 
-PREVIEW = False
+PREVIEW = True
 GRADATION = True
 PREVIEWPERIODICITY=20
 # SLOW=False
-OPTIMISE_SYMMETRIES = False
-SKIP_NOTFULL = True
+OPTIMISE_SYMMETRIES = True
+SKIP_NOTFULL = False
 
 LOAD_PROGRESS = False
-TAKE_PICTURES = True
+TAKE_PICTURES = False
 
 PICTURE_TRESHOLD = 0.03
+ROLL_ONLY_ONCE = True
+TIME_LIMIT = 3
+WAIT_AT_END = 0.5
 
 SCREENSPACE = 1
 NSPACE = 2
 EXPLORATION_SPACE = SCREENSPACE
 
-CHECK_UNUSED_FACES = True  #Will disable symmetry optimisations
-CHECK_ALL_CELLS = False #Only checking rollers: will go everywhere eventually
+CHECK_UNUSED_FACES = False  #Will disable symmetry optimisations
+CHECK_ALL_CELLS = True #Only checking rollers: will go everywhere eventually
 # CHECK_ALL_FACEROT = False
 
+PAUSE_AT_BEGINNING = 0#5000
 QUIT_PREVIEW_EARLY = True
 
 LIMIT_TO_ROLLING_PAIRS = False
+LIMIT_TO_SHOWCASE = False
 INSERT_FILL = False #insert new areas to explore at the beginning. Only checking rollers
 
 TESSELLATION_POLYHEDRON = False
@@ -61,7 +67,7 @@ skip_pairs = []
 resume_counter = -1
 
 all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings, **triisogonal_vertex_homogeneous}
-all_tilings = {**triisogonal_vertex_homogeneous}
+# all_tilings = {**triisogonal_vertex_homogeneous}
 all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
 
 if(TESSELLATION_POLYHEDRON):
@@ -70,7 +76,7 @@ if(TESSELLATION_POLYHEDRON):
     all_nets=tessellation_polyhedrons
     from symmetry_classes.TessPolySymmetries import TessPoly as poly_symmetries
 
-winning_pairs = {('3^6;3^2x4x3x4', 'j89'), ('3^6', 'j84'), ('3^6', 'j89'), ('3^2x4x3x4', 'j31'), ('(3^6;3^3x4^2)2', 'j87'), ('(3^6;3^3x4^2)2', 'j89'), ('3^6', 'j87'), ('3x4x6x4', 'j54'), ('(3^6;3^3x4^2)2', 'j50'), ('3^6', 'j13'), ('3^6;3^2x4x3x4', 'j87'), ('3^6;3^2x4x3x4', 'j50'), ('3^6', 'j51'), ('3^6', 'j50'), ('3^6', 'j11'), ('(3^6;3^3x4^2)1', 'j90'), ('3^2x4x3x4', 'j26'), ('3^3x4^2', 'j28'), ('(3^6;3^3x4^2)1', 'j14'), ('(3^6;3^4x6)1', 'j22'), ('(3^6;3^3x4^2)1', 'j10'), ('(3^6;3^4x6)2', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j85'), ('(3^6;3^3x4^2)1', 'j88'), ('3^6', 'octahedron'), ('(3^6;3^3x4^2)2', 'j86'), ('3^3x4^2', 'j27'), ('3x4x6x4', 'j56'), ('3^6;3^2x6^2', 'truncated_tetrahedron'), ('3^6', 'j86'), ('4^4', 'j8'), ('3^4x6;3^2x6^2', 'hexagonal_antiprism'), ('3^6;3^2x4x3x4', 'j86'), ('(3^3x4^2;3^2x4x3x4)1', 'j1'), ('(3^6;3^3x4^2)1', 'j16'), ('(3^6;3^3x4^2)1', 'j89'), ('3^3x4^2', 'square_antiprism'), ('4^4', 'j37'), ('3^2x4x3x4', 'j29'), ('(3^6;3^3x4^2)2', 'j90'), ('(3^6;3^3x4^2)1', 'j87'), ('3^6', 'j62'), ('3^6', 'j90'), ('(3^3x4^2;3^2x4x3x4)2', 'j26'), ('(3^6;3^3x4^2)2', 'j10'), ('3^6;3^2x4x3x4', 'j10'), ('3^6;3^2x4x3x4', 'j90'), ('4^4', 'cube'), ('(3^3x4^2;3^2x4x3x4)1', 'j27'), ('3^6', 'j10'), ('(3^6;3^3x4^2)1', 'j50'), ('3^3x4^2', 'j30'), ('(3^6;3^3x4^2)2', 'j85'), ('(3^6;3^3x4^2)2', 'j88'), ('3^6', 'j85'), ('3^6', 'j17'), ('3^2x4x3x4', 'j1'), ('3x6x3x6', 'j65'), ('3^6;3^2x4x3x4', 'j1'), ('3^6', 'j88'), ('3^6;3^2x4x3x4', 'j85'), ('3^6', 'tetrahedron'), ('(3^6;3^3x4^2)1', 'j15'), ('(3^6;3^4x6)1', 'hexagonal_antiprism'), ('3^6', 'icosahedron'), ('3^6', 'j12'), ('3^4x6', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j86')}
+winning_pairs = {('3^6;3^2x4x3x4', 'j89'), ('3^6', 'j84'), ('3^6', 'j89'), ('3^2x4x3x4', 'j31'), ('(3^6;3^3x4^2)2', 'j87'), ('(3^6;3^3x4^2)2', 'j89'), ('3^6', 'j87'), ('3x4x6x4', 'j54'), ('(3^6;3^3x4^2)2', 'j50'), ('3^6', 'j13'), ('3^6;3^2x4x3x4', 'j87'), ('3^6;3^2x4x3x4', 'j50'), ('3^6', 'j51'), ('3^6', 'j50'), ('3^6', 'j11'), ('(3^6;3^3x4^2)1', 'j90'), ('3^2x4x3x4', 'j26'), ('3^3x4^2', 'j28'), ('(3^6;3^3x4^2)1', 'j14'), ('(3^6;3^4x6)1', 'j22'), ('(3^6;3^3x4^2)1', 'j10'), ('(3^6;3^4x6)2', 'hexagonal_antiprism'),  ('(3^6;3^3x4^2)1', 'j88'), ('3^6', 'octahedron'), ('(3^6;3^3x4^2)2', 'j86'), ('3^3x4^2', 'j27'), ('3x4x6x4', 'j56'), ('3^6;3^2x6^2', 'truncated_tetrahedron'), ('3^6', 'j86'), ('4^4', 'j8'), ('3^4x6;3^2x6^2', 'hexagonal_antiprism'), ('3^6;3^2x4x3x4', 'j86'), ('(3^3x4^2;3^2x4x3x4)1', 'j1'), ('(3^6;3^3x4^2)1', 'j16'), ('(3^6;3^3x4^2)1', 'j89'), ('3^3x4^2', 'square_antiprism'), ('4^4', 'j37'), ('3^2x4x3x4', 'j29'), ('(3^6;3^3x4^2)2', 'j90'), ('(3^6;3^3x4^2)1', 'j87'), ('3^6', 'j62'), ('3^6', 'j90'), ('(3^3x4^2;3^2x4x3x4)2', 'j26'), ('(3^6;3^3x4^2)2', 'j10'), ('3^6;3^2x4x3x4', 'j10'), ('3^6;3^2x4x3x4', 'j90'), ('4^4', 'cube'), ('(3^3x4^2;3^2x4x3x4)1', 'j27'), ('3^6', 'j10'), ('(3^6;3^3x4^2)1', 'j50'), ('3^3x4^2', 'j30'), ('(3^6;3^3x4^2)2', 'j85'), ('(3^6;3^3x4^2)2', 'j88'), ('3^6', 'j85'), ('3^6', 'j17'), ('3^2x4x3x4', 'j1'), ('3x6x3x6', 'j65'), ('3^6;3^2x4x3x4', 'j1'), ('3^6', 'j88'), ('3^6;3^2x4x3x4', 'j85'), ('3^6', 'tetrahedron'), ('(3^6;3^3x4^2)1', 'j15'), ('(3^6;3^4x6)1', 'hexagonal_antiprism'), ('3^6', 'icosahedron'), ('3^6', 'j12'), ('3^4x6', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j86')}
 if(LIMIT_TO_ROLLING_PAIRS):
     if(TESSELLATION_POLYHEDRON):
         with open("saved_results/tessellation_polyhedron/rollers.txt","r") as f:
@@ -80,19 +86,30 @@ if(LIMIT_TO_ROLLING_PAIRS):
             winning_pairs = [tuple(line.split()[:2]) for line in f.readlines()]
 print(winning_pairs)
 
+showcase = []
+showcase += [("(3^3x4^2;3^2x4x3x4)2", "j26"), ("4^4", "j37"), ("(3^3x4^2;3^2x4x3x4)1","j27"), ("(3^3x4^2;3^2x4x3x4)1", "j27"), ("(3^6;3^4x6)1","j22"), ("05-(3^6;3^4x6;3x6x3x6)2","hexagonal_antiprism"), ("07-3^6;3^3x4^2;3^2x4x3x4","j1"), ("3^6;3^2x6^2","truncated_tetrahedron"),("(3^6;3^4x6)2","hexagonal_antiprism")] #,("15-3^6;3^2x4x3x3x4;3x4^2x6","j3")
+showcase += [ ("(3^3x4^2;4^4)1","j23"), ("(3^3x4^2;3^2x4x3x4)1","j7"), ("(3^3x4^2;3^2x4x3x4)1","j26"), ("(3^6;3^4x6)1","j46"), ("(3^3x4^2;3^2x4x3x4)2","snub_cube"), ("(3^3x4^2;3^2x4x3x4)2","j86"), ("(3^3x4^2;4^4)2","j28"), ("(3^3x4^2;3^2x4x3x4)1","j90")] #, ("(3^3x4^2;3^2x4x3x4)1","j49")
+showcase += [("(3^3x4^2;3^2x4x3x4)1","j46"), ("(3^3x4^2;3^2x4x3x4)1","j18"), ("(3^3x4^2;3^2x4x3x4)1","j22"), ("(3^3x4^2;3^2x4x3x4)1","j23"), ("(3^3x4^2;3^2x4x3x4)1","j29"), ("(3^3x4^2;3^2x4x3x4)1","j44"), ("(3^6;3^3x4^2)2","j23"), ("3^4x6","j88"), ("(3^6;3^4x6)2","j22")]
+showcase += [("09-3^6;3^3x4^2;3x4x6x4","j1"),("16-(3^6;3^2x4x3x4;3x4x6x4)1","j3"),("3^3x4^2","j89"), ("17-(3^6;3^2x4x3x4;3x4x6x4)2","j3"), ("4^4","j28"), ("(3^3x4^2;3^2x4x3x4)1","triangular_prism"),("32-(3^2x6^2;3x6x3x6;6^3)2","truncated_tetrahedron"),("31-(3^2x6^2;3x6x3x6;6^3)1","truncated_tetrahedron"),("17-(3^6;3^2x4x3x4;3x4x6x4)2","j44"),("3^2x4x3x4;3x4x6x4","j18")]
+showcase += [("24-3^3x4^2;3^2x4x12;3x4x6x4","j30"),("17-(3^6;3^2x4x3x4;3x4x6x4)2","j90"),("3x4^2x6;3x6x3x6)_2","hexagonal_prism"),("3^6;3^2x6^2","truncated_icosahedron"),("4x8^2","truncated_cube"),("(3^6;3^4x6)2","tetrahedron")]
+
+#if(LIMIT_TO_SHOWCASE):
+#    LIMIT_TO_ROLLING_PAIRS=True
+#    winning_pairs = showcase
+
 all_tilings_names = list(all_tilings.keys()) #if you want to limit to a few, change this line
 # all_tilings_names=all_tilings_names[all_tilings_names.index("(3^6;3^3x4^2)1"):]
 #all_tilings_names = ["4^4"]
 #all_tilings_names = ["3^6"]
 #all_tilings_names=["3^6;3^2x4x3x4"]
-all_tilings_names=["02-(3^6;3^4x6;3^2x6^2)2"]
+# all_tilings_names=["02-(3^6;3^4x6;3^2x6^2)2"]
 
 all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change this line
 #all_nets_names = all_nets_names[all_nets_names.index("j50"):]
 #all_nets_names = ["cube"]
 #all_nets_names = ["snub_cube"]
 #all_nets_names=["j89"]
-all_nets_names=["hexagonal_antiprism"]
+# all_nets_names=["hexagonal_antiprism"]
 
 import sys
 import argparse
@@ -299,7 +316,6 @@ def determine_n(tiling,net,polyname):#,startcase,startface,startorientation):
         print("[No optimisation]N=%i==%i"%(N,N2))
     return min(N+1,N2+1)
 
-
 def n_explore(tiling,net,startcase,startface,startorientation,mapping,sp1,sp2,polyname,precision):
     #mapping= visited areas[center points: (polygon, cell number, distance in tile to center)]
     visited_places = {coord: [] for coord in mapping.keys()}
@@ -402,6 +418,13 @@ def n_explore(tiling,net,startcase,startface,startorientation,mapping,sp1,sp2,po
 
 def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp1,sp2, polyname,
                  area = (-100, -100, 900, 900), area2 = (-25, -25, 825, 825), EDGESIZE = 50, precision = 7):
+    global PAUSE_AT_BEGINNING
+    # print(PAUSE)
+    # input()
+    if(PAUSE_AT_BEGINNING):
+        pygame.time.wait(PAUSE_AT_BEGINNING)
+        PAUSE_AT_BEGINNING=False
+    TIMERSTART = time()
     if(CHECK_UNUSED_FACES and LIMIT_TO_ROLLING_PAIRS):
         faces = set(net.keys())
     if(PREVIEW):
@@ -465,6 +488,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
         if(CHECK_UNUSED_FACES and LIMIT_TO_ROLLING_PAIRS):
             faces-= {face}
             if not(faces):
+                print("No faces")
                 return True, visited_places
 
         if(PREVIEW):
@@ -550,7 +574,8 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
             if(previewcounter%PREVIEWPERIODICITY==0):
                 refresh()
                 screen.blit(outlines, (0, 0))
-
+        if(TIMERSTART+TIME_LIMIT<time() and TIME_LIMIT>0):
+            return True, visited_places
 
         # if(PREVIEW and SLOW):
            #wait_for_input()
@@ -563,6 +588,12 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
     visited = sum(bool(visited_places[ccenter]) for ccenter in visited_places
         if (((area2[0]-edgeadd < ccenter[0] < area2[2]+edgeadd) and (area2[1]-edgeadd < ccenter[1] < area2[3]+edgeadd))))
         # if ((area2[0] < ccenter[0] < area2[2]) and (area2[1] < ccenter[1] < area2[3])))
+    if(TIMERSTART+TIME_LIMIT>time() and TIME_LIMIT>0 and visited/max_visitable>PICTURE_TRESHOLD and WAIT_AT_END and visited>4):
+        if(WAIT_AT_END==1):
+            pygame.time.wait(int(TIMERSTART+TIME_LIMIT-time())*1000)
+        else:
+            pygame.time.wait(int((TIMERSTART+TIME_LIMIT-time())*visited/max_visitable)*1000)
+
     if(visited<max_visitable):
         #print("Could not visit everything: %s/%i"%(visited,max_visitable))
         if(visited>2):
@@ -618,6 +649,8 @@ if __name__ == "__main__":
     p2 = RollyPoint(xx + EDGESIZE, yy)
     precision = 7
 
+    last_mapping = "", 0
+
     for tilingname in all_tilings_names:
         if(LOAD_PROGRESS and progress_tiling!=None):
             if(progress_tiling!=tilingname):
@@ -627,6 +660,9 @@ if __name__ == "__main__":
         #Skip to
         tiling = all_tilings[tilingname]
         for polyname in all_nets_names:
+            if(LIMIT_TO_SHOWCASE):
+                tilingname,polyname = showcase.pop(0)
+                tiling = all_tilings[tilingname]
             if (TESSELLATION_POLYHEDRON):
                 if(polyname!=tilingname):
                     continue
@@ -690,6 +726,7 @@ if __name__ == "__main__":
             for case in (CHECK_ALL_CELLS and tiling or [0]):
                 #make an algo that chooses better the only tile
                 if(EXPLORATION_SPACE==SCREENSPACE):
+                    #if(last_mapping != tilingname): #need something to align p1, p2 with the starting tile in the right orientation
                     mapping = None
                 for face,orientation in sorted(faceori):
                     counter+=1
@@ -709,7 +746,9 @@ if __name__ == "__main__":
 
                     if(mapping==None):
                         if(EXPLORATION_SPACE==SCREENSPACE):
+                            print("Regenerating mapping",tilingname)
                             mapping = map_screenspace(tiling, case, area, p1, p2, precision)
+                            last_mapping = tilingname
                         else:
                             N=determine_n(tiling,net,polyname)#,case,face,orientation)
                             #continue
@@ -728,7 +767,7 @@ if __name__ == "__main__":
                                                        area=area, area2=area2))
                     else:
                         result, visits = n_explore(tiling, net, case, face, orientation, mapping, p1, p2, polyname, precision)
-
+                    # print(result)
                     # ,FaceSym=FaceSym))
 
                     # Ouptut result
@@ -785,3 +824,10 @@ if __name__ == "__main__":
                     except:pass
                     with open("exploration_results/PROGRESS_CHECKPOINT.txt","w") as progress_output:
                         progress_output.write("%s\n%s\n%i"%(tilingname,polyname,counter))
+
+                    if (ROLL_ONLY_ONCE and result >= PICTURE_TRESHOLD):
+                        print(result,"picture treshold met")
+                        break
+                if (ROLL_ONLY_ONCE and result >= PICTURE_TRESHOLD):
+                    print(result, "picture treshold met")
+                    break
