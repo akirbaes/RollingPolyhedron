@@ -385,7 +385,6 @@ def is_roller(tiling,tilingname,net,polyname):
     # print("Groups:",groups)
     """Turn class transformation into integers"""
     if transformations!=0:
-        cids = list(range(len(classes)))
         cts = set()
         ctsd = dict()
         for cfo,rotations in transformations.items():
@@ -650,6 +649,10 @@ def is_roller(tiling,tilingname,net,polyname):
                 generate_stability_image(tilingname,polyname,tiling,net,borders,type,stable_spots)
 
             results["stability"]=all(cell_stability[cell]==maxfo[cell] for cell in range(len(tiling)))
+
+            results["CFO_classes"]=classes
+            results["CFO_class_groups"]=groups
+            results["class_to_supertile_coordinates"]=ctsd
         return results
     else:
         if(classes):
