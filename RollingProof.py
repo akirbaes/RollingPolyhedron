@@ -19,16 +19,19 @@ from GeometryFunctions import centerpoint
 from RollyPoint import RollyPoint
 from symmetry_classes.poly_symmetries import poly_symmetries
 from symmetry_classes.symmetry_functions import canon_fo
-from tiling_dicts.archimedean_tilings import archimedean_tilings
-from tiling_dicts.platonic_tilings import platonic_tilings
-from tiling_dicts.isogonal_tilings import biisogonal_tilings
-from tiling_dicts.triisogonal_vertex_homogeneous import triisogonal_vertex_homogeneous
+# from tiling_dicts.archimedean_tilings import archimedean_tilings
+# from tiling_dicts.platonic_tilings import platonic_tilings
+# from tiling_dicts.isogonal_tilings import biisogonal_tilings
+# from tiling_dicts.triisogonal_vertex_homogeneous import triisogonal_vertex_homogeneous
 from poly_dicts.prism_nets import prism_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.johnson_nets import johnson_nets
-all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings, **triisogonal_vertex_homogeneous}
+# all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings, **triisogonal_vertex_homogeneous}
 # all_tilings = {**triisogonal_vertex_homogeneous}
 all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
+
+from tiling_dicts.uniform_tilings import uniform_tilings as all_tilings
+
 
 
 import CFOClassGenerator
