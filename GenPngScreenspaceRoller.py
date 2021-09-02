@@ -145,7 +145,6 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilin
             x=int(x)
             y=int(y)
             xx, yy, XX, YY = min(x, xx), min(y, yy), max(XX, x), max(YY, y)
-
         for index,nextface in enumerate(polyhedron[face]):
             face_shift = polyhedron[nextface].index(face)
             # Create a stub nextface at the edge of the current face
@@ -153,7 +152,9 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilin
             # Reorient it
             pa, pb = nextface_stub[-face_shift], nextface_stub[(-face_shift+1)%len(nextface_stub)]
             orientation = polyhedron[nextface].index(face)
-            visits.insert(0,(nextface,0,pa,pb))
+
+            if face not in unusedfaces or nextface in unusedfaces:
+                visits.insert(0,(nextface,0,pa,pb))
     return xx,yy,XX,YY
 
 def draw_background(surf,grid,color=(0,0,0),width=2):
@@ -193,6 +194,53 @@ def refresh():
         if e.type == pygame.QUIT:
             exit()
 
+def cell_match(tiling, previous_case, newcaseid):
+    #Imported from screenspaceroller
+    """tiling = dict
+previous_case = int
+newcaseid = tuple"""
+    current_case, id = newcaseid
+    # Match mirror id first
+    for index, pc in enumerate(tiling[current_case]):
+        pcc, pid = pc
+        if (pcc == previous_case and pid == -id):
+            return index
+    # Match same id
+    for index, pc in enumerate(tiling[current_case]):
+        pcc, pid = pc
+        if (pcc == previous_case and pid == id):
+            return index
+    print(previous_case,newcaseid,tiling)
+
+def map_screenspace(tiling, startcell, area, p1, p2, precision):
+    #imported from screenspaceroller
+    "visited areas[center points: (polygon, cell number)]"
+    visited_areas = dict()
+    visits = [(startcell, p1, p2)]
+    while (visits):
+        cell, p1, p2 = visits.pop()
+        cface = xgon(len(tiling[cell]), p1, p2)
+        ccenter = tuple(floatcenterpoint(cface))
+        ccenter = int(round(ccenter[0] / precision) * precision), int(round(ccenter[1] / precision) * precision)
+
+        if not (area[0] < ccenter[0] < area[2]) or not (area[1] < ccenter[1] < area[3]):
+            continue
+        if (ccenter in visited_areas):
+            continue
+
+        visited_areas[ccenter] = (cface, cell)  # later for drawing
+
+        for index, nextcellid in enumerate(tiling[cell]):
+            cell_shift = cell_match(tiling, cell, nextcellid)
+            nextcell, id = nextcellid
+            # Create a stub ncface at the edge of the current cface
+            nextface_stub = xgon(len(tiling[nextcell]), cface[(index + 1) % len(cface)], cface[index])
+            # Reorient it
+            pa, pb = nextface_stub[-cell_shift], nextface_stub[(-cell_shift + 1) % len(nextface_stub)]
+            visits.append((nextcell, pa, pb))
+    return visited_areas
+
+
 def draw_answer(filename,tilingname,polyname,visits,grid,polyhedron,p1,p2,startface,startorientation,w,h,unusedfaces):
     #no need for startcase because grid and p1,p2 is enough
     surf = pygame.Surface((w,h))
@@ -217,7 +265,7 @@ def draw_answer(filename,tilingname,polyname,visits,grid,polyhedron,p1,p2,startf
     pygame.draw.rect(surf, (255,255,255),(xx,yy,text.get_width()+2,text.get_height()+2))
     surf.blit(text, (xx+1,yy+1))
     # sub = screen.subsurface(rect)
-    print(xx,yy,XX,YY,w,h)
+    # print(xx,yy,XX,YY,w,h)
     pygame.image.save(surf.subsurface([xx,yy,XX-xx,YY-yy]),filename)
 
 if __name__ == "__main__":
