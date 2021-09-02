@@ -6,7 +6,8 @@ from time import time
 def make_timestamp():
     return datetime.now().strftime("[%Hh%Mm%S]")
 from GeometryFunctions import *
-from GenPngScreenspaceRoller import draw_answer, draw_background, draw_polygon, wait_for_input, refresh, draw_tiling
+from GenPngScreenspaceRoller import draw_answer, draw_background, draw_polygon, wait_for_input, refresh, draw_tiling, \
+    map_screenspace
 from tiling_dicts.uniform_tilings import uniform_tilings
 from poly_dicts.prism_nets import prism_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
@@ -22,6 +23,9 @@ PREVIEWPERIODICITY=20
 # SLOW=False
 OPTIMISE_SYMMETRIES = True
 SKIP_NOTFULL = False
+
+PREVIEW_TILINGNAME = True
+PREVIEW_POLYNAME = True
 
 LOAD_PROGRESS = False
 TAKE_PICTURES = False
@@ -43,7 +47,7 @@ PAUSE_AT_BEGINNING = 0#5000
 QUIT_PREVIEW_EARLY = True
 
 LIMIT_TO_ROLLING_PAIRS = False
-LIMIT_TO_SHOWCASE = False
+LIMIT_TO_SHOWCASE = True
 INSERT_FILL = False #insert new areas to explore at the beginning. Only checking rollers
 
 TESSELLATION_POLYHEDRON = False
@@ -73,16 +77,18 @@ if(TESSELLATION_POLYHEDRON):
     all_tilings=net_tessellations
     all_nets=tessellation_polyhedrons
     from symmetry_classes.TessPolySymmetries import TessPoly as poly_symmetries
+#
+# winning_pairs = {('(3^6;3^2x4x3x4)', 'j89'), ('(3^6)', 'j84'), ('(3^6)', 'j89'), ('(3^2x4x3x4)', 'j31'), ('(3^6;3^3x4^2)2', 'j87'), ('(3^6;3^3x4^2)2', 'j89'), ('(3^6)', 'j87'), ('(3x4x6x4)', 'j54'), ('(3^6;3^3x4^2)2', 'j50'), ('(3^6)', 'j13'), ('(3^6;3^2x4x3x4)', 'j87'), ('(3^6;3^2x4x3x4)', 'j50'), ('(3^6)', 'j51'), ('(3^6)', 'j50'), ('(3^6)', 'j11'), ('(3^6;3^3x4^2)1', 'j90'), ('3^2x4x3x4', 'j26'), ('(3^3x4^2)', 'j28'), ('(3^6;3^3x4^2)1', 'j14'), ('(3^6;3^4x6)1', 'j22'), ('(3^6;3^3x4^2)1', 'j10'), ('(3^6;3^4x6)2', 'hexagonal_antiprism'),  ('(3^6;3^3x4^2)1', 'j88'), ('(3^6)', 'octahedron'), ('(3^6;3^3x4^2)2', 'j86'), ('(3^3x4^2)', 'j27'), ('(3x4x6x4)', 'j56'), ('(3^6;3^2x6^2)', 'truncated_tetrahedron'), ('(3^6)', 'j86'), ('(4^4)', 'j8'), ('3^4x6;3^2x6^2', 'hexagonal_antiprism'), ('3^6;3^2x4x3x4', 'j86'), ('(3^3x4^2;3^2x4x3x4)1', 'j1'), ('(3^6;3^3x4^2)1', 'j16'), ('(3^6;3^3x4^2)1', 'j89'), ('3^3x4^2', 'square_antiprism'), ('4^4', 'j37'), ('3^2x4x3x4', 'j29'), ('(3^6;3^3x4^2)2', 'j90'), ('(3^6;3^3x4^2)1', 'j87'), ('3^6', 'j62'), ('3^6', 'j90'), ('(3^3x4^2;3^2x4x3x4)2', 'j26'), ('(3^6;3^3x4^2)2', 'j10'), ('3^6;3^2x4x3x4', 'j10'), ('3^6;3^2x4x3x4', 'j90'), ('4^4', 'cube'), ('(3^3x4^2;3^2x4x3x4)1', 'j27'), ('3^6', 'j10'), ('(3^6;3^3x4^2)1', 'j50'), ('3^3x4^2', 'j30'), ('(3^6;3^3x4^2)2', 'j85'), ('(3^6;3^3x4^2)2', 'j88'), ('3^6', 'j85'), ('3^6', 'j17'), ('3^2x4x3x4', 'j1'), ('3x6x3x6', 'j65'), ('3^6;3^2x4x3x4', 'j1'), ('3^6', 'j88'), ('3^6;3^2x4x3x4', 'j85'), ('3^6', 'tetrahedron'), ('(3^6;3^3x4^2)1', 'j15'), ('(3^6;3^4x6)1', 'hexagonal_antiprism'), ('3^6', 'icosahedron'), ('3^6', 'j12'), ('3^4x6', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j86')}
+#TODO: rewrite the "winning pair" thing to import the Proof generated dict
 
-winning_pairs = {('3^6;3^2x4x3x4', 'j89'), ('3^6', 'j84'), ('3^6', 'j89'), ('3^2x4x3x4', 'j31'), ('(3^6;3^3x4^2)2', 'j87'), ('(3^6;3^3x4^2)2', 'j89'), ('3^6', 'j87'), ('3x4x6x4', 'j54'), ('(3^6;3^3x4^2)2', 'j50'), ('3^6', 'j13'), ('3^6;3^2x4x3x4', 'j87'), ('3^6;3^2x4x3x4', 'j50'), ('3^6', 'j51'), ('3^6', 'j50'), ('3^6', 'j11'), ('(3^6;3^3x4^2)1', 'j90'), ('3^2x4x3x4', 'j26'), ('3^3x4^2', 'j28'), ('(3^6;3^3x4^2)1', 'j14'), ('(3^6;3^4x6)1', 'j22'), ('(3^6;3^3x4^2)1', 'j10'), ('(3^6;3^4x6)2', 'hexagonal_antiprism'),  ('(3^6;3^3x4^2)1', 'j88'), ('3^6', 'octahedron'), ('(3^6;3^3x4^2)2', 'j86'), ('3^3x4^2', 'j27'), ('3x4x6x4', 'j56'), ('3^6;3^2x6^2', 'truncated_tetrahedron'), ('3^6', 'j86'), ('4^4', 'j8'), ('3^4x6;3^2x6^2', 'hexagonal_antiprism'), ('3^6;3^2x4x3x4', 'j86'), ('(3^3x4^2;3^2x4x3x4)1', 'j1'), ('(3^6;3^3x4^2)1', 'j16'), ('(3^6;3^3x4^2)1', 'j89'), ('3^3x4^2', 'square_antiprism'), ('4^4', 'j37'), ('3^2x4x3x4', 'j29'), ('(3^6;3^3x4^2)2', 'j90'), ('(3^6;3^3x4^2)1', 'j87'), ('3^6', 'j62'), ('3^6', 'j90'), ('(3^3x4^2;3^2x4x3x4)2', 'j26'), ('(3^6;3^3x4^2)2', 'j10'), ('3^6;3^2x4x3x4', 'j10'), ('3^6;3^2x4x3x4', 'j90'), ('4^4', 'cube'), ('(3^3x4^2;3^2x4x3x4)1', 'j27'), ('3^6', 'j10'), ('(3^6;3^3x4^2)1', 'j50'), ('3^3x4^2', 'j30'), ('(3^6;3^3x4^2)2', 'j85'), ('(3^6;3^3x4^2)2', 'j88'), ('3^6', 'j85'), ('3^6', 'j17'), ('3^2x4x3x4', 'j1'), ('3x6x3x6', 'j65'), ('3^6;3^2x4x3x4', 'j1'), ('3^6', 'j88'), ('3^6;3^2x4x3x4', 'j85'), ('3^6', 'tetrahedron'), ('(3^6;3^3x4^2)1', 'j15'), ('(3^6;3^4x6)1', 'hexagonal_antiprism'), ('3^6', 'icosahedron'), ('3^6', 'j12'), ('3^4x6', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j86')}
-if(LIMIT_TO_ROLLING_PAIRS):
-    if(TESSELLATION_POLYHEDRON):
-        with open("saved_results/tessellation_polyhedron/rollers.txt","r") as f:
-            winning_pairs = [tuple(line.split()[:2]) for line in f.readlines()]
-    else:
-        with open("saved_results/rollers/rollers.txt","r") as f:
-            winning_pairs = [tuple(line.split()[:2]) for line in f.readlines()]
-print(winning_pairs)
+# if(LIMIT_TO_ROLLING_PAIRS):
+#     if(TESSELLATION_POLYHEDRON):
+#         with open("saved_results/tessellation_polyhedron/rollers.txt","r") as f:
+#             winning_pairs = [tuple(line.split()[:2]) for line in f.readlines()]
+#     else:
+#         with open("saved_results/rollers/rollers.txt","r") as f:
+#             winning_pairs = [tuple(line.split()[:2]) for line in f.readlines()]
+# print(winning_pairs)
 
 showcase = []
 showcase += [("(3^3x4^2;3^2x4x3x4)2", "j26"), ("(4^4)", "j37"), ("(3^3x4^2;3^2x4x3x4)1","j27"), ("(3^3x4^2;3^2x4x3x4)1", "j27"), ("(3^6;3^4x6)1","j22"), ("(3^6;3^4x6;3x6x3x6)2","hexagonal_antiprism"), ("(3^6;3^3x4^2;3^2x4x3x4)","j1"), ("(3^6;3^2x6^2)","truncated_tetrahedron"),("(3^6;3^4x6)2","hexagonal_antiprism")] #,("15-3^6;3^2x4x3x3x4;3x4^2x6","j3")
@@ -92,7 +98,7 @@ showcase += [("(3^6;3^3x4^2;3x4x6x4)","j1"),("(3^6;3^2x4x3x4;3x4x6x4)1","j3"),("
 showcase += [("(3^3x4^2;3^2x4x12;3x4x6x4)","j30"),("(3^6;3^2x4x3x4;3x4x6x4)2","j90"),("(3x4^2x6;3x6x3x6))_2","hexagonal_prism"),("(3^6;3^2x6^2)","truncated_icosahedron"),("(4x8^2)","truncated_cube"),("(3^6;3^4x6)2","tetrahedron")]
 
 if(LIMIT_TO_SHOWCASE):
-    LIMIT_TO_ROLLING_PAIRS=True
+    # LIMIT_TO_ROLLING_PAIRS=True
     showcase_update=[]
     for tiling_s,p in showcase:
         for tiling in all_tilings:
@@ -173,7 +179,7 @@ if(PREVIEW):
     outlines = pygame.Surface((800, 800), pygame.SRCALPHA)
     temp = pygame.Surface((800, 800), pygame.SRCALPHA)
 
-def case_match(tiling, previous_case, newcaseid):
+def cell_match(tiling, previous_case, newcaseid):
     """tiling = dict
 previous_case = int
 newcaseid = tuple"""
@@ -189,7 +195,7 @@ newcaseid = tuple"""
         if (pcc == previous_case and pid == id):
             return index
     print(previous_case,newcaseid,tiling)
-cell_match=case_match
+case_match=cell_match
 
 def is_outside(previouscase,newcaseid):
     newcase, id = newcaseid
@@ -257,32 +263,6 @@ def map_nspace(tiling,startcell,area,p1,p2,precision,N):
     return visited_areas
 
 
-def map_screenspace(tiling, startcell, area, p1, p2, precision):
-    "visited areas[center points: (polygon, cell number)]"
-    visited_areas = dict()
-    visits = [(startcell, p1, p2)]
-    while (visits):
-        cell, p1, p2 = visits.pop()
-        cface = xgon(len(tiling[cell]), p1, p2)
-        ccenter = tuple(floatcenterpoint(cface))
-        ccenter = int(round(ccenter[0] / precision) * precision), int(round(ccenter[1] / precision) * precision)
-
-        if not (area[0] < ccenter[0] < area[2]) or not (area[1] < ccenter[1] < area[3]):
-            continue
-        if (ccenter in visited_areas):
-            continue
-
-        visited_areas[ccenter] = (cface, cell)  # later for drawing
-
-        for index, nextcellid in enumerate(tiling[cell]):
-            cell_shift = cell_match(tiling, cell, nextcellid)
-            nextcell, id = nextcellid
-            # Create a stub ncface at the edge of the current cface
-            nextface_stub = xgon(len(tiling[nextcell]), cface[(index + 1) % len(cface)], cface[index])
-            # Reorient it
-            pa, pb = nextface_stub[-cell_shift], nextface_stub[(-cell_shift + 1) % len(nextface_stub)]
-            visits.append((nextcell, pa, pb))
-    return visited_areas
 
 def drawtemp(points,color,outline=0):
     temp.fill((255, 255, 255, 0))
@@ -422,6 +402,7 @@ def n_explore(tiling,net,startcase,startface,startorientation,mapping,sp1,sp2,po
 
 def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp1,sp2, polyname,
                  area = (-100, -100, 900, 900), area2 = (-25, -25, 825, 825), EDGESIZE = 50, precision = 7):
+
     global PAUSE_AT_BEGINNING
     # print(PAUSE)
     # input()
@@ -433,6 +414,11 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
         faces = set(net.keys())
     if(PREVIEW):
         previewcounter=0
+        if(PREVIEW_TILINGNAME or PREVIEW_POLYNAME):
+            text= pygame.font.SysFont(None,30).render((tilingname+"    ")*PREVIEW_TILINGNAME + polyname*PREVIEW_POLYNAME, True, (0,0,0))
+            titlecard = text.copy()
+            titlecard.fill((255,255,255))
+            titlecard.blit(text,(0,0))
     visits = [(startface, startcase, startorientation, sp1, sp2)]
     "mapping= visited areas[center points: (polygon, cell number)]"
     visited_places = {coord: [] for coord in mapping.keys()}
@@ -576,7 +562,10 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
         if(PREVIEW):
             previewcounter+=1
             if(previewcounter%PREVIEWPERIODICITY==0):
+                if(PREVIEW_POLYNAME or PREVIEW_TILINGNAME):
+                    screen.blit(titlecard,(0,0))
                 refresh()
+
                 screen.blit(outlines, (0, 0))
         if(TIMERSTART+TIME_LIMIT<time() and TIME_LIMIT>0):
             return True, visited_places
@@ -588,6 +577,8 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
 
     if(PREVIEW):
         screen.blit(outlines, (0, 0))
+        if(PREVIEW_POLYNAME or PREVIEW_TILINGNAME):
+            screen.blit(titlecard,(0,0))
         refresh()
     visited = sum(bool(visited_places[ccenter]) for ccenter in visited_places
         if (((area2[0]-edgeadd < ccenter[0] < area2[2]+edgeadd) and (area2[1]-edgeadd < ccenter[1] < area2[3]+edgeadd))))
