@@ -1,5 +1,6 @@
 import pygame
 from GeometryFunctions import xgon, centerpoint, floatcenterpoint
+from RollyPoint import RollyPoint
 
 try:
     from exploration_results.unusedfaces import unusedfaces as unusedfacesdict
@@ -157,13 +158,17 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilin
                 visits.insert(0,(nextface,0,pa,pb))
     return xx,yy,XX,YY
 
-def draw_background(surf,grid,color=(0,0,0),width=2):
+def draw_background(surf,grid,color=(0,0,0),width=2,numbers=False):
     for data in grid.values():
         points = data[0]
         #cell = data[1]
         #distance = data[2] #not always available, distance from center
         # print(points)
         pygame.draw.polygon(surf, color, convertToTuples(points), width)
+        if(numbers):
+            cell = data[1]
+            ccenter=centerpoint(points)
+            draw_text(surf, str(cell), ccenter[0], ccenter[1], color, 40)
 
 def draw_polygon(surf,color,points,width):
     pygame.draw.polygon(surf, color, convertToTuples(points), width)
@@ -268,5 +273,65 @@ def draw_answer(filename,tilingname,polyname,visits,grid,polyhedron,p1,p2,startf
     # print(xx,yy,XX,YY,w,h)
     pygame.image.save(surf.subsurface([xx,yy,XX-xx,YY-yy]),filename)
 
+
+def draw_answers_nets(rollersdata):
+    print("Generating rollers nets images")
+    types = "roller","hollow", "band"," area"
+    for (tilingname,polyname),value in rollersdata.items():
+        if(value!=None and value["type"]=="roller"):
+            # print((tilingname,polyname), value.keys())
+            group_max = sum(1 for group_data in value["all_data"] if group_data and group_data["type"]=="roller")
+            group_counter = 0
+            for group_index,group_data in enumerate(value["all_data"]):
+                if group_data and group_data["type"]=="roller":
+                    # print(group_data.keys())
+                    # print(group_data["symmetry_vectors"])
+                    # print(group_data["exploration"])
+                    # print("Current group:",value["CFO_class_groups"][group_index], value["CFO_class_groups"][group_index][0])
+                    # print("Classes",len(value["CFO_classes"]),value["CFO_classes"])
+
+                    gc = ""
+                    if(group_max>1):
+                        group_counter+=1
+                        gc = " (%s)"%str(group_counter)
+                    #instead of an arbitrary, choose the least frequent face
+                    try:os.mkdir("rolled_nets/")
+                    except:pass
+                    filename = "rolled_nets/"+tilingname + " @ " + polyname + gc + ".png"
+                    tiling = all_tilings[tilingname]
+                    net = all_nets[polyname]
+
+                    existing_faces = set(net)
+                    used_faces = set(f for cfo_group in value["CFO_class_groups"][group_index] for c,f,o in value["CFO_classes"][cfo_group])
+                    unused_faces = existing_faces-used_faces
+
+                    face_counter = {facesize: sum(1 for face in net if len(net[face])==facesize) for facesize in set(len(net[face]) for face in used_faces)}
+                    rarest_face = sorted((face_counter[len(net[face])], face) for face in used_faces)[0][1]
+
+                    # c,f,o = list(value["CFO_classes"][value["CFO_class_groups"][group_index][0]])[0]
+                    c,f,o =  [(c,f,o) for cfo_group in value["CFO_class_groups"][group_index] for c,f,o in value["CFO_classes"][cfo_group] if f==rarest_face][0]
+                    if(tilingname.startswith("2u03") and polyname=="j87"):
+                        print(face_counter)
+                        print("face",rarest_face,"of size",len(net[rarest_face]))
+
+                    area = (-200, -200, 1000, 1000)
+                    area2 = (0, 0, 800, 800)
+                    xx = (area[0] + area[2]) / 2
+                    yy = (area[1] + area[3]) / 2
+                    p1 = RollyPoint(xx, yy)
+                    EDGESIZE = 50
+                    p2 = RollyPoint(xx + EDGESIZE, yy)
+                    precision = 7
+
+                    mapping =  map_screenspace(tiling, c, area, p1, p2, precision)
+                    draw_answer(filename, tilingname, polyname, None, mapping, net, p1, p2, f, o,area2[2], area2[3],unused_faces)
+    print("Generated roller nets images")
+
 if __name__ == "__main__":
-    pass
+    from tiling_dicts.uniform_tilings import uniform_tilings as all_tilings
+    from poly_dicts.regular_faced_polyhedrons import all_nets
+    import os
+    import pickle
+    with open("rolling_results.pickle", "rb") as handle:
+        rollingresults = pickle.load(handle)
+    draw_answers_nets(rollingresults)
