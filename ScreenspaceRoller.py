@@ -7,10 +7,7 @@ def make_timestamp():
     return datetime.now().strftime("[%Hh%Mm%S]")
 from GeometryFunctions import *
 from GenPngScreenspaceRoller import draw_answer, draw_background, draw_polygon, wait_for_input, refresh, draw_tiling
-from tiling_dicts.archimedean_tilings import archimedean_tilings
-from tiling_dicts.platonic_tilings import platonic_tilings
-from tiling_dicts.isogonal_tilings import biisogonal_tilings
-from tiling_dicts.triisogonal_vertex_homogeneous import triisogonal_vertex_homogeneous
+from tiling_dicts.uniform_tilings import uniform_tilings
 from poly_dicts.prism_nets import prism_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.johnson_nets import johnson_nets
@@ -66,7 +63,8 @@ progressfile = "exploration_results/PROGRESS_CHECKPOINT.txt"
 skip_pairs = []
 resume_counter = -1
 
-all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings, **triisogonal_vertex_homogeneous}
+# all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings, **triisogonal_vertex_homogeneous}
+all_tilings = {**uniform_tilings}
 # all_tilings = {**triisogonal_vertex_homogeneous}
 all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
 
@@ -87,15 +85,21 @@ if(LIMIT_TO_ROLLING_PAIRS):
 print(winning_pairs)
 
 showcase = []
-showcase += [("(3^3x4^2;3^2x4x3x4)2", "j26"), ("4^4", "j37"), ("(3^3x4^2;3^2x4x3x4)1","j27"), ("(3^3x4^2;3^2x4x3x4)1", "j27"), ("(3^6;3^4x6)1","j22"), ("05-(3^6;3^4x6;3x6x3x6)2","hexagonal_antiprism"), ("07-3^6;3^3x4^2;3^2x4x3x4","j1"), ("3^6;3^2x6^2","truncated_tetrahedron"),("(3^6;3^4x6)2","hexagonal_antiprism")] #,("15-3^6;3^2x4x3x3x4;3x4^2x6","j3")
+showcase += [("(3^3x4^2;3^2x4x3x4)2", "j26"), ("(4^4)", "j37"), ("(3^3x4^2;3^2x4x3x4)1","j27"), ("(3^3x4^2;3^2x4x3x4)1", "j27"), ("(3^6;3^4x6)1","j22"), ("(3^6;3^4x6;3x6x3x6)2","hexagonal_antiprism"), ("(3^6;3^3x4^2;3^2x4x3x4)","j1"), ("(3^6;3^2x6^2)","truncated_tetrahedron"),("(3^6;3^4x6)2","hexagonal_antiprism")] #,("15-3^6;3^2x4x3x3x4;3x4^2x6","j3")
 showcase += [ ("(3^3x4^2;4^4)1","j23"), ("(3^3x4^2;3^2x4x3x4)1","j7"), ("(3^3x4^2;3^2x4x3x4)1","j26"), ("(3^6;3^4x6)1","j46"), ("(3^3x4^2;3^2x4x3x4)2","snub_cube"), ("(3^3x4^2;3^2x4x3x4)2","j86"), ("(3^3x4^2;4^4)2","j28"), ("(3^3x4^2;3^2x4x3x4)1","j90")] #, ("(3^3x4^2;3^2x4x3x4)1","j49")
-showcase += [("(3^3x4^2;3^2x4x3x4)1","j46"), ("(3^3x4^2;3^2x4x3x4)1","j18"), ("(3^3x4^2;3^2x4x3x4)1","j22"), ("(3^3x4^2;3^2x4x3x4)1","j23"), ("(3^3x4^2;3^2x4x3x4)1","j29"), ("(3^3x4^2;3^2x4x3x4)1","j44"), ("(3^6;3^3x4^2)2","j23"), ("3^4x6","j88"), ("(3^6;3^4x6)2","j22")]
-showcase += [("09-3^6;3^3x4^2;3x4x6x4","j1"),("16-(3^6;3^2x4x3x4;3x4x6x4)1","j3"),("3^3x4^2","j89"), ("17-(3^6;3^2x4x3x4;3x4x6x4)2","j3"), ("4^4","j28"), ("(3^3x4^2;3^2x4x3x4)1","triangular_prism"),("32-(3^2x6^2;3x6x3x6;6^3)2","truncated_tetrahedron"),("31-(3^2x6^2;3x6x3x6;6^3)1","truncated_tetrahedron"),("17-(3^6;3^2x4x3x4;3x4x6x4)2","j44"),("3^2x4x3x4;3x4x6x4","j18")]
-showcase += [("24-3^3x4^2;3^2x4x12;3x4x6x4","j30"),("17-(3^6;3^2x4x3x4;3x4x6x4)2","j90"),("3x4^2x6;3x6x3x6)_2","hexagonal_prism"),("3^6;3^2x6^2","truncated_icosahedron"),("4x8^2","truncated_cube"),("(3^6;3^4x6)2","tetrahedron")]
+showcase += [("(3^3x4^2;3^2x4x3x4)1","j46"), ("(3^3x4^2;3^2x4x3x4)1","j18"), ("(3^3x4^2;3^2x4x3x4)1","j22"), ("(3^3x4^2;3^2x4x3x4)1","j23"), ("(3^3x4^2;3^2x4x3x4)1","j29"), ("(3^3x4^2;3^2x4x3x4)1","j44"), ("(3^6;3^3x4^2)2","j23"), ("(3^4x6)","j88"), ("(3^6;3^4x6)2","j22")]
+showcase += [("(3^6;3^3x4^2;3x4x6x4)","j1"),("(3^6;3^2x4x3x4;3x4x6x4)1","j3"),("(3^3x4^2)","j89"), ("(3^6;3^2x4x3x4;3x4x6x4)2","j3"), ("4^4","j28"), ("(3^3x4^2;3^2x4x3x4)1","triangular_prism"),("(3^2x6^2;3x6x3x6;6^3)2","truncated_tetrahedron"),("(3^2x6^2;3x6x3x6;6^3)1","truncated_tetrahedron"),("(3^6;3^2x4x3x4;3x4x6x4)2","j44"),("(3^2x4x3x4;3x4x6x4)","j18")]
+showcase += [("(3^3x4^2;3^2x4x12;3x4x6x4)","j30"),("(3^6;3^2x4x3x4;3x4x6x4)2","j90"),("(3x4^2x6;3x6x3x6))_2","hexagonal_prism"),("(3^6;3^2x6^2)","truncated_icosahedron"),("(4x8^2)","truncated_cube"),("(3^6;3^4x6)2","tetrahedron")]
 
-#if(LIMIT_TO_SHOWCASE):
-#    LIMIT_TO_ROLLING_PAIRS=True
-#    winning_pairs = showcase
+if(LIMIT_TO_SHOWCASE):
+    LIMIT_TO_ROLLING_PAIRS=True
+    showcase_update=[]
+    for tiling_s,p in showcase:
+        for tiling in all_tilings:
+            if tiling.endswith(tiling_s):
+                showcase_update.append((tiling,p))
+                break
+    showcase=showcase_update
 
 all_tilings_names = list(all_tilings.keys()) #if you want to limit to a few, change this line
 # all_tilings_names=all_tilings_names[all_tilings_names.index("(3^6;3^3x4^2)1"):]
