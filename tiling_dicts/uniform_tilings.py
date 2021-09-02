@@ -1,9 +1,10 @@
 from tiling_dicts._1uniform_tilings import uniform1
 from tiling_dicts._2uniform_tilings import uniform2
 from tiling_dicts._3uniform_tilings import uniform3
+from tiling_dicts._4uniform_tilings import uniform4
 
 
-uniform_tilings = {**uniform1, **uniform2, **uniform3}
+uniform_tilings = {**uniform1, **uniform2, **uniform3, **uniform4}
 
 if __name__ == "__main__":
     print(uniform_tilings)
