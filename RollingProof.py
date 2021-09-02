@@ -487,8 +487,12 @@ def is_roller(tiling,tilingname,net,polyname):
                 else:
                     all_data[groupindex]["type"]="area"
                 continue
+            mx = min(x for (x,y) in min_symmetries+[(0,0)])
+            my = min(y for (x,y) in min_symmetries+[(0,0)])
+            Mx = max(x for (x,y) in min_symmetries+[(0,0)])
+            My = max(y for (x,y) in min_symmetries+[(0,0)])
             N = max(max(abs(x),abs(y)) for (x,y) in min_symmetries)+1
-            coordinates = {(i, j): set() for i in range(-N, N + 1, 1) for j in range(-N, N+1, 1)}
+            coordinates = {(i, j): set() for i in range(mx, Mx+1, 1) for j in range(my, My+1, 1)}
             filled_supertiles = set()
             to_explore = [(startingstate,0,0)]
             explored = set()
@@ -580,7 +584,7 @@ def is_roller(tiling,tilingname,net,polyname):
                     type="non-roller"
                     all_data[groupindex]["type"]= "hollow"
                 if(N):
-                    graph = [[bool((i, j) in filled_supertiles)+bool(coordinates[(i,j)]) for i in range(-N//2, N//2 + 1, 1)] for j in range(-N//2, N//2+1, 1)]
+                    graph = [[bool((i, j) in filled_supertiles)+bool(coordinates[(i,j)]) for i in range(-N//2, N//2 + 1, 1) if (i,j) in coordinates] for j in range(-N//2, N//2+1, 1)]
                     CFOClassGenerator.prettyprint_012(graph)
                     #input()
             if(GENERATE_PROOF):
