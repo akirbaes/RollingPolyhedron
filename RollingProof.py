@@ -300,7 +300,7 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
             color = (128,128,128)
         pygame.draw.polygon(surf,color,poly,width=0)
     for poly in unused_tiles:
-        pygame.draw.polygon(surf,(0,0,64),poly,width=0)
+        pygame.draw.polygon(surf,(16,16,48),poly,width=0)
     for poly in drawn_tiles:
         pygame.draw.lines(surf,(192,192,192),1,poly,width=int(6*ratio))
     for line in drawn_supertiles:
@@ -409,6 +409,7 @@ def is_roller(tiling,tilingname,net,polyname):
         incompatible = len(tiling_sides-poly_sides)
         all_data = [dict() for x in groups]
         stability = [False]*len(groups)
+        has_image = False
         """For every group, explore the transformations up to N supertiles away to build symmetry vectors"""
         for groupindex,group in enumerate(groups):
             # print(groupindex,group)
@@ -520,11 +521,13 @@ def is_roller(tiling,tilingname,net,polyname):
                             # print("S:",s1,s2)
                             nx = x + dx
                             ny = y + dy
-                            while ((nx,ny) in coordinates):
+                            for k in range(N*2):
+                            # while ((nx,ny) in coordinates):
                                 nxold = nx
                                 nyold = ny
-                                while ((nx,ny) in coordinates):
-                                    if (next_st not in coordinates[(nx, ny)]
+                                # while ((nx,ny) in coordinates):
+                                for l in range(N*2):
+                                    if ((nx,ny) in coordinates and next_st not in coordinates[(nx, ny)]
                                             and (next_st, nx, ny) not in to_explore):
                                         to_explore.insert(0,(next_st,nx,ny))
                                     nx+=x2*s2
