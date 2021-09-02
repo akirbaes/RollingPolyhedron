@@ -114,17 +114,17 @@ def loop():
                 f.close()
             except:
                 traceback.print_exc()
-
-            tiling_result_p = dict()
-            for key in tiling_result:
-                tiling_result_p[key] = [((isinstance(x,tuple) and x[0]+x[1]*len(tiling_result))) or (isinstance(x,int) and x) for x in tiling_result[key]]
-            pprint.pprint(tiling_result_p,indent=4,sort_dicts=True)
-            try:
-                f=open(file_name+".oldformat","w")
-                f.write(("all_tilings['%s'] = \\\n"%basename)+pprint.pformat(tiling_result_p,indent=4,sort_dicts=True))
-                f.close()
-            except:
-                traceback.print_exc()
+            #
+            # tiling_result_p = dict()
+            # for key in tiling_result:
+            #     tiling_result_p[key] = [((isinstance(x,tuple) and x[0]+x[1]*len(tiling_result))) or (isinstance(x,int) and x) for x in tiling_result[key]]
+            # pprint.pprint(tiling_result_p,indent=4,sort_dicts=True)
+            # try:
+            #     f=open(file_name+".oldformat","w")
+            #     f.write(("all_tilings['%s'] = \\\n"%basename)+pprint.pformat(tiling_result_p,indent=4,sort_dicts=True))
+            #     f.close()
+            # except:
+            #     traceback.print_exc()
 
         tiling_result  = {None:(None,)}
         for e in pygame.event.get():
