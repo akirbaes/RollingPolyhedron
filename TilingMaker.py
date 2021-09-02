@@ -167,6 +167,22 @@ def loop():
                 p2 = (p2-p1).rotate(-15/180*pi)+p1
                 all_objects[0].remove_traces()
                 all_objects[0].__init__((p1,p2), current_facetype, None)
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
+                for edge in all_objects:
+                    if edge.active:
+                        for coord,edge2 in Edge.activelist.items():
+                            if edge2!=edge:
+                                if(distance(floatcenterpoint(edge.coords),coord))<2:
+                                    edge.set_link(edge2)
+                tiling_result=get_tiling()
+            if e.type == pygame.KEYDOWN and e.key == ord("c"):
+                #this is more for polyhedrons...
+                for edge in all_objects:
+                    if edge.active:
+                        for edge2 in all_objects:
+                            if edge2.active and edge2!=edge:
+                                if distance(floatcenterpoint(edge.coords), floatcenterpoint(edge2.coords))<EDGE_SIZE/2:
+                                    edge.set_link(edge2)
             if e.type == pygame.KEYDOWN and e.key == pygame.K_RETURN:
                 running = False
             if e.type == pygame.QUIT:
@@ -226,16 +242,17 @@ def get_tiling():
     return all_neighbours
 
 
-def draw_copy(points,edge):
+def draw_copy(points,edge, activelist = None):
     #Draws a copy of the whole thing outside
     #Inefficient but helpful
+    if(activelist==None):
+        activelist=dict()
     global copy_change
     if(copy_change=="no change"):
-        return
+        return activelist
     drawn = []
     orientation = edge.parent.get_orientation(edge)
     p1,p2 = (points[-orientation:]+points[:-orientation])[:2]
-
     to_draw = [(p1,p2,edge.parent)]
     while to_draw:
         p1,p2,shape = to_draw.pop()
@@ -256,6 +273,13 @@ def draw_copy(points,edge):
                 to_draw.append((pb,pa,chi))
                 #pc=centerpoint((pa,pb))
                 #draw_text(2, str(id), pa.x, pa.y, (0, 0, 255), EDGE_SIZE / 2)
+            if chi!=None and chi.active==True:
+                pa = points[(id)%len(points)]
+                pb = points[(id+1)%len(points)]
+                pc = floatcenterpoint((pa,pb))
+                if (pc not in activelist):
+                    activelist[pc] = chi
+
         if shape.parent!=None and shape.parent not in drawn:
             ppoints = Edge.shapes_functions[len(shape.parent.points)](p2,p1)
             orientation = shape.parent.get_orientation(shape)
@@ -270,7 +294,11 @@ def draw_copy(points,edge):
             draw_polygon(-1,points,(128,128,128),0.1)
             center=centerpoint(points)
             draw_text(-1,str(shape.faceid),center[0],center[1],(128,128,128),EDGE_SIZE/2)
-
+        else:
+            pc = floatcenterpoint((pa,pb))
+            if (pc not in activelist):
+                activelist[pc] = chi
+    return activelist
 class Edge():
     """Each edge of each polygon is an Edge object that turns into a face with children when deactivated"""
     depth = 0
@@ -279,6 +307,7 @@ class Edge():
     select_neighbour = None
     cursors = list()
     closest = None
+    activelist = dict()
     def reset(ignore):
         depth = 0
         numbering = set()
@@ -407,7 +436,7 @@ class Edge():
                 draw_text(1, str(self.other.parent.faceid), *center, (0, 0, 0), EDGE_SIZE / 2)
                 draw_polygon(1, self.points, (0, 0, 0), 0, 1)
                 if(not self.same_position(self.other)):
-                    draw_copy(self.points,self.other)
+                    Edge.activelist = {**draw_copy(self.points,self.other), **Edge.activelist}
 
             if (self.mouse_inside()):
                 Edge.cursors.append(self)
@@ -522,6 +551,7 @@ class Edge():
         self.active = True
         self.polysize=current_facetype
         # delete the edges that were created by this, and its descendance
+        Edge.activelist = dict()
 
 
 if __name__ == "__main__":
