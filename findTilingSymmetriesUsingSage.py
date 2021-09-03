@@ -3,12 +3,17 @@ import os
 import pprint
 from copy import deepcopy
 # sage -python findTilingSymmetriesUsingSage.py
-SAVEGRAPHES = False
+SAVEGRAPHES = True
 
 from tiling_dicts.uniform_tilings import uniform_tilings as all_tilings
 
-MAX_ANTENNAE_AMOUNT = 3
+MAX_ANTENNAE_AMOUNT = 12
 #None for all
+#12 works too
+
+
+#Contrary to polyhedron, tilings can have different plane representations
+#This was an issue for "3uhv34 (3x4^2x6;3x4x6x4;4^4)"]
 
 def modify_net(net,face,ori):
     n = len(net)
@@ -111,6 +116,7 @@ def oblongue(til):
 def firstdraft():
     all_symmetries = dict()
     for tilingname in all_tilings:#["snub_cube"]:#['hexagonal_prism']:  # all_nets:
+    # for tilingname in ["3uhv34 (3x4^2x6;3x4x6x4;4^4)"]:#["snub_cube"]:#['hexagonal_prism']:  # all_nets:
         print(tilingname)
         tiling: dict = all_tilings[tilingname]
         original_tiles = list(range(len(tiling)))
@@ -138,7 +144,7 @@ def firstdraft():
 
 
     all = pprint.pformat(all_symmetries)
-    f = open("symmetry_classes/" + "_TILINGS_" + "SAGE"  +"A%s"%MAX_ANTENNAE_AMOUNT+ ".py", "w")
+    f = open("symmetry_classes/" + "_TILINGS_" + "SAGE"  +"A%s"%MAX_ANTENNAE_AMOUNT+ " test.py", "w")
     f.write(all)
     f.close()
 
