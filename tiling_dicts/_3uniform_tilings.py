@@ -767,7 +767,7 @@ uniform3=dict()
 index = 0
 for key,value in triisogonal_vertex_homogeneous.items():
     index+=1
-
+    key=key.replace(".py","")
     shift = key.index("-")
     if "(" not in key:
         newkey = "3uhv%02d (%s)"%(index,key[shift+1:])
@@ -1416,6 +1416,7 @@ uniform3_vh['22 3.42.6;3.6.3.6;3.6.3.6)2'] = \
 for key,value in uniform3_vh.items():
     index+=1
 
+    key=key.replace(".py","")
     newkey = ""
     for i,l in enumerate(key):
         newkey+=l
