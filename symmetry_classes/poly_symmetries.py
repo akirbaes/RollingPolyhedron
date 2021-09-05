@@ -8077,3 +8077,14 @@ poly_symmetries = {
                             (7, 1),
                             (7, 3),
                             (7, 5))]}
+
+def canon_fo(polyname,face,orientation):
+    try:
+        symmetries = poly_symmetries[polyname]
+        for sym in symmetries:
+            if (face,orientation) in sym:
+                #print("Found a symmetry!")
+                return min(sym)
+    except:
+        print("No symmetry info for this poly")
+    return face, orientation
