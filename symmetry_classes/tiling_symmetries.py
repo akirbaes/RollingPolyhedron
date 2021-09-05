@@ -4593,7 +4593,13 @@ tiling_symmetries={'1u01 (3^6)': [((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2
                                   ((6, 0), (6, 3)),
                                   ((6, 1), (6, 4)),
                                   ((6, 2), (6, 5))]}
-                                  
+
+def canon_co(tilingname,cell,orientation):
+    symmetries = tiling_symmetries[tilingname]
+    for group in symmetries:
+        if (cell,orientation) in group:
+            return min(group)
+
 if __name__ == "__main__":
     max_group_size = 0
     diff_groups = None
