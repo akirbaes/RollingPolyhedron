@@ -1,10 +1,7 @@
-"""Roll a shape in a space with a given tiling and starting position
-"""
 import os
 from datetime import datetime
 from time import time
-def make_timestamp():
-    return datetime.now().strftime("[%Hh%Mm%S]")
+from symmetry_classes.tiling_symmetries import canon_co
 from GeometryFunctions import *
 from GenPngScreenspaceRoller import draw_answer, draw_background, draw_polygon, wait_for_input, refresh, draw_tiling, \
     map_screenspace
@@ -14,9 +11,9 @@ from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.johnson_nets import johnson_nets
 from symmetry_classes.poly_symmetries import poly_symmetries
 import symmetry_classes.symmetry_functions
-def canon_fo(polyname,face,orientation):
-    return symmetry_classes.symmetry_functions.canon_fo(polyname,face,orientation,poly_symmetries)
-
+from symmetry_classes.poly_symmetries import canon_fo
+"""Roll a shape in a space with a given tiling and starting position
+"""
 PREVIEW = True
 GRADATION = True
 PREVIEWPERIODICITY=20
@@ -32,7 +29,7 @@ TAKE_PICTURES = False
 
 PICTURE_TRESHOLD = 0.03
 ROLL_ONLY_ONCE = True
-TIME_LIMIT = 3
+TIME_LIMIT = 3.5
 WAIT_AT_END = 0.5
 
 SCREENSPACE = 1
@@ -43,7 +40,7 @@ CHECK_UNUSED_FACES = False  #Will disable symmetry optimisations
 CHECK_ALL_CELLS = True #Only checking rollers: will go everywhere eventually
 # CHECK_ALL_FACEROT = False
 
-PAUSE_AT_BEGINNING = 0#5000
+PAUSE_AT_BEGINNING = 3000
 QUIT_PREVIEW_EARLY = True
 
 LIMIT_TO_ROLLING_PAIRS = False
@@ -178,6 +175,9 @@ if(PREVIEW):
     screen.fill((255,255,255,255))
     outlines = pygame.Surface((800, 800), pygame.SRCALPHA)
     temp = pygame.Surface((800, 800), pygame.SRCALPHA)
+
+def make_timestamp():
+    return datetime.now().strftime("[%Hh%Mm%S]")
 
 def cell_match(tiling, previous_case, newcaseid):
     """tiling = dict
@@ -337,7 +337,7 @@ def n_explore(tiling,net,startcase,startface,startorientation,mapping,sp1,sp2,po
             continue #Out of bounds
         if(OPTIMISE_SYMMETRIES):
             face, orientation = canon_fo(polyname,face, orientation)
-        if (face, orientation) in visited_places[ccenter]:
+        if (case, face, orientation) in visited_places[ccenter]:
             continue #already reached
 
         # print(OPTIMISE_SYMMETRIES,case,face,orientation)
@@ -349,7 +349,7 @@ def n_explore(tiling,net,startcase,startface,startorientation,mapping,sp1,sp2,po
         elif(len(visited_places[ccenter])==0):
             drawtemp(cface, (255, 180, 180))
             # refresh()
-        visited_places[ccenter].append((face, orientation))
+        visited_places[ccenter].append((case, face, orientation))
 
         neighbours_faces = net[face]
         neighbours_faces = neighbours_faces[orientation:] + neighbours_faces[:orientation]
@@ -415,7 +415,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
     if(PREVIEW):
         previewcounter=0
         if(PREVIEW_TILINGNAME or PREVIEW_POLYNAME):
-            text= pygame.font.SysFont(None,30).render((tilingname+"    ")*PREVIEW_TILINGNAME + polyname*PREVIEW_POLYNAME, True, (0,0,0))
+            text= pygame.font.SysFont(None,30).render((tilingname+"    ")*PREVIEW_TILINGNAME + polyname*PREVIEW_POLYNAME, True, (0,0,0),(255,255,255))
             titlecard = text.copy()
             titlecard.fill((255,255,255))
             titlecard.blit(text,(0,0))
@@ -462,7 +462,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
             face, orientation = canon_fo(polyname,face, orientation)
             # face = findPolySymmetries.canon_face(face, FaceSym)
 
-        if (face, orientation) in visited_places[ccenter]:
+        if (case, face, orientation) in visited_places[ccenter]:
             # if (PREVIEW):
                 # screen.fill((255,255,255)
                 # drawtemp(cface,(0,255,0),2)
@@ -473,7 +473,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
                 #     wait_for_input()
             continue #already visited
 
-        visited_places[ccenter].append((face, orientation))
+        visited_places[ccenter].append((case, face, orientation))
 
         if(CHECK_UNUSED_FACES and LIMIT_TO_ROLLING_PAIRS):
             faces-= {face}
@@ -584,8 +584,8 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
         if (((area2[0]-edgeadd < ccenter[0] < area2[2]+edgeadd) and (area2[1]-edgeadd < ccenter[1] < area2[3]+edgeadd))))
         # if ((area2[0] < ccenter[0] < area2[2]) and (area2[1] < ccenter[1] < area2[3])))
     if(TIMERSTART+TIME_LIMIT>time() and TIME_LIMIT>0 and visited/max_visitable>PICTURE_TRESHOLD and WAIT_AT_END and visited>4):
-        if(WAIT_AT_END==1):
-            pygame.time.wait(int(TIMERSTART+TIME_LIMIT-time())*1000)
+        if(WAIT_AT_END):
+            pygame.time.wait(int((TIMERSTART+TIME_LIMIT-time())*WAIT_AT_END*1000))
         else:
             pygame.time.wait(int((TIMERSTART+TIME_LIMIT-time())*visited/max_visitable)*1000)
 
@@ -593,10 +593,10 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
         #print("Could not visit everything: %s/%i"%(visited,max_visitable))
         if(visited>2):
             print("Could not visit everything: %s/%i"%(visited,max_visitable), "(c%i f%i o%i)"%(startcase,startface,startorientation))
-            visited_places = {center for center,visitors in visited_places.items() if visitors}
+            visited_places = {center:visitors for center,visitors in visited_places.items() if visitors}
             return visited/max_visitable, visited_places
         #print("failure")
-        return False, None
+        return False, visited_places
     else:
         print("Visited everything: %s/%i"%(visited,max_visitable))
         return True, visited_places
@@ -655,6 +655,7 @@ if __name__ == "__main__":
         #Skip to
         tiling = all_tilings[tilingname]
         for polyname in all_nets_names:
+            result = 0
             if(LIMIT_TO_SHOWCASE):
                 tilingname,polyname = showcase.pop(0)
                 tiling = all_tilings[tilingname]
@@ -718,6 +719,8 @@ if __name__ == "__main__":
                     faceori.add(canon_fo(polyname,face,orientation))
                     # faceori.append((face,orientation))
             #Main loop
+            explored_canon_cfo = set()
+            explored_canon_cells = set()
             for case in (CHECK_ALL_CELLS and tiling or [0]):
                 #make an algo that chooses better the only tile
                 if(EXPLORATION_SPACE==SCREENSPACE):
@@ -738,7 +741,21 @@ if __name__ == "__main__":
                         continue
                     if(SKIP_NOTFULL and skip_pair):
                         continue
-
+                    canon_cell = canon_co(tilingname,case,orientation)
+                    if canon_cell!=None:
+                        canon_cfo = canon_cell+(face,)
+                        if canon_cfo in explored_canon_cfo:
+                            # print("CFO already explored")
+                            continue
+                        if canon_cfo in explored_canon_cells:
+                            # print("Tiling symmetry already explored")
+                            continue
+                        explored_canon_cells.add(canon_cfo)
+                    if len(tiling[case])!=len(net[face]):
+                        continue
+                    if not any(len(net[net[face][index]])==len(tiling[tiling[case][index][0]]) for index in range(len(tiling[case]))):
+                        print("Cannot escape first tile")
+                        continue
                     if(mapping==None):
                         if(EXPLORATION_SPACE==SCREENSPACE):
                             print("Regenerating mapping",tilingname)
@@ -766,6 +783,13 @@ if __name__ == "__main__":
                     # ,FaceSym=FaceSym))
 
                     # Ouptut result
+                    if(type(visits)==dict):
+                        print(visits)
+                        for visitor in visits.values():
+                            for c,f,o in visitor :
+                                f,o = canon_fo(polyname,f,o)
+                                c,o = canon_co(tilingname,c,o)
+                                explored_canon_cfo.add((c,f,o))
                     if(PREVIEW):
                         screen.blit(outlines,(0,0))
                         refresh()
