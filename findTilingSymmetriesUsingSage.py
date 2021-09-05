@@ -3,7 +3,7 @@ import os
 import pprint
 from copy import deepcopy
 # sage -python findTilingSymmetriesUsingSage.py
-SAVEGRAPHES = True
+SAVEGRAPHES = False
 
 from tiling_dicts.uniform_tilings import uniform_tilings as all_tilings
 
