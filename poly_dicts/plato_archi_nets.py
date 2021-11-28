@@ -1,3 +1,4 @@
+#platonic and archimedean polyhedrons
 #dict[face]=[neighbour_face ...]
 plato_archi_nets= dict()
 

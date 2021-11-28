@@ -1,3 +1,4 @@
+#johnson solids, including chiral variants
 #dict[face]=[neighbour_face ...]
 johnson_nets= dict()
 johnson_nets['j1'] = \
