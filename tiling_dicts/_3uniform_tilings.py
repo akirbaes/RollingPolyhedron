@@ -1,3 +1,4 @@
+#3-uniform tilings, with variations
 triisogonal_vertex_homogeneous= dict()
 triisogonal_vertex_homogeneous['01-(3^6;3^4x6;3^2x6^2)1'] = \
 {   0: [(0, 1), (1, 0), (2, 2), (0, -1), (4, 3), (5, 4)],

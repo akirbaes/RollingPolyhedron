@@ -1,3 +1,5 @@
+#platonic tilings are regular tilings
+#1-uniform regular
 #dict[face]=[(neighbour_face, differenciator)]
 #neighbour faces in clockwise order
 #match differenciator: -d with +d, else d with d
