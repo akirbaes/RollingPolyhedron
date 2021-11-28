@@ -12,7 +12,7 @@ import sympy
 
 GENERATE_PROOF = True
 GENERATE_STAB = True
-UPDATE_RESULTS = True
+UPDATE_RESULTS = False
 DUPLICATE_IMAGES = False
 
 from GeometryFunctions import centerpoint
@@ -30,7 +30,7 @@ from poly_dicts.johnson_nets import johnson_nets
 # all_tilings = {**triisogonal_vertex_homogeneous}
 all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
 
-from tiling_dicts.uniform_tilings import uniform_tilings as all_tilings
+from tiling_dicts.uniform_tiling_supertiles import uniform_tilings as all_tilings
 
 
 
@@ -693,6 +693,7 @@ if __name__ == "__main__":
     import symmetry_classes.symmetry_functions
     def canon_fo(polyname, face, orientation):
         return symmetry_classes.symmetry_functions.canon_fo(polyname, face, orientation, poly_symmetries)
+    from symmetry_classes.tiling_symmetries import canon_co
 
     # for tilingname, polyname in [["3^6","j8"]]:
 #     for tilingname, polyname in [
@@ -703,6 +704,7 @@ if __name__ == "__main__":
 # ["(3^3x4^2;3^2x4x3x4)1", "j27"]
 #         ]:
 
+    # showcase = [("3unhv48 (3^6;3^2x4x3x4;3^2x4x3x4)", "cuboctahedron")]
     for tilingname, polyname in ((t,p) for t in all_tilings.keys() for p in all_nets.keys()):
     # for tilingname, polyname in [["3^6;3^2x4x3x4","j89"]]:
     # for tilingname, polyname in [["3^2x4x3x4;3x4x6x4","j29"]]:
