@@ -6,8 +6,13 @@ from tiling_dicts._4uniform_tilings import uniform4
 
 uniform_tilings = {**uniform1, **uniform2, **uniform3, **uniform4}
 
+import pprint
+
 if __name__ == "__main__":
     print(uniform_tilings)
+    with open("uniform_tiling_supertiles.py","w") as f:
+        f.write("uniform_tilings = \\\n")
+        f.write(pprint.pformat(uniform_tilings, indent=1, sort_dicts=False))
 
 """from _1uniform_tilings import uniform1
     import archimedean_tilings
