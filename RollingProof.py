@@ -1,23 +1,17 @@
-import copy
-import os
 import pickle
 import time
 from datetime import datetime
-from math import ceil
-from statistics import mean
 
 import numpy
-import pygame
 import sympy
+
+from RollingProofImageGen import generate_stability_image, generate_image
 
 GENERATE_PROOF = True
 GENERATE_STAB = True
 UPDATE_RESULTS = False
 DUPLICATE_IMAGES = False
 
-from GeometryFunctions import centerpoint
-from RollyPoint import RollyPoint
-from symmetry_classes.poly_symmetries import poly_symmetries
 from symmetry_classes.symmetry_functions import canon_fo
 # from tiling_dicts.archimedean_tilings import archimedean_tilings
 # from tiling_dicts.platonic_tilings import platonic_tilings
@@ -35,311 +29,6 @@ from tiling_dicts.uniform_tiling_supertiles import uniform_tilings as all_tiling
 
 
 import CFOClassGenerator
-
-def generate_stability_image(tilingname,polyname,tiling,polyhedron,hexborders,type,stable_spots):
-    p1 = RollyPoint(0, 0)
-    EDGESIZE = 100
-    p2 = RollyPoint(0 + EDGESIZE, 0)
-    startcell = 0
-    cx,cy = supertile_center(tiling, startcell, p1, p2, precision=7)
-
-    faces_withsides = [[] for x in range(13)]
-    for face,neigh in polyhedron.items():
-        faces_withsides[len(neigh)].append(face)
-
-    #1: determine the shape and position of every cell IRT the supertile center
-    cells_pos = dict()
-    for cell, pa, pb, cgon, ccenter in yield_insides(tiling,startcell,p1,p2,precision=7):
-        cells_pos[cell]=[(x-cx,y-cy) for (x,y) in cgon]
-
-    neighbour_pos = dict()
-    supertile_border_segments = list()
-    # 2: determine the position of neighbouring supertiles in order to create the coords
-    # and the borders of the supertile IRT the supertile center
-    for cell, nextcellid, cgon, nextcgon, pa, pb in yield_borders(tiling, startcell, p1, p2, precision=7):
-        nextcell, nextid = nextcellid
-        neigh = supertile_center(tiling, nextcell, pa, pb, precision=3)
-        neighcoord = hexborders[(cell,nextcellid)]
-        neighbour_pos[neighcoord]=neigh
-        supertile_border_segments.append([(x-cx,y-cy) for (x,y) in nextcgon[0:2]])
-
-    dx = neighbour_pos[(1,0)]
-    dx = [dx[0]-cx,dx[1]-cy]
-    dy = neighbour_pos[(0,1)]
-    dy = [dy[0]-cx,dy[1]-cy]
-
-    drawn_tiles = list()
-    drawn_supertiles = list()
-    filled_tiles = list()
-    empty_tiles = list()
-
-    min_x=0
-    min_y=0
-    max_x=0
-    max_y=0
-
-    for coordinates,stability in stable_spots.items():
-        hcoordx,hcoordy = coordinates
-        x0 = hcoordx*dx[0] + hcoordy*dy[0]
-        y0 = hcoordx*dx[1] + hcoordy*dy[1]
-        for c1,stable in enumerate(stability):
-            polygon = [(x0 + x, y0 + y) for (x, y) in cells_pos[c1]]
-
-            drawn_tiles.append(polygon)
-            if(stable):
-                filled_tiles.append(polygon)
-            if not faces_withsides[len(polygon)]:
-                empty_tiles.append(polygon)
-
-            min_x = min(min_x, min(x for (x, y) in polygon))
-            min_y = min(min_y, min(y for (x, y) in polygon))
-            max_x = max(max_x, max(x for (x, y) in polygon))
-            max_y = max(max_y, max(y for (x, y) in polygon))
-        for segment in supertile_border_segments:
-            seg = [(x0+x,y0+y) for (x,y) in segment]
-            drawn_supertiles.append(seg)
-
-    width = max_x-min_x
-    height = max_y-min_y
-    print("Width=",width)
-    if(width>height):
-        final_width = 980
-        ratio = final_width/width
-        final_height = int((max_y-min_y)*ratio)
-    else:
-        final_height = 980
-        ratio = final_height/height
-        final_width = int((max_x-min_x)*ratio)
-    # ratio = ratio**0.5
-    def coord_adapt(shape):
-        return [((x-min_x)*final_width/width+10, (y-min_y)*final_width/width+10) for (x,y) in shape]
-
-    drawn_supertiles = [coord_adapt(segment) for segment in drawn_supertiles]
-    drawn_tiles = [coord_adapt(poly) for poly in drawn_tiles]
-    filled_tiles = [coord_adapt(poly) for poly in filled_tiles]
-    empty_tiles = [coord_adapt(poly) for poly in empty_tiles]
-
-    cells_pos = list(cells_pos.values())
-    cells_pos = [coord_adapt(poly) for poly in cells_pos]
-
-    ratio=ratio
-    pygame.init()
-    surf = pygame.Surface((final_width+20, final_height+20))
-    surf.fill((255,255,255))
-    for poly in cells_pos:
-        color = (230,255,255)
-        pygame.draw.polygon(surf,color,poly,width=0)
-    for poly in filled_tiles:
-        color = (96,96,96)
-        if(poly in cells_pos):
-            color=(90,110,110)
-        pygame.draw.polygon(surf,color,poly,width=0)
-    for poly in empty_tiles:
-        color = (0,0,32)
-        if(poly in cells_pos):
-            color = (0,32,40)
-        pygame.draw.polygon(surf,color,poly,width=0)
-    typeset = (type=="quasi-roller" )*2
-    for poly in drawn_tiles:
-        pygame.draw.lines(surf,(192,192,192),1,poly,width=int(ceil((6+typeset)*ratio)))
-    for line in drawn_supertiles:
-        pygame.draw.line(surf,(0,0,0),*line,width=int(ceil((8-typeset)*ratio)))
-    # for line in supertile_border_segments:
-    #     pygame.draw.line(surf,(0,0,0),*line,width=int(8*ratio))
-    if(width<height):
-        surf=pygame.transform.rotate(surf,90)
-
-    path = "_proofimages/"+type+"_stability/"
-    try:os.mkdir("_proofimages/")
-    except:pass
-    try:os.mkdir(path)
-    except:pass
-    pygame.image.save(surf,path+polyname+"@"+tilingname+" stability"+".png")
-
-
-def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,hexborders,symmetries,explored,type):
-    p1 = RollyPoint(0, 0)
-    EDGESIZE = 100
-    p2 = RollyPoint(0 + EDGESIZE, 0)
-    startcell = list(classes[group[0]])[0][0]
-    cx,cy = supertile_center(tiling, startcell, p1, p2, precision=7)
-
-    faces_withsides = [[] for x in range(13)]
-    for face,neigh in polyhedron.items():
-        faces_withsides[len(neigh)].append(face)
-
-    #1: determine the shape and position of every cell IRT the supertile center
-    cells_pos = dict()
-    for cell, pa, pb, cgon, ccenter in yield_insides(tiling,startcell,p1,p2,precision=7):
-        cells_pos[cell]=[(x-cx,y-cy) for (x,y) in cgon]
-
-    neighbour_pos = dict()
-    supertile_border_segments = list()
-    # 2: determine the position of neighbouring supertiles in order to create the coords
-    # and the borders of the supertile IRT the supertile center
-    for cell, nextcellid, cgon, nextcgon, pa, pb in yield_borders(tiling, startcell, p1, p2, precision=7):
-        nextcell, nextid = nextcellid
-        neigh = supertile_center(tiling, nextcell, pa, pb, precision=3)
-        neighcoord = hexborders[(cell,nextcellid)]
-        neighbour_pos[neighcoord]=neigh
-        supertile_border_segments.append([(x-cx,y-cy) for (x,y) in nextcgon[0:2]])
-
-    dx = neighbour_pos[(1,0)]
-    dx = [dx[0]-cx,dx[1]-cy]
-    dy = neighbour_pos[(0,1)]
-    dy = [dy[0]-cx,dy[1]-cy]
-    symmetrylines = [[None,None],[None,None]]
-
-
-    drawn_tiles = list()
-    drawn_supertiles = list()
-    filled_tiles = list()
-    facefull_tiles = list()
-    faceorifull_tiles = list()
-    unused_tiles = list()
-
-    min_x=0
-    min_y=0
-    max_x=0
-    max_y=0
-
-    for coordinates,eclasses in explored.items():
-        hcoordx,hcoordy = coordinates
-        x0 = cx + hcoordx*dx[0] + hcoordy*dy[0]
-        y0 = cy + hcoordx*dx[1] + hcoordy*dy[1]
-        #cx, cy unnecessary
-        #coloration? count compatible faces in advance and decide from there
-        #symmetries: draw a line from the center of a tile to another
-
-        faces = set()
-        faceori = set()
-
-        for c1 in tiling:
-            reached_faces = set()
-            reached_fo = set()
-
-            polygon = [(x0 + x, y0 + y) for (x, y) in cells_pos[c1]]
-            center = centerpoint(polygon)
-            if c1 == startcell and coordinates == (0, 0):
-                symmetrylines[0][0] = center
-                symmetrylines[1][0] = center
-            if c1 == startcell and list(coordinates) == list(symmetries[0]):
-                symmetrylines[0][1] = center
-            if c1 == startcell and list(coordinates) == list(symmetries[1]):
-                symmetrylines[1][1] = center
-
-            drawn_tiles.append(polygon)
-
-            min_x = min(min_x, min(x for (x, y) in polygon))
-            min_y = min(min_y, min(y for (x, y) in polygon))
-            max_x = max(max_x, max(x for (x, y) in polygon))
-            max_y = max(max_y, max(y for (x, y) in polygon))
-
-            for clas in eclasses:
-                for c,f,o in classes[clas]:
-                    if c == c1:
-                        reached_faces.add(f)
-                        reached_fo.add((f,o))
-            if(reached_faces):
-                filled_tiles.append(polygon)
-            if(len(reached_faces)==len(faces_withsides[len(polygon)])):
-                facefull_tiles.append(polygon)
-            if(len(reached_fo)==len(faces_withsides[len(polygon)]*len(polygon))):
-                faceorifull_tiles.append(polygon)
-            # print("Faces with",len(polygon),"sides:",faces_withsides[len(polygon)])
-            if len(faces_withsides[len(polygon)])==0:
-                unused_tiles.append(polygon)
-        # if(polyname=="cube"):
-        #     input("cube fo |%s|"%str(reached_fo))
-        for segment in supertile_border_segments:
-            seg = [(x0+x,y0+y) for (x,y) in segment]
-            drawn_supertiles.append(seg)
-
-            min_x = min(min_x,min(x for (x,y) in segment))
-            min_y = min(min_y,min(y for (x,y) in segment))
-            max_x = max(max_x,max(x for (x,y) in segment))
-            max_y = max(max_y,max(y for (x,y) in segment))
-    # print(supertile_border_segments)
-    # print(explored)
-    # print(max_x,max_y,min_x,min_y)
-    width = max_x-min_x
-    height = max_y-min_y
-    print("Width=",width)
-    if(width>height):
-        final_width = 980
-        ratio = final_width/width
-        final_height = int((max_y-min_y)*ratio)
-    else:
-        final_height = 980
-        ratio = final_height/height
-        final_width = int((max_x-min_x)*ratio)
-    ratio = ratio**0.5
-    def coord_adapt(shape):
-        return [((x-min_x)*final_width/width+10, (y-min_y)*final_width/width+10) for (x,y) in shape]
-
-    drawn_supertiles = [coord_adapt(segment) for segment in drawn_supertiles]
-    # print("b",symmetrylines)
-    symmetrylines = [coord_adapt(line) for line in symmetrylines]
-    # print("a",symmetrylines)
-    drawn_tiles = [coord_adapt(poly) for poly in drawn_tiles]
-    filled_tiles = [coord_adapt(poly) for poly in filled_tiles]
-    facefull_tiles = [coord_adapt(poly) for poly in facefull_tiles]
-    faceorifull_tiles = [coord_adapt(poly) for poly in faceorifull_tiles]
-    unused_tiles = [coord_adapt(poly) for poly in unused_tiles]
-
-    pygame.init()
-    surf = pygame.Surface((final_width+20, final_height+20), pygame.SRCALPHA)
-    surf.fill((255,255,255))
-    for poly in filled_tiles:
-        # print("poly:",poly)
-        if(poly in faceorifull_tiles):
-            color = (255,0,0)
-        elif(poly in facefull_tiles):
-            color = (128,0,0)
-        else:
-            color = (128,128,128)
-        pygame.draw.polygon(surf,color,poly,width=0)
-    for poly in unused_tiles:
-        pygame.draw.polygon(surf,(16,16,48),poly,width=0)
-    for poly in drawn_tiles:
-        pygame.draw.lines(surf,(192,192,192),1,poly,width=int(6*ratio))
-    for line in drawn_supertiles:
-        pygame.draw.line(surf,(0,0,0),*line,width=int(8*ratio))
-    for index,line in enumerate(symmetrylines):
-        b=(255,255,0,0)
-        pygame.draw.line(surf,(0,128,b[index]),*line,width=int(9*ratio))
-        pygame.draw.circle(surf,(0,128,b[index]),line[0],12*ratio*ratio)
-        pygame.draw.circle(surf,(0,128,b[index]),line[1],12*ratio*ratio)
-    if(width<height):
-        surf=pygame.transform.rotate(surf,90)
-    totalsurf = pygame.Surface((1000, surf.get_height()+100), pygame.SRCALPHA)
-    totalsurf.fill((255,255,255))
-    totalsurf.blit(surf,(0,100))
-    # surf.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
-    try:
-        polimage=pygame.image.load("polyhedron_images/"+polyname+".png")
-    except:
-        polimage=pygame.image.load("polyhedron_images/"+polyname+".jpg")
-
-    width,height = polimage.get_width(),polimage.get_height()
-    newwidth=int(width/height*100)
-    polimage=pygame.transform.scale(polimage,(newwidth,100))
-
-    totalsurf.blit(polimage,(0,0))
-    text = pygame.font.SysFont(None, 70).render(polyname+"    %i/%i"%(groups.index(group)+1,len(groups)), True, (0, 0, 0))
-    totalsurf.blit(text, (newwidth+4,2))
-    text = pygame.font.SysFont(None, 70).render(tilingname, True, (0, 0, 0))
-    totalsurf.blit(text, (newwidth+4,52))
-    text = pygame.font.SysFont(None, 20).render("polyhedron render via Wikipedia", True, (128, 128, 128))
-    totalsurf.blit(text, (1000-text.get_width()-2,52))
-
-    path = "_proofimages/"+type+"/"
-    try:os.mkdir("_proofimages/")
-    except:pass
-    try:os.mkdir(path)
-    except:pass
-    pygame.image.save(totalsurf,path+polyname+"@"+tilingname+" %i"%(groups.index(group)+1)+".png")
-
 
 
 def determine_n(tiling,net,polyname):#,startcase,startface,startorientation):
@@ -368,8 +57,18 @@ def determine_n(tiling,net,polyname):#,startcase,startface,startorientation):
 def sqrdist(tupl):
     return tupl[0]*tupl[0]+tupl[1]*tupl[1]
 
-from SupertileCoordinatesGenerator import generate_supertile_coordinate_helpers, supertile_center, yield_insides, \
-    yield_borders
+from SupertileCoordinatesGenerator import generate_supertile_coordinate_helpers
+
+from math import copysign
+
+def advance_on_integer(dx,dy):
+    if abs(dx)>abs(dy):
+        for x in range(abs(dx)+1):
+            yield copysign(x,dx),int(x/dx*dy)
+    else:
+        for y in range(abs(dy)+1):
+            yield int(y/dy*dx) ,copysign(y,dy)
+
 
 
 def is_roller(tiling,tilingname,net,polyname):
@@ -488,84 +187,103 @@ def is_roller(tiling,tilingname,net,polyname):
                 else:
                     all_data[groupindex]["type"]="area"
                 continue
-            mx = min(x for (x,y) in min_symmetries+[(0,0)])
+            """mx = min(x for (x,y) in min_symmetries+[(0,0)])
             my = min(y for (x,y) in min_symmetries+[(0,0)])
             Mx = max(x for (x,y) in min_symmetries+[(0,0)])
             My = max(y for (x,y) in min_symmetries+[(0,0)])
             N = max(max(abs(x),abs(y)) for (x,y) in min_symmetries)+1
-            coordinates = {(i, j): set() for i in range(mx, Mx+1, 1) for j in range(my, My+1, 1)}
+            coordinates = {(i, j): set() for i in range(mx, Mx+1, 1) for j in range(my, My+1, 1)}"""
             filled_supertiles = set()
             to_explore = [(startingstate,0,0)]
             explored = set()
             """Using the symmetry vectors, fill a N*2 space"""
-            while(to_explore):
-                st,x,y=to_explore.pop(0)
-                next = ctsd[st]
-                if st not in coordinates[(x,y)]:
-                    #print(st,x,y)
-                    coordinates[(x,y)].add(st)
-                    if((x,y) not in filled_supertiles and CFOClassGenerator.has_all_tiles(coordinates[(x, y)],classes,tiling)):
-                        filled_supertiles.add((x,y))
-                        print("\r",len(filled_supertiles),"/",len(coordinates),end="")
-                        # print(to_explore)
-                        # if(len(filled_supertiles)==len(coordinates)):
-                        #     break
-                    for next_st,(dx,dy) in list(next)+[(st,(0,0))]:
-                        (x1,y1),(x2,y2)= min_symmetries
-                        # nx = x+dx
-                        # ny = y+dy
-                        # if ((nx,ny) in coordinates and next_st not in coordinates[(nx, ny)]
-                        #         and (next_st, nx, ny) not in to_explore):
-                        #     to_explore.insert(0,(next_st,nx,ny))
-                        for s1,s2 in ((1,1),(1,-1),(-1,1),(-1,-1)):
-                            # print("S:",s1,s2)
+            def between(border1, border2, value):
+                borders = min(border1, border2)
+                borderm = max(border1, border2)
+                return borders<=value<=borderm
+
+            def lines_to_fill(points, y):
+                xes = []
+                for i in range(4):
+                    segment = points[i], points[(i+1)%4]
+                    if(between(segment[0][1],segment[1][1],y)):
+                        if(segment[1][1]-segment[0][1]==0):
+                            #point = min(segment[0][0],segment[1][0])
+                            xes.append(segment[0][0])
+                            xes.append(segment[1][0])
+                        else:
+                            point = int(round((y-segment[0][1])/(segment[1][1]-segment[0][1])*(segment[1][0]-segment[0][0])))
+                            xes.append(point)
+                print(xes)
+                xes=sorted(set(xes))
+                if(len(xes)!=2):
+                    print(xes,"too many or too few points of comparison")
+                    xes=2*xes
+
+                res = [(x,y) for x in range(xes[0],xes[-1],1)]
+                return res
+
+            def find_opposite_border(point, points, vec1, vec2):
+                for (i,j) in (-1,0),(1,0),(-1,-1),(1,1),(0,1),(0,-1):
+                    checkpoint = point[0]+vec1[0]*i+vec2[0]*j, point[1]+vec1[1]*i+vec2[1]*j
+                    if checkpoint in points:
+                        yield checkpoint
+                return None
+
+            def fill_parallelogram(vec1, vec2):
+                points = (0,0),vec1,(vec1[0]+vec2[0],vec1[1]+vec2[1]), vec2
+                miny = min(y for x,y in points)
+                maxy = max(y for x,y in points)
+                minx = min(x for x,y in points)
+                maxx = max(x for x,y in points)
+
+                coordinates = {(i,j) for i in range(minx, maxx + 1, 1) for j in range(miny, maxy + 1, 1)}
+                return coordinates
+                coordinates = set()
+                for y in range(miny, maxy+1, 1):
+                    for pos in lines_to_fill(points,y):
+                        coordinates.add(pos)
+                return coordinates
+
+            def explore_parallelogram(vec1,vec2, rules, to_explore):
+                points = fill_parallelogram(vec1, vec2)
+                explored_states = {point:set() for point in points}
+                startingpoint = to_explore[0]
+                for nx,ny in find_opposite_border(startingpoint[1:],points, vec1,vec2):
+                    to_explore.append((startingpoint[0], nx,ny))
+                # symmetrypoint =
+                # if(symmetrypoint):
+                #     to_explore.append((startingpoint[0],symmetrypoint[0],symmetrypoint[1]))
+
+                while (to_explore):
+                    print(to_explore)
+                    st, x, y = to_explore.pop(0)
+                    next = rules[st]
+                    if st not in explored_states[(x, y)]:
+                        # print(st,x,y)
+                        explored_states[(x, y)].add(st)
+                        if ((x, y) not in filled_supertiles and CFOClassGenerator.has_all_tiles(explored_states[(x, y)],
+                                                                                                classes, tiling)):
+                            filled_supertiles.add((x, y))
+                            print("\r", len(filled_supertiles), "/", len(explored_states), end="")
+
+                        for next_st, (dx, dy) in list(next):
                             nx = x + dx
                             ny = y + dy
-                            for k in range(N*2):
-                            # while ((nx,ny) in coordinates):
-                                nxold = nx
-                                nyold = ny
-                                # while ((nx,ny) in coordinates):
-                                for l in range(N*2):
-                                    if ((nx,ny) in coordinates and next_st not in coordinates[(nx, ny)]
-                                            and (next_st, nx, ny) not in to_explore):
-                                        to_explore.insert(0,(next_st,nx,ny))
-                                    nx+=x2*s2
-                                    ny+=y2*s2
-                                    # print(nx,ny)
-                                # print("Quit:",nx,ny)
-                                nx = nxold + x1*s1
-                                ny = nyold + y1*s1
-                            # print("Quit:",nx,ny)
-
-                        # input()
-
-                        # for
-                        #     for sx2,sy2 in symmetries:
-                            # nx = x+dx
-                            # ny = y + dy
-                            # while(-N<=nx<=N and -N<=ny<=N):
-                            #         if (next_st not in coordinates[(nx, ny)] and (
-                            #         next_st, nx, ny) not in to_explore):
-                            #             to_explore.insert(0,(next_st,nx,ny))
-                            #         ny+=sy
-                            #         if(sy==0):
-                            #             break
-                            #     nx+=sx
-                            #     if(sx==0):
-                            #         break
-
-                        # for sx, sy in symmetries:
-                        #     nx,ny = x+dx+sx, y+dy+sy
-                        #     if(-N<=nx<=N and -N<=ny<=N and next_st not in coordinates[(nx,ny)] and (next_st,nx,ny) not in to_explore):
-                        #         to_explore.insert(0,(next_st,nx,ny))
-                                #print(next_st,nx,ny)
+                            if(nx,ny) in explored_states and next_st not in explored_states[(nx,ny)] and (next_st,nx,ny) not in to_explore:
+                                to_explore.insert(0, (next_st, nx, ny))
+                            for nx, ny in find_opposite_border((nx,ny),points, vec1,vec2):
+                                if (nx, ny) in explored_states and next_st not in explored_states[(nx, ny)] and (
+                                next_st, nx, ny) not in to_explore:
+                                    to_explore.insert(0, (next_st, nx, ny))
+                return explored_states
+            explored_states = explore_parallelogram(min_symmetries[0],min_symmetries[1], ctsd, to_explore)
             """After the exploration, gather results"""
             print()
             is_roller=True
 
-            all_data[groupindex]["exploration"]=coordinates
-            for coord,states in coordinates.items():
+            all_data[groupindex]["exploration"]=explored_states
+            for coord,states in explored_states.items():
                 if not(CFOClassGenerator.has_all_tiles(states, classes, tiling)):
                     is_roller = False
             if(is_roller):
@@ -575,7 +293,7 @@ def is_roller(tiling,tilingname,net,polyname):
                 all_data[groupindex]["type"]= type
             else:
                 is_quasi_roller = True
-                for coord,states in coordinates.items():
+                for coord,states in explored_states.items():
                     if not(CFOClassGenerator.has_all_compatible_tiles(states, classes, tiling,net)):
                         is_quasi_roller = False
                 stability[groupindex]=is_quasi_roller
@@ -587,12 +305,12 @@ def is_roller(tiling,tilingname,net,polyname):
                     type="non-roller"
                     all_data[groupindex]["type"]= "hollow"
                 if(N):
-                    graph = [[bool((i, j) in filled_supertiles)+bool(coordinates[(i,j)]) for i in range(-N//2, N//2 + 1, 1) if (i,j) in coordinates] for j in range(-N//2, N//2+1, 1)]
+                    graph = [[bool((i, j) in filled_supertiles)+bool(explored_states[(i,j)]) for i in range(-N//2, N//2 + 1, 1) if (i,j) in explored_states] for j in range(-N//2, N//2+1, 1)]
                     CFOClassGenerator.prettyprint_012(graph)
                     #input()
             if(GENERATE_PROOF):
                 if not any(stability[:groupindex]) or DUPLICATE_IMAGES:
-                    generate_image(tiling, net, tilingname, polyname, classes, group, groups, borders, min_symmetries, coordinates,type)
+                    generate_image(tiling, net, tilingname, polyname, classes, group, groups, borders, min_symmetries, explored_states, type)
         """Done with all the groups"""
         is_stable = not False in stability
         results = dict()
@@ -653,7 +371,7 @@ def is_roller(tiling,tilingname,net,polyname):
             stable_spots = {pos:[cell_stability[cell]==maxfo[cell] and maxfo[cell]!=0 for cell in range(len(tiling))] for pos in fill_area}
             type=("roller","quasi-roller")[bool(incompatible)]
             if(GENERATE_STAB):
-                generate_stability_image(tilingname,polyname,tiling,net,borders,type,stable_spots)
+                generate_stability_image(tilingname, polyname, tiling, net, borders, type, stable_spots)
 
             results["stability"]=all(cell_stability[cell]==maxfo[cell] for cell in range(len(tiling)))
 
@@ -693,7 +411,7 @@ if __name__ == "__main__":
     import symmetry_classes.symmetry_functions
     def canon_fo(polyname, face, orientation):
         return symmetry_classes.symmetry_functions.canon_fo(polyname, face, orientation, poly_symmetries)
-    from symmetry_classes.tiling_symmetries import canon_co
+
 
     # for tilingname, polyname in [["3^6","j8"]]:
 #     for tilingname, polyname in [
