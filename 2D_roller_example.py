@@ -211,7 +211,9 @@ def area_explore(tiling, tilename, net, polyname, mapping,sp1,sp2, startcase=0, 
 
 
 
-def common_face(net,tiling):
+def common_face(net,tiling, startface=None):
+    if(startface!=None):
+        net = {startface:net[startface]}
     for face, neigh in net.items():
         for cell, vois in tiling.items():
             if(len(neigh)==len(vois)):
@@ -236,11 +238,15 @@ if __name__ == "__main__":
     startorientation = 0
     area = (0,0,WIDTH, WIDTH)
     shuffle(stable_showcase)
-    stable_showcase = [('tetrahedron', '1u01 (3^6)'), ('cube', '1u02 (4^4)')]+stable_showcase
+    stable_showcase = [('tetrahedron', '1u01 (3^6)'), ('cube', '1u02 (4^4)'), ("j1",'1u06 (3^2x4x3x4)')]+stable_showcase
     for polyname, tilename in stable_showcase:
         tiling = uniform_tilings[tilename]
         net = all_nets[polyname]
-        startface,startcell = common_face(net,tiling)
+        if(polyname=="j1"):
+            startface=0
+            startface,startcell = common_face(net,tiling, startface=0)
+        else:
+            startface,startcell = common_face(net,tiling)
         if(startcell==None):
             continue
 
