@@ -1,6 +1,9 @@
 #main file with all uniform tilings crammed together
 #1-uniform to 4-uniform
 #higher more complex tilings were not added yet
+#format: describes a periodic part of the tiling (repeated supertile)
+#tile number: list of (neighbouring tile number, with pairing ID) in clockwise order
+#pairing ID: pair with given tile number but negative pairing ID, or itself
 uniform_tilings = \
 {'1u01 (3^6)': {0: [(1, 0), (1, 1), (1, 2)], 1: [(0, 0), (0, -1), (0, -2)]},
  '1u02 (4^4)': {0: [(0, 1), (0, 2), (0, -1), (0, -2)]},
