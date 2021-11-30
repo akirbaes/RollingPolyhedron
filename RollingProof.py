@@ -224,7 +224,7 @@ def is_roller(tiling,tilingname,net,polyname):
                 return res
 
             def find_opposite_border(point, points, vec1, vec2):
-                for (i,j) in (-1,0),(1,0),(-1,-1),(1,1),(0,1),(0,-1):
+                for (i,j) in (-1,0),(1,0),(-1,-1),(1,1),(1,-1),(-1,1),(0,1),(0,-1):
                     checkpoint = point[0]+vec1[0]*i+vec2[0]*j, point[1]+vec1[1]*i+vec2[1]*j
                     if checkpoint in points:
                         yield checkpoint
