@@ -12,6 +12,10 @@ Generates a rolling space that fits in the screen/in a given area and explores i
 
 Generates a proof of rolling area by using the symmetries in the rolling structure. Outputs images and pickled dictionaries.
 
+## 2D_roller_example.py
+
+Compact example of the rolling logic for reference. Randomly rolls in screen space tiling.
+
 ----
  
 # Other tools
