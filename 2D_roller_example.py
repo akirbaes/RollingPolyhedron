@@ -238,12 +238,13 @@ if __name__ == "__main__":
     startorientation = 0
     area = (0,0,WIDTH, WIDTH)
     shuffle(stable_showcase)
-    stable_showcase = [('tetrahedron', '1u01 (3^6)'), ('cube', '1u02 (4^4)'), ("j1",'1u06 (3^2x4x3x4)')]+stable_showcase
+    stable_showcase = [("j1",'1u06 (3^2x4x3x4)'), ("j1",'2u05 (3^6;3^2x4x3x4)'), ("j1",'2u09 (3^3x4^2;3^2x4x3x4)1')]+stable_showcase
+    stable_showcase = [('tetrahedron', '1u01 (3^6)'), ('cube', '1u02 (4^4)')]+stable_showcase
     for polyname, tilename in stable_showcase:
         tiling = uniform_tilings[tilename]
         net = all_nets[polyname]
         if(polyname=="j1"):
-            startface=0
+            startface=0 #unstable: choose stable tile
             startface,startcell = common_face(net,tiling, startface=0)
         else:
             startface,startcell = common_face(net,tiling)
