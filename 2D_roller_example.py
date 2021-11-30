@@ -14,20 +14,7 @@ EDGESIZE = 50
 
 stable_showcase = [('tetrahedron', '1u01 (3^6)'), ('octahedron', '1u01 (3^6)'), ('icosahedron', '1u01 (3^6)'), ('j10', '1u01 (3^6)'), ('j11', '1u01 (3^6)'), ('j12', '1u01 (3^6)'), ('j13', '1u01 (3^6)'), ('j17', '1u01 (3^6)'), ('j50', '1u01 (3^6)'), ('j51', '1u01 (3^6)'), ('j62', '1u01 (3^6)'), ('j84', '1u01 (3^6)'), ('j85', '1u01 (3^6)'), ('j86', '1u01 (3^6)'), ('j87', '1u01 (3^6)'), ('j88', '1u01 (3^6)'), ('j89', '1u01 (3^6)'), ('j90', '1u01 (3^6)'), ('cube', '1u02 (4^4)'), ('j8', '1u02 (4^4)'), ('j37', '1u02 (4^4)'), ('tetrahedron', '1u04 (3^4x6)'), ('octahedron', '1u04 (3^4x6)'), ('icosahedron', '1u04 (3^4x6)'), ('j12', '1u04 (3^4x6)'), ('j13', '1u04 (3^4x6)'), ('j17', '1u04 (3^4x6)'), ('j51', '1u04 (3^4x6)'), ('j84', '1u04 (3^4x6)'), ('cuboctahedron', '1u06 (3^2x4x3x4)'), ('j26', '1u06 (3^2x4x3x4)'), ('j31', '1u06 (3^2x4x3x4)'), ('cuboctahedron', '1u07 (3x4x6x4)'), ('tetrahedron', '2u01 (3^6;3^4x6)1'), ('octahedron', '2u01 (3^6;3^4x6)1'), ('icosahedron', '2u01 (3^6;3^4x6)1'), ('j12', '2u01 (3^6;3^4x6)1'), ('j13', '2u01 (3^6;3^4x6)1'), ('j17', '2u01 (3^6;3^4x6)1'), ('j50', '2u01 (3^6;3^4x6)1'), ('j51', '2u01 (3^6;3^4x6)1'), ('j84', '2u01 (3^6;3^4x6)1'), ('j85', '2u01 (3^6;3^4x6)1'), ('j87', '2u01 (3^6;3^4x6)1'), ('j88', '2u01 (3^6;3^4x6)1'), ('j89', '2u01 (3^6;3^4x6)1'), ('tetrahedron', '2u02 (3^6;3^4x6)2'), ('octahedron', '2u02 (3^6;3^4x6)2'), ('icosahedron', '2u02 (3^6;3^4x6)2'), ('j10', '2u02 (3^6;3^4x6)2'), ('j11', '2u02 (3^6;3^4x6)2'), ('j12', '2u02 (3^6;3^4x6)2'), ('j13', '2u02 (3^6;3^4x6)2'), ('j17', '2u02 (3^6;3^4x6)2'), ('j50', '2u02 (3^6;3^4x6)2'), ('j51', '2u02 (3^6;3^4x6)2'), ('j84', '2u02 (3^6;3^4x6)2'), ('j85', '2u02 (3^6;3^4x6)2'), ('j86', '2u02 (3^6;3^4x6)2'), ('j87', '2u02 (3^6;3^4x6)2'), ('j88', '2u02 (3^6;3^4x6)2'), ('j89', '2u02 (3^6;3^4x6)2'), ('j85', '2u03 (3^6;3^3x4^2)1'), ('j87', '2u03 (3^6;3^3x4^2)1'), ('j88', '2u03 (3^6;3^3x4^2)1'), ('j85', '2u04 (3^6;3^3x4^2)2'), ('j87', '2u04 (3^6;3^3x4^2)2'), ('j88', '2u04 (3^6;3^3x4^2)2'), ('j90', '2u04 (3^6;3^3x4^2)2'), ('cuboctahedron', '2u05 (3^6;3^2x4x3x4)'), ('cuboctahedron', '2u09 (3^3x4^2;3^2x4x3x4)1'), ('cuboctahedron', '2u14 (3^2x4x3x4;3x4x6x4)'), ('j26', '2u14 (3^2x4x3x4;3x4x6x4)'), ('j31', '2u14 (3^2x4x3x4;3x4x6x4)'), ('cuboctahedron', '3uhv16 (3^6;3^2x4x3x4;3x4x6x4)1'), ('cuboctahedron', '3uhv17 (3^6;3^2x4x3x4;3x4x6x4)2'), ('tetrahedron', '3unhv40 (3^6;3^6;3^4x6^1)'), ('octahedron', '3unhv40 (3^6;3^6;3^4x6^1)'), ('icosahedron', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j10', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j11', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j12', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j13', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j17', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j50', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j51', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j84', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j85', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j86', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j87', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j88', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j89', '3unhv40 (3^6;3^6;3^4x6^1)'), ('j90', '3unhv40 (3^6;3^6;3^4x6^1)'), ('tetrahedron', '3unhv41 (3^6;3^6;3^4x6^2)'), ('octahedron', '3unhv41 (3^6;3^6;3^4x6^2)'), ('icosahedron', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j10', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j11', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j12', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j13', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j17', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j50', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j51', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j84', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j85', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j86', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j87', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j88', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j89', '3unhv41 (3^6;3^6;3^4x6^2)'), ('j90', '3unhv41 (3^6;3^6;3^4x6^2)'), ('tetrahedron', '3unhv42 (3^6;3^6;3^4x6^3)'), ('octahedron', '3unhv42 (3^6;3^6;3^4x6^3)'), ('icosahedron', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j10', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j11', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j12', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j13', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j17', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j50', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j51', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j84', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j85', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j86', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j87', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j88', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j89', '3unhv42 (3^6;3^6;3^4x6^3)'), ('j90', '3unhv42 (3^6;3^6;3^4x6^3)'), ('tetrahedron', '3unhv43 (3^6;3^4x6;3^4x6)'), ('octahedron', '3unhv43 (3^6;3^4x6;3^4x6)'), ('icosahedron', '3unhv43 (3^6;3^4x6;3^4x6)'), ('j12', '3unhv43 (3^6;3^4x6;3^4x6)'), ('j13', '3unhv43 (3^6;3^4x6;3^4x6)'), ('j17', '3unhv43 (3^6;3^4x6;3^4x6)'), ('j50', '3unhv43 (3^6;3^4x6;3^4x6)'), ('j51', '3unhv43 (3^6;3^4x6;3^4x6)'), ('j84', '3unhv43 (3^6;3^4x6;3^4x6)'), ('j87', '3unhv43 (3^6;3^4x6;3^4x6)'), ('j85', '3unhv44 (3^6;3^6;3^3x4^2)1'), ('j87', '3unhv44 (3^6;3^6;3^3x4^2)1'), ('j88', '3unhv44 (3^6;3^6;3^3x4^2)1'), ('j90', '3unhv44 (3^6;3^6;3^3x4^2)1'), ('j85', '3unhv45 (3^6;3^6;3^3x4^2)2'), ('j87', '3unhv45 (3^6;3^6;3^3x4^2)2'), ('j88', '3unhv45 (3^6;3^6;3^3x4^2)2'), ('j90', '3unhv45 (3^6;3^6;3^3x4^2)2'), ('cuboctahedron', '3unhv48 (3^6;3^2x4x3x4;3^2x4x3x4)'), ('j26', '3unhv48 (3^6;3^2x4x3x4;3^2x4x3x4)'), ('j31', '3unhv48 (3^6;3^2x4x3x4;3^2x4x3x4)')]
 
-def draw_text(surf, text, x, y, color, size,underline=False):
-    font = pygame.font.SysFont(None, int(round(size)))
-    if(underline):
-        font.set_underline(True)
-    text = font.render(text, True, color,background="white")
-    surf.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
-def drawtemp(points,color,outline=0):
-    temp.fill((255, 255, 255, 0))
-    draw_polygon(temp, color, points, outline)
-    screen.blit(temp, (0, 0))
-
-def convertToTuples(points): #make sure they are non-mutable
-    return  tuple((int(x), int(y)) for x,y in points)
-def centerpoint(points):
+def centerpoint(points): #averages points
     mx = sum(x for x,y in points)
     my = sum(y for x,y in points)
     return (int(round(mx / len(points))), int(round(my / len(points))))
@@ -41,7 +28,6 @@ def rotate_point(vector,radiants):
     s, c = [f(radiants) for f in (sin, cos)]
     x, y = (c * vector[0] - s * vector[1], s * vector[0] + c * vector[1])
     return x, y
-from copy import deepcopy
 def ngon(sides,p1,p2): #returns an n-gon of sides starting clockwise from p1,p2
     sol = [(p1), (p2)]
     for i in range(sides-2):
@@ -51,27 +37,33 @@ def ngon(sides,p1,p2): #returns an n-gon of sides starting clockwise from p1,p2
         p2 = pn
     return sol
 
+def draw_text(surf, text, x, y, color, size,underline=False):
+    font = pygame.font.SysFont(None, int(round(size)))
+    if(underline):
+        font.set_underline(True)
+    text = font.render(text, True, color,background="white")
+    surf.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
+def drawtemp(points,color,outline=0):
+    temp.fill((255, 255, 255, 0))
+    draw_polygon(temp, color, points, outline)
+    screen.blit(temp, (0, 0))
 def draw_background(surf,grid,color=(0,0,0),width=2,numbers=False):
     for data in grid.values():
         #data = (cface, cell)
         points = data[0]
         #cell = data[1]
-        pygame.draw.polygon(surf, color, convertToTuples(points), width)
+        pygame.draw.polygon(surf, color, points, width)
         if(numbers):
             cell = data[1]
             ccenter=centerpoint(points)
             draw_text(surf, str(cell), ccenter[0], ccenter[1], color, 40)
-
 def draw_polygon(surf,color,points,width):
-    pygame.draw.polygon(surf, color, convertToTuples(points), width)
+    pygame.draw.polygon(surf, color, points, width)
 
 def wait_for_input():
     clock = pygame.time.Clock()
     running = True
     while running:
-        # keys = pygame.key.get_pressed()
-        # if keys[pygame.K_RETURN]:
-        #     break;
         if (len(pygame.event.get()) == 0):
             clock.tick(20)
         for e in pygame.event.get():
@@ -79,7 +71,6 @@ def wait_for_input():
                 running = False
             if e.type == pygame.QUIT:
                 pygame.quit()
-
 def refresh():
     pygame.display.update()
     for e in pygame.event.get():
@@ -87,7 +78,7 @@ def refresh():
             exit()
 
 def cell_match(tiling, previous_case, newcaseid):
-    #match two cells based on their pairing id
+    #match two tiling cells based on their pairing id
     """tiling = dict
 previous_case = int
 newcaseid = tuple"""
@@ -104,6 +95,7 @@ newcaseid = tuple"""
             return index
 
 def is_outside(previouscase,newcaseid):
+    #does a move leave the supertile or stays inside
     newcase, id = newcaseid
     if(previouscase==newcase):
         return True
@@ -111,7 +103,7 @@ def is_outside(previouscase,newcaseid):
         return True
     return False
 
-def map_screenspace(tiling, startcell, area, p1, p2, precision=7, limit_to_one=False):
+def map_screenspace(tiling, startcell, area, p1, p2, limit_to_one=False):
     #tile the screen with the given tiling
     visited_areas = dict()
     visits = [(startcell, p1, p2)]
@@ -128,7 +120,7 @@ def map_screenspace(tiling, startcell, area, p1, p2, precision=7, limit_to_one=F
         if (ccenter in visited_areas):
             continue
         drawtemp(cface, (255,255,255))
-        drawtemp(cface, (128,128,128),2)
+        drawtemp(cface, (128,128,128),outline=2)
         counter+=1
         if counter%50==0:
             refresh()
@@ -136,7 +128,7 @@ def map_screenspace(tiling, startcell, area, p1, p2, precision=7, limit_to_one=F
         if(visited_areas):
             all_distances = [(distance(ccenter, other), other) for other in visited_areas]
             dist, closest = min(all_distances)
-            if (dist < 2):
+            if (dist < 3): #too close to an already drawn tile
                 # print("Already visited")
                 continue
         visited_areas[ccenter] = (cface, cell)  # later for drawing
@@ -154,6 +146,7 @@ def map_screenspace(tiling, startcell, area, p1, p2, precision=7, limit_to_one=F
     return visited_areas
 
 def area_explore(tiling, tilename, net, polyname, mapping,sp1,sp2, startcase=0, startface=0, startorientation=0, ):
+    #explore the given screen mapping with the given tiling, polyhedron
     TIMERSTART = time()
 
     text= pygame.font.SysFont(None,30).render((tilename+"    ") + polyname, True, (0,0,0),(255,255,255))
@@ -165,7 +158,7 @@ def area_explore(tiling, tilename, net, polyname, mapping,sp1,sp2, startcase=0, 
     screen.blit(titlecard, (0, 0))
     refresh()
     visits = [(startface, startcase, startorientation, sp1, sp2)]
-    "mapping= visited areas[center points: (polygon, cell number)]"
+    "mapping= visited areas[center points: (polygon face, cell number)]"
 
     while visits and (TIMERSTART+TIME_LIMIT>time() and TIME_LIMIT>0):
         face, case, orientation, p1, p2 = visits[-1]
@@ -176,15 +169,16 @@ def area_explore(tiling, tilename, net, polyname, mapping,sp1,sp2, startcase=0, 
         cface = ngon(len(net[face]), p1, p2)
         ccenter = list(centerpoint(cface))
 
-        all_distances = [ (distance(ccenter,other),other) for other in mapping]
+        all_distances = [(distance(ccenter,other),other) for other in mapping]
         dist,closest = min(all_distances)
-        if(dist>2):
+        if(dist>3): #there is no mapped tile closeby
             # print("Out of map")
             visits.pop()
             continue
 
         color = tuple(randint(0,255) for i in range(3))
         drawtemp(cface, color)
+
         neighbours_faces = net[face]
         neighbours_faces = neighbours_faces[orientation:] + neighbours_faces[:orientation] #rotate to match orientation
         possible_directions = list()
@@ -216,9 +210,8 @@ def area_explore(tiling, tilename, net, polyname, mapping,sp1,sp2, startcase=0, 
            wait_for_input()
 
 
-
-
 def common_face(net,tiling, startface=None):
+    #selects a face and tile that shares the same polygon
     if(startface!=None):
         net = {startface:net[startface]}
     for face, neigh in net.items():
@@ -243,16 +236,19 @@ if __name__ == "__main__":
     startface = 0
     startorientation = 0
     area = (0,0,WIDTH, WIDTH)
+
     shuffle(stable_showcase)
     stable_showcase = [("j1",'1u06 (3^2x4x3x4)'), ("j1",'2u05 (3^6;3^2x4x3x4)'), ("j1",'2u09 (3^3x4^2;3^2x4x3x4)1')]+stable_showcase
     stable_showcase = [('tetrahedron', '1u01 (3^6)'), ('cube', '1u02 (4^4)')]+stable_showcase
+
     for polyname, tilename in stable_showcase:
         tiling = uniform_tilings[tilename]
         net = all_nets[polyname]
         if(polyname=="j1"):
-            startface=0 #unstable: choose stable tile
+            startface=0 #j1 has unstable rollers: choose a stable tile to start on
             startface,startcell = common_face(net,tiling, startface=0)
         else:
+            #I only selected stable rollers/quasi-rollers for the showcase so we can start anywhere
             startface,startcell = common_face(net,tiling)
         if(startcell==None):
             continue
