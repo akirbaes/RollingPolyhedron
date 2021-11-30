@@ -1,8 +1,9 @@
 """Roll a shape in a space with a given tiling and starting position"""
-from RollyPoint import RollyPoint
+import pygame
 from tiling_dicts.uniform_tiling_supertiles import uniform_tilings
 from poly_dicts.regular_faced_polyhedron_nets import all_nets
-from math import pi, sqrt
+
+from math import pi, sqrt, sin, cos
 from time import time
 from random import choice, randint, shuffle
 
@@ -32,16 +33,22 @@ def centerpoint(points):
     return (int(round(mx / len(points))), int(round(my / len(points))))
 def distance(p1,p2):
     return sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
+def add_points(p1,p2):
+    return tuple(sum(coord) for coord in zip(p1,p2))
+def sub_points(p1,p2):
+    return tuple(coord[0]-coord[1] for coord in zip(p1,p2))
+def rotate_point(vector,radiants):
+    s, c = [f(radiants) for f in (sin, cos)]
+    x, y = (c * vector[0] - s * vector[1], s * vector[0] + c * vector[1])
+    return x, y
 from copy import deepcopy
 def ngon(sides,p1,p2): #returns an n-gon of sides starting clockwise from p1,p2
     sol = [(p1), (p2)]
-    pa = RollyPoint(p1)
-    pb = RollyPoint(p2)
     for i in range(sides-2):
-        pn = pb + (pa - pb).rotate(-(sides-2) * pi / (sides))
-        sol.append((pn.as_tuple()))
-        pa = deepcopy(pb)
-        pb = deepcopy(pn)
+        pn = add_points(p2, rotate_point(sub_points(p1, p2), -(sides-2) * pi / (sides)))
+        sol.append(pn)
+        p1 = p2
+        p2 = pn
     return sol
 
 def draw_background(surf,grid,color=(0,0,0),width=2,numbers=False):
@@ -222,7 +229,6 @@ def common_face(net,tiling, startface=None):
 
 
 if __name__ == "__main__":
-    import pygame
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, WIDTH), pygame.DOUBLEBUF)
     outlines = pygame.Surface((WIDTH, WIDTH), pygame.SRCALPHA)
