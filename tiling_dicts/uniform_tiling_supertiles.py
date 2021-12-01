@@ -3,7 +3,30 @@
 #higher more complex tilings were not added yet
 #format: describes a periodic part of the tiling (repeated supertile)
 #tile number: list of (neighbouring tile number, with pairing ID) in clockwise order
-#pairing ID: pair with given tile number but negative pairing ID, or itself
+#pairing ID: when a pair of tiles is linked more than once, the pairing ID differenciates the links
+
+"""Pairing ID conventions (to help draw them):
+(u, v are tiles, k is a pairing id)
+regular link (inside a supertile)
+u:(v,0)
+v:(u,0)
+
+regular link (outside a supertile)
+u:(v,k)
+v:(u,k)
+also acceptable:
+u:(v,k)
+v:(u,-k)
+
+self-link (regular)
+u:(u,k)
+u:(u,-k)
+self-link (centrosymmetry) unused for parallelogon supertiles
+u:(u,k)
+(u:(u,k) is not repeated and u:(u,-k) should not be found)
+"""
+
+
 uniform_tilings = \
 {'1u01 (3^6)': {0: [(1, 0), (1, 1), (1, 2)], 1: [(0, 0), (0, -1), (0, -2)]},
  '1u02 (4^4)': {0: [(0, 1), (0, 2), (0, -1), (0, -2)]},
