@@ -6,6 +6,13 @@ def pointAngle(a, b, c):
     # Course formula: [AB]x[BC] product
     return ((b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x))
 
+def ptAngle(a, b, c):
+    # Course formula: [AB]x[BC] product
+    return ((b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]))
+def ptAdd(a,b):
+    return a[0]+b[0],a[1]+b[1]
+def ptSub(a,b):
+    return a[0]-b[0],a[1]-b[1]
 
 def psign(number):
     return (number >= 0) * 2 - 1
