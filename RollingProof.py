@@ -9,7 +9,7 @@ from RollingProofImageGen import generate_stability_image, generate_image
 
 GENERATE_PROOF = True
 GENERATE_STAB = True
-UPDATE_RESULTS = False
+UPDATE_RESULTS = True
 DUPLICATE_IMAGES = False
 
 from symmetry_classes.symmetry_functions import canon_fo
@@ -55,7 +55,7 @@ def determine_n(tiling,net,polyname):#,startcase,startface,startorientation):
     return min(N+1,N2+1)
 
 def sqrdist(tupl):
-    return tupl[0]*tupl[0]+tupl[1]*tupl[1]
+    return (tupl[0]*tupl[0])+(tupl[1]*tupl[1])
 
 from SupertileCoordinatesGenerator import generate_supertile_coordinate_helpers
 
@@ -230,23 +230,115 @@ def is_roller(tiling,tilingname,net,polyname):
                         yield checkpoint
                 return None
 
-            def fill_parallelogram(vec1, vec2):
+            def frange(start,end,step):
+                while start<end:
+                    yield(start)
+                    start+=step
+            def fill_parallelogram_opt(vec1, vec2):
+                #http://alienryderflex.com/polygon_fill/
+                points = (0.5,0.5),(vec1[0]+0.5,vec1[1]+0.5),(vec1[0]+vec2[0]+0.5,vec1[1]+vec2[1]+0.5), (vec2[0]+0.5,vec2[1]+0.5)
                 points = (0,0),vec1,(vec1[0]+vec2[0],vec1[1]+vec2[1]), vec2
+                points = (-0.5,-0.5),(vec1[0]-0.5,vec1[1]-0.5),(vec1[0]+vec2[0]-0.5,vec1[1]+vec2[1]-0.5), (vec2[0]-0.5,vec2[1]-0.5)
+                print(points)
                 miny = min(y for x,y in points)
                 maxy = max(y for x,y in points)
                 minx = min(x for x,y in points)
                 maxx = max(x for x,y in points)
+                coordinates = set()
+                for y in frange(miny,maxy+1,1):
+                    nodesx = list()
+                    corners = 4;
+                    for i in range(corners):
+                        j = (i-1)%corners
+                        if(points[i][1]<y and points[j][1]>=y or points[j][1]<y and points[i][1]>=y):
+                            nodesx.append(int(points[i][0]+(y-points[i][1])/(points[j][1]-points[i][1])*(points[j][0]-points[i][0])))
+                    nodesx.sort()
+                    print(nodesx)
+                    for n in range(0,len(nodesx),2):
+                        for x in frange(nodesx[n],nodesx[n+1]+1,1):
+                            coordinates.add((int(x),int(y)))
+                print("Filled coordinates:",coordinates)
+                return coordinates
+            from GeometryFunctions import ptAngle,ptAdd
+            def remove_outsiders(points,vec1,vec2):
+                pc = (0,0)
+                if(ptAngle(vec1,pc,vec2)>0):
+                    corners = vec1,pc,vec2,ptAdd(vec1,vec2)
+                else:
+                    corners = vec2,pc,vec1,ptAdd(vec1,vec2)
+                to_remove = set()
+                for point in points:
+                    if point in corners:
+                        continue
+                    for i in range(len(corners)):
+                        j=(i+1)%len(corners)
+                        if(ptAngle(corners[i], corners[j], point))<0:
+                            to_remove.add(point)
+                            break
+                return points-to_remove
 
+
+            def fill_parallelogram(vec1, vec2):
+                points = (0,0),vec1,(vec1[0]+vec2[0],vec1[1]+vec2[1]), vec2
+                # points = (0,0),vec1, vec2
+                miny = min(y for x,y in points)
+                maxy = max(y for x,y in points)
+                minx = min(x for x,y in points)
+                maxx = max(x for x,y in points)
+                meanx = (vec1[0]+vec2[0])/4
+                meany = (vec1[1]+vec2[1])/4
                 coordinates = {(i,j) for i in range(minx, maxx + 1, 1) for j in range(miny, maxy + 1, 1)}
                 return coordinates
-                coordinates = set()
-                for y in range(miny, maxy+1, 1):
-                    for pos in lines_to_fill(points,y):
-                        coordinates.add(pos)
+                # coordinates = set()
+                # for y in range(miny, maxy+1, 1):
+                #     for pos in lines_to_fill(points,y):
+                #         coordinates.add(pos)
+                #cleanup
+                allcoords = list(coordinates)
+                index=0
+                to_remove = set()
+                while index<len(allcoords):
+                    c1=allcoords[index]
+                    for c2 in find_opposite_border(c1,allcoords,vec1,vec2):
+                        index2 = allcoords.index(c2)
+                        # print(sqrdist(c1)>sqrdist(c2),sqrdist(c1),sqrdist(c2))
+                        d1,d2 = sqrdist((c1[0]-meanx,c1[1]-meany)),sqrdist((c2[0]-meanx,c2[1]-meany))
+                        if(d1==d2):
+                            if(sqrdist(c1)>sqrdist(c2)):
+                                to_remove.add(c1)
+                                print("Removing",c1,sqrdist(c1),"over",c2,sqrdist(c2))
+                            else:
+                                to_remove.add(c2)
+                                print("Removing",c2,sqrdist(c2),"over",c1,sqrdist(c1))
+                            # to_remove.add(max(c1,c2))
+                            # print("Removing",max(c1,c2)," max of",c1,c2,sqrdist(c1),sqrdist(c2))
+                        elif(d1>d2):
+                            to_remove.add(c1)
+                            print("Removing",c1,sqrdist(c1),"over",c2,sqrdist(c2))
+                        else:
+                            to_remove.add(c2)
+                            print("Removing",c2,sqrdist(c2),"over",c1,sqrdist(c1))
+                            # allcoords[index],allcoords[index2]=allcoords[index2],allcoords[index]
+                            # c1=allcoords[index]
+                        # print("Removing",allcoords[index2],sqrdist(allcoords[index2]),"over",allcoords[index],sqrdist(allcoords[index]))
+                        # allcoords.pop(index2)
+                    index+=1
+                print(coordinates)
+                print(coordinates-to_remove)
+                print(len(coordinates),">?",len(coordinates-to_remove))
+                # input(str((len(coordinates),">?",len(allcoords))))
+                # exit()
+
+                coordinates=coordinates-to_remove
+                coordinates.add(tuple(vec1))
+                coordinates.add(tuple(vec2))
+                coordinates.add((0,0))
                 return coordinates
 
             def explore_parallelogram(vec1,vec2, rules, to_explore):
                 points = fill_parallelogram(vec1, vec2)
+                points = remove_outsiders(points,vec1,vec2)
+                print("Points to fill:",points)
                 explored_states = {point:set() for point in points}
                 startingpoint = to_explore[0]
                 for nx,ny in find_opposite_border(startingpoint[1:],points, vec1,vec2):
