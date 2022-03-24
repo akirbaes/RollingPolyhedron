@@ -93,7 +93,7 @@ def draw_symmetries(surf,grid,smallgrid,symmetries):
 
 def draw_tiling_symmetries():
     pygame.init()
-    from tiling_dicts.uniform_tilings import uniform_tilings as all_tilings
+    from tiling_dicts.combine_uniform_tilings import uniform_tilings as all_tilings
     for tilingname, tiling in all_tilings.items():
         print(tilingname)
         # screen = pygame.display.set_mode((800, 800), pygame.DOUBLEBUF)

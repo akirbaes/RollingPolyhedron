@@ -12,7 +12,7 @@ from tiling_dicts.archimedean_tilings import archimedean_tilings
 # from tiling_dicts.isogonal_tilings import biisogonal_tilings
 # from tiling_dicts.triisogonal_vertex_homogeneous import triisogonal_vertex_homogeneous
 # all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings, **triisogonal_vertex_homogeneous}
-from tiling_dicts.uniform_tilings import uniform_tilings
+from tiling_dicts.combine_uniform_tilings import uniform_tilings
 
 all_tilings  = {**uniform_tilings}
 from poly_dicts.plato_archi_nets import plato_archi_nets
@@ -41,8 +41,9 @@ johnsonurls = [
 ("https://en.wikipedia.org/wiki/Johnson_solid#Snub_antiprisms",(84,85)),
 ("https://en.wikipedia.org/wiki/Johnson_solid#Others",(86,87,88,89,90,91,92))
 ]
+
 polyurls = {
-    polyname:"https://en.wikipedia.org/wiki/%s"%(polyname.replace("_c","")) for polyname in list(plato_archi_nets)+list(prism_nets)
+    polyname:"https://en.wikipedia.org/wiki/%s"%(polyname[:-2] if polyname.endswith("_c") else polyname) for polyname in list(plato_archi_nets)+list(prism_nets)
 }
 
 for url,js in johnsonurls:
@@ -72,6 +73,7 @@ def find_roller_url(planerollerid):
 
                 url = "https://i.imgur.com/%s"%(name.split(" ")[-1])
                 return url
+
 def roller_id(til,poly,rollersdata):
     return list(rollersdata).index((til,poly))
 
