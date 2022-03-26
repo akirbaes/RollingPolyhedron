@@ -5,7 +5,7 @@ from symmetry_classes.tiling_symmetries import canon_co
 from GeometryFunctions import *
 from GenPngScreenspaceRoller import draw_answer, draw_background, draw_polygon, wait_for_input, refresh, draw_tiling, \
     map_screenspace
-from tiling_dicts.uniform_tilings import uniform_tilings
+from tiling_dicts.combine_uniform_tilings import uniform_tilings
 from poly_dicts.prism_nets import prism_nets
 from poly_dicts.plato_archi_nets import plato_archi_nets
 from poly_dicts.johnson_nets import johnson_nets
@@ -14,23 +14,26 @@ import symmetry_classes.symmetry_functions
 from symmetry_classes.poly_symmetries import canon_fo
 """Roll a shape in a space with a given tiling and starting position
 """
+LOAD_PROGRESS = True
+
 PREVIEW = True
-GRADATION = True
-PREVIEWPERIODICITY=20
+COLOR_GRADATION = False#True
+PREVIEWPERIODICITY= 0 #20
 # SLOW=False
 OPTIMISE_SYMMETRIES = True
 SKIP_NOTFULL = False
 
-PREVIEW_TILINGNAME = True
-PREVIEW_POLYNAME = True
+PREVIEW_TILINGNAME = False
+PREVIEW_POLYNAME = False
 
-LOAD_PROGRESS = False
-TAKE_PICTURES = False
+TAKE_PICTURES = True
+DRAW_ANSWER = False
+BIGGEST_PICTURE = True
 
-PICTURE_TRESHOLD = 0.03
-ROLL_ONLY_ONCE = True
-TIME_LIMIT = 3.5
-WAIT_AT_END = 0.5
+PICTURE_TRESHOLD = 0#0.03
+ROLL_ONLY_ONCE = False#True
+TIME_LIMIT = -1#3.5
+WAIT_AT_END = False#0.5
 
 SCREENSPACE = 1
 NSPACE = 2
@@ -40,11 +43,11 @@ CHECK_UNUSED_FACES = False  #Will disable symmetry optimisations
 CHECK_ALL_CELLS = True #Only checking rollers: will go everywhere eventually
 # CHECK_ALL_FACEROT = False
 
-PAUSE_AT_BEGINNING = 3000
-QUIT_PREVIEW_EARLY = True
+PAUSE_AT_BEGINNING = 0#3000
+QUIT_PREVIEW_EARLY = False
 
 LIMIT_TO_ROLLING_PAIRS = False
-LIMIT_TO_SHOWCASE = True
+LIMIT_TO_SHOWCASE = False#True
 INSERT_FILL = False #insert new areas to explore at the beginning. Only checking rollers
 
 TESSELLATION_POLYHEDRON = False
@@ -139,7 +142,7 @@ parser.add_argument("-p","--preview", type=int, help="En/Disable preview for spe
 parser.add_argument("-l","--load", type=int, help="En/Disable progress loading (default="+str(int(LOAD_PROGRESS))
     +")\nDon't forget to backup your PROGRESS_CHECKPOINT.txt file before turning this off!")
 parser.add_argument("-c","--color", type=str, help="Choose [single] color or [gradation] for preview (default="
-        +["single","gradation"][GRADATION]+")")
+                                                   + ["single","gradation"][COLOR_GRADATION] + ")")
 parser.add_argument("-s","--prevspeed", type=int, help="How many steps of preview are skipped between refreshes. Bigger number makes the app run faster, smaller number makes the animation prettier. (default=%s)"%PREVIEWPERIODICITY)
 parser.add_argument("-t","--picture", type=int, help="Take pictures for every failed step. (default=%i)"%TAKE_PICTURES)
 parser.add_argument("-u","--check_unused", type=int, help="Check unused faces for successful search. Disables optimisations. (default=%i)"%CHECK_UNUSED_FACES)
@@ -152,7 +155,7 @@ if(len(sys.argv)==1):
 if args.preview!=None:
     PREVIEW = args.preview
 if args.color!=None:
-    GRADATION = ["single","gradation"].index(args.color)
+    COLOR_GRADATION = ["single", "gradation"].index(args.color)
 if args.prevspeed!=None:
     PREVIEWPERIODICITY=args.prevspeed
 if args.load!=None:
@@ -426,7 +429,9 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
         edgeadd = 0
     else:
         edgeadd = EDGESIZE/2
-    max_visitable = sum((area2[0]-edgeadd < ccenter[0] < area2[2]+edgeadd) and (area2[1]-edgeadd < ccenter[1] < area2[3]+edgeadd) for ccenter in visited_places)
+    poly_compatibility = set(len(neigh) for neigh in net.values())
+    print(mapping)
+    max_visitable = sum((area2[0]-edgeadd < ccenter[0] < area2[2]+edgeadd) and (area2[1]-edgeadd < ccenter[1] < area2[3]+edgeadd) for ccenter in visited_places if (len(mapping[ccenter][0]) in poly_compatibility))
     once = True
     while (visits):
         #print(len(visits))
@@ -482,7 +487,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
                 return True, visited_places
 
         if(PREVIEW):
-            if(GRADATION):
+            if(COLOR_GRADATION):
                 grade = len(visited_places[ccenter])
                 color = (min(int(255/grade)+min(max(0,grade*32-255-128-10*32),128),255),min(255,max(0,grade*16-192-10*16-max(0,grade*2-70*2))),max(0,min(255,grade*12-10*12)-max(0,grade*3-40*3)))
                 colorlinks = [(256,0,-32),(-128,0,256),(0,256+64,128),(256,64,128),(256,256,0),(28,145,48)]
@@ -540,7 +545,7 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
                     if(PREVIEW):
                         if(CHECK_UNUSED_FACES):
                             drawtemp(nextface_stub, (0, 0, 0), 0)
-                        else:
+                        elif PREVIEWPERIODICITY:
                             drawtemp(nextface_stub, (255, 255, 0), 0)
                         #refresh() #wait for periodicity
                     if(INSERT_FILL):
@@ -561,13 +566,16 @@ def area_explore(tiling, net, startcase, startface, startorientation, mapping,sp
         # print(visits)
         if(PREVIEW):
             previewcounter+=1
-            if(previewcounter%PREVIEWPERIODICITY==0):
+            if(PREVIEWPERIODICITY and previewcounter%PREVIEWPERIODICITY==0):
                 if(PREVIEW_POLYNAME or PREVIEW_TILINGNAME):
                     screen.blit(titlecard,(0,0))
                 refresh()
 
                 screen.blit(outlines, (0, 0))
         if(TIMERSTART+TIME_LIMIT<time() and TIME_LIMIT>0):
+            if(PREVIEW_POLYNAME or PREVIEW_TILINGNAME):
+                screen.blit(titlecard,(0,0))
+            refresh()
             return True, visited_places
 
         # if(PREVIEW and SLOW):
@@ -605,6 +613,8 @@ progress_tiling = None
 progress_poly = None
 progress_counter = None
 progress_skip = 0
+
+biggest_picture = -1
 
 if __name__ == "__main__":
     if(LOAD_PROGRESS):
@@ -656,6 +666,7 @@ if __name__ == "__main__":
         tiling = all_tilings[tilingname]
         for polyname in all_nets_names:
             result = 0
+            biggest_picture = -1
             if(LIMIT_TO_SHOWCASE):
                 tilingname,polyname = showcase.pop(0)
                 tiling = all_tilings[tilingname]
@@ -790,7 +801,7 @@ if __name__ == "__main__":
                                 f,o = canon_fo(polyname,f,o)
                                 c,o = canon_co(tilingname,c,o)
                                 explored_canon_cfo.add((c,f,o))
-                    if(PREVIEW):
+                    if(PREVIEW and not (PREVIEW_POLYNAME or PREVIEW_TILINGNAME)):
                         screen.blit(outlines,(0,0))
                         refresh()
 
@@ -815,7 +826,7 @@ if __name__ == "__main__":
                         outputfile.write(out+ "\n")
                         outputfile.close()
                         print(out,flush=True)
-                        if(result and TAKE_PICTURES):
+                        if(result and DRAW_ANSWER):
                             filename="exploration_results/"+str(TEMPORARY_GLOBAL_COUNTER).zfill(2)+" "+polyname+" rolls the "+tilingname+" tiling"+'.png'
                             TEMPORARY_GLOBAL_COUNTER+=1
                             draw_answer(filename, tilingname, polyname, visits, mapping, net, p1, p2, face, orientation, area2[2], area2[3], unused)
@@ -833,10 +844,23 @@ if __name__ == "__main__":
                         if(visits and TAKE_PICTURES and (result>=PICTURE_TRESHOLD)):
                             try:os.mkdir("exploration_results/%s_coverage/"%keyword)
                             except:pass
-                            draw_tiling(p1, p2, screen, case, 0, tiling, 1, [(0,255,0),(192,192,192)])
-                            pygame.image.save(screen,"exploration_results/%s_coverage/"%keyword
-                                              +tilingname+"@"+polyname+"@"+keyword
-                                              +"@(%i,%i,%i)"%(case,face,orientation)+'.png')
+
+                            if(BIGGEST_PICTURE):
+                                # input(str(len(visits))+str(biggest_picture))
+                                if(visits):
+                                    visits_count = len([1 for center,visitors in visits.items() if visitors])
+                                else:
+                                    visits_count= 0
+                                if(visits_count>biggest_picture):
+                                    # pygame.image.save(screen,".image_output/bigpics/"+polyname+"[on]"+tilingname+'.png')
+                                    biggest_picture=visits_count
+                                    pygame.image.save(screen,".image_output/bigpics/"+polyname+"[on]"+tilingname+'.png')
+
+                            else:
+                                draw_tiling(p1, p2, screen, case, 0, tiling, 1, [(0,255,0),(192,192,192)])
+                                pygame.image.save(screen,"exploration_results/%s_coverage/"%keyword
+                                                  +tilingname+"@"+polyname+"@"+keyword
+                                                  +"@(%i,%i,%i)"%(case,face,orientation)+'.png')
                     if(PREVIEW):
                         screen.fill((255,255,255))
                     try:os.mkdir("exploration_results")
