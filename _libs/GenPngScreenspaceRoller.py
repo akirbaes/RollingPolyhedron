@@ -365,6 +365,6 @@ if __name__ == "__main__":
         from _resources.poly_dicts import all_nets
         import os
         import pickle
-        with open("../rolling_results.pickle", "rb") as handle:
+        with open("../_results/rolling_results.pickle", "rb") as handle:
             rollingresults = pickle.load(handle)
         draw_answers_nets(rollingresults)

@@ -1,3 +1,4 @@
+"""DEV NOTE: First big version of the explorer using conway supertiles as coordinates, which didn't go that well"""
 # from main import *
 import os
 import traceback
@@ -874,9 +875,9 @@ def explore_rotations(tile, poly,polyname):
             ordered[index][index2] = ma[clas][clas2]
 
     print_matrix(ordered)
-    try:os.mkdir(".archives/CFO_ajdacency_matrixes/")
+    try:os.mkdir("CFO_ajdacency_matrixes/")
     except:pass
-    try:os.mkdir(".archives/CFO_ajdacency_matrixes/tessellation_polyhedron/")
+    try:os.mkdir("CFO_ajdacency_matrixes/tessellation_polyhedron/")
     except:pass
 
     Draw.turn_into_image(ordered,"CFO_ajdacency_matrixes/tessellation_polyhedron/"+polyname+".png")

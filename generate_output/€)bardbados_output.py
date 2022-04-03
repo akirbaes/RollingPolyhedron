@@ -163,11 +163,11 @@ if __name__ == "__main__":
     write_tilings_list()
     write_polyherons_list()
 
-    with open('../rollersdata.pickle', 'rb') as handle:
+    with open('../_results/rollersdata.pickle', 'rb') as handle:
         rollersdata,all_tilings,all_nets = pickle.load(handle)
         #Only contains the result type string
 
-    with open("../rolling_results.pickle", "rb") as handle:
+    with open("../_results/rolling_results.pickle", "rb") as handle:
         rollingresults = pickle.load(handle)
 
     all_rollers = [(til,poly) for til,poly in rollersdata if rollersdata[(til,poly)]=="PR" or rollersdata[(til,poly)]=="SPR"]

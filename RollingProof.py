@@ -537,9 +537,9 @@ if __name__ == "__main__":
             rollersdata[(tilingname,polyname)]="x"
     print()
     if(UPDATE_RESULTS):
-        with open('rolling_results.pickle', 'wb') as handle:
+        with open('_results/rolling_results.pickle', 'wb') as handle:
             pickle.dump(all_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        with open('rollersdata.pickle', 'wb') as handle:
+        with open('_results/rollersdata.pickle', 'wb') as handle:
             pickle.dump((rollersdata,tuple(all_tilings.keys()),tuple(all_nets.keys())), handle, protocol=pickle.HIGHEST_PROTOCOL)
     #output_table(all_nets,all_tilings,rollersdata)
     json_object = json.dumps(all_results, indent=4)
