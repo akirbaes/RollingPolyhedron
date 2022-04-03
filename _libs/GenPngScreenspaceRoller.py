@@ -3,7 +3,7 @@ from _libs.GeometryFunctions import xgon, centerpoint, floatcenterpoint
 from _libs.RollyPoint import RollyPoint
 from _resources.symmetry_classes.poly_symmetries import canon_fo
 from _resources.symmetry_classes.tiling_symmetries import canon_co
-
+import svgwrite
 ROLLING_NETS = True
 
 
@@ -113,7 +113,7 @@ def draw_tiling(spa,spb,surface,startcell,startorientation,tiling:dict,iterlevel
 
 
 
-def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilingname,polyname,unusedfaces = None):
+def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilingname,polyname,unusedfaces = None,svg=None):
     xx,yy,XX,YY = 9999,9999,0,0
 
     if(unusedfaces==None):
@@ -142,9 +142,14 @@ def draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilin
             pygame.draw.circle(surface2, color1,(x,y), int(textsize/2))
             surf.blit(surface2, (0, 0))
             pygame.draw.polygon(surface2, color1, convertToTuples(face_poly), 0)
+            if(svg):
+                svg.add(svg.polygon(convertToTuples(face_poly), fill=svgwrite.rgb(*color1, '%')))
             surf.blit(surface2, (0, 0))
             surface2.fill((0,0,0,0))
         pygame.draw.polygon(surf, color2, convertToTuples(face_poly), 1)
+        if(svg):
+            print("DFaces:",face_poly)
+            svg.add(svg.polyline(convertToTuples(face_poly)+convertToTuples(face_poly)[0:1], stroke="black",fill="none"))
         text = pygame.font.SysFont(None, textsize).render(str(face), True, (0,0,0))
         surf.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
 
@@ -253,32 +258,42 @@ def map_screenspace(tiling, startcell, area, p1, p2, precision, limit=False):
     return visited_areas
 
 
-def draw_answer(filename,tilingname,polyname,visits,grid,polyhedron,p1,p2,startface,startorientation,w,h,unusedfaces):
+def draw_answer(filename,tilingname,polyname,visits,grid,polyhedron,p1,p2,startface,startorientation,w,h,unusedfaces,svg=False):
     #no need for startcase because grid and p1,p2 is enough
-    surf = pygame.Surface((w,h))
-    surf.fill((255,255,255))
     face = xgon(len(polyhedron[startface]),p1,p2)
-    draw_background(surf,grid)
-    surface2 = pygame.Surface((w,h), pygame.SRCALPHA)
-    surface2.set_colorkey((0, 0, 0))
-    surface2.set_alpha(100)
+    if(svg):
+        dwg = svgwrite.Drawing(filename+'.svg', profile='tiny',height=800, width=800)
+        centralface = dwg.polygon()
+        #dwg.add(dwg.polygon(convertToTuples(face), fill="yellow"))
+        dwg.add(dwg.polygon(convertToTuples(face), fill="blue"))
 
-    pygame.draw.polygon(surf, (255,255,0), convertToTuples(face), 0)
-    xx,yy,XX,YY = draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilingname, polyname,unusedfaces)
-    surface2.set_alpha(255)
-    text = pygame.font.SysFont(None, 30).render(tilingname+" with "+polyname, True, (0, 0, 0))
-    xx-=10
-    XX+=10
-    yy-=10+text.get_height()
-    YY+=10
-    if XX-xx<text.get_width()+2:
-        xx-=int(text.get_width()-(XX-xx)+2)/2
-        XX+=int(text.get_width()-(XX-xx)+2)
-    pygame.draw.rect(surf, (255,255,255),(xx,yy,text.get_width()+2,text.get_height()+2))
-    surf.blit(text, (xx+1,yy+1))
-    # sub = screen.subsurface(rect)
-    # print(xx,yy,XX,YY,w,h)
-    pygame.image.save(surf.subsurface([xx,yy,XX-xx,YY-yy]),filename)
+        s = pygame.Surface((w,h))
+        xx,yy,XX,YY = draw_polynet(s,s,polyhedron,startface,startorientation,p1,p2,tilingname, polyname,unusedfaces,svg=dwg)
+        dwg.save()
+    else:
+        surf = pygame.Surface((w,h))
+        surf.fill((255,255,255))
+        draw_background(surf,grid)
+        surface2 = pygame.Surface((w,h), pygame.SRCALPHA)
+        surface2.set_colorkey((0, 0, 0))
+        surface2.set_alpha(100)
+
+        pygame.draw.polygon(surf, (255,255,0), convertToTuples(face), 0)
+        xx,yy,XX,YY = draw_polynet(surf,surface2,polyhedron,startface,startorientation,p1,p2,tilingname, polyname,unusedfaces)
+        surface2.set_alpha(255)
+        text = pygame.font.SysFont(None, 30).render(tilingname+" with "+polyname, True, (0, 0, 0))
+        xx-=10
+        XX+=10
+        yy-=10+text.get_height()
+        YY+=10
+        if XX-xx<text.get_width()+2:
+            xx-=int(text.get_width()-(XX-xx)+2)/2
+            XX+=int(text.get_width()-(XX-xx)+2)
+        pygame.draw.rect(surf, (255,255,255),(xx,yy,text.get_width()+2,text.get_height()+2))
+        surf.blit(text, (xx+1,yy+1))
+        # sub = screen.subsurface(rect)
+        # print(xx,yy,XX,YY,w,h)
+        pygame.image.save(surf.subsurface([xx,yy,XX-xx,YY-yy]),filename)
 
 def canon_cfo(tilingname,polyname,c,f,o):
     f,o = canon_fo(polyname,f,o)
@@ -353,7 +368,8 @@ def draw_answers_nets(rollersdata):
                     rollerscount+=1
                     filename = "rolled_nets/[%03d]"%rollerscount+tilingname + " @ " + polyname + gc + ".png"
 
-                    draw_answer(filename, tilingname, polyname, None, mapping, net, p1, p2, f, o,area2[2], area2[3],unused_faces)
+                    draw_answer(filename, tilingname, polyname, None, mapping, net, p1, p2, f, o,area2[2], area2[3],unused_faces,svg=False)
+                    draw_answer(filename, tilingname, polyname, None, mapping, net, p1, p2, f, o,area2[2], area2[3],unused_faces,svg=True)
     print("Generated roller nets images")
 
 
@@ -361,8 +377,8 @@ def draw_answers_nets(rollersdata):
 
 if __name__ == "__main__":
     if(ROLLING_NETS):
-        from _resources.tiling_dicts import uniform_tilings as all_tilings
-        from _resources.poly_dicts import all_nets
+        from _resources.uniform_tiling_supertiles import uniform_tilings as all_tilings
+        from _resources.regular_faced_polyhedron_nets import all_nets
         import os
         import pickle
         with open("../_results/rolling_results.pickle", "rb") as handle:
