@@ -1,7 +1,7 @@
 import pickle
 import time
 from datetime import datetime
-
+import json
 import numpy
 import sympy
 
@@ -554,6 +554,9 @@ if __name__ == "__main__":
         with open('rollersdata.pickle', 'wb') as handle:
             pickle.dump((rollersdata,tuple(all_tilings.keys()),tuple(all_nets.keys())), handle, protocol=pickle.HIGHEST_PROTOCOL)
     #output_table(all_nets,all_tilings,rollersdata)
+    json_object = json.dumps(all_results, indent=4)
+    with("rolling_results.json", "w") as f:
+        f.write(json_object)
     for tilingname,polyname in rollers:
         print(tilingname,polyname)
     print(len(rollers))
