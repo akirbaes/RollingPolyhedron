@@ -5,13 +5,14 @@ from poly_dicts.prism_nets import prism_nets
 
 from tiling_dicts.platonic_tilings import platonic_tilings
 from tiling_dicts.archimedean_tilings import archimedean_tilings
-from tiling_dicts.isogonal_tilings import isogonal_tilings
+from tiling_dicts.isogonal_tilings import biisogonal_tilings
+from tiling_dicts.triisogonal_vertex_homogeneous import triisogonal_vertex_homogeneous
 
 
 nets = list(plato_archi_nets.keys()) + list(prism_nets.keys())
 nets += list(johnson_nets.keys())
 
-tiles = list(platonic_tilings)+list(archimedean_tilings)+list(isogonal_tilings)
+tiles = list(platonic_tilings)+list(archimedean_tilings)+list(biisogonal_tilings)+list(triisogonal_vertex_homogeneous)
 
 
 master = Tk()
