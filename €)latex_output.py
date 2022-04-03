@@ -464,6 +464,38 @@ def output_counters_table(all_nets,all_tilings,rollersdata):
 \end{center}""")
     f.close()
 
+    uniqueresults = [[],[],[],[],[]]
+    duperesults = [[],[],[],[],[]]
+    index = {"PR":0,"SPR":0,"SQPR":1,"QPR":1,"HPR":1,"br":2,"ar":3,"x":4," ":4}
+    f = open(".latex_output/supercondensed_results.tex","w")
+
+    for net in all_nets:
+        for tile in all_tilings:
+
+            # netter = net.replace("_", " ")
+            # neturl = "\href{%s}{%s}" % (polyurls[net], netter + "hiral" if netter.endswith(" c") else netter)
+            if(net not in uniqueresults[index[rollersdata[(tile,net)]]]):
+                uniqueresults[index[rollersdata[(tile, net)]]].append(net)
+            duperesults[index[rollersdata[(tile, net)]]].append(net)
+    f.write("\\begin{table}\n")
+    f.write("\\begin{tabular}{|p{\linewidth}|} \n")
+    # f.write("\hline \n")
+
+    titles = "Plane","Hollow plane","Band","Area$>$1"
+    commands = "\planeroller", "\hollowplaneroller", "\\bandroller", "\\arearoller"
+    for i in range(len(titles)-1):
+        f.write(" \hline ")
+        f.write(commands[i]+" Polyhedrons that Roll on a %s on a given tessellation: (%i results for %i pairings)\\\\ \hline "%(titles[i],len(uniqueresults[i]), len(duperesults[i])))
+        f.write(" - ".join([
+            "\href{%s}{%s}" % (polyurls[net], (net+"hiral" if net.endswith("_c") else net).replace("_","~"))
+            + ("~(x%s)"%duperesults[i].count(net) if duperesults[i].count(net)>1 else "") for net in uniqueresults[i]
+        ]))
+        f.write("\\\\ \hline ")
+
+    f.write("\n\\end{tabular} \n")
+    f.write("\\caption{\label{tab:supercondensed_results}Condensed table showing Polyhedron to Roller classification with impacted tessellations count.}\n")
+    f.write("\\end{table}")
+    f.close()
 
 def output_whitematrix(all_nets,all_tilings,rollersdata):
     print("Output whitematrix",len(all_nets),"X",len(all_tilings))
@@ -599,6 +631,9 @@ if __name__ == "__main__":
 
     with open("rolling_results.pickle", "rb") as handle:
         rollingresults = pickle.load(handle)
+
+    print(len(all_nets),"polyhedron nets")
+    print(len(all_tilings), "tessellation tilings")
 
     # new_object = dict()
     # print(rollingresults)
