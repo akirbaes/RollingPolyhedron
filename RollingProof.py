@@ -5,30 +5,18 @@ import json
 import numpy
 import sympy
 
-from RollingProofImageGen import generate_stability_image, generate_image
+from _libs.RollingProofImageGen import generate_stability_image, generate_image
 
 GENERATE_PROOF = True
 GENERATE_STAB = True
 UPDATE_RESULTS = True
 DUPLICATE_IMAGES = False
 
-from symmetry_classes.symmetry_functions import canon_fo
-# from tiling_dicts.archimedean_tilings import archimedean_tilings
-# from tiling_dicts.platonic_tilings import platonic_tilings
-# from tiling_dicts.isogonal_tilings import biisogonal_tilings
-# from tiling_dicts.triisogonal_vertex_homogeneous import triisogonal_vertex_homogeneous
-from poly_dicts.prism_nets import prism_nets
-from poly_dicts.plato_archi_nets import plato_archi_nets
-from poly_dicts.johnson_nets import johnson_nets
-# all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings, **triisogonal_vertex_homogeneous}
-# all_tilings = {**triisogonal_vertex_homogeneous}
-all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
+from _resources.symmetry_classes.symmetry_functions import canon_fo
+from _resources.regular_faced_polyhedron_nets import all_nets
+from _resources.uniform_tiling_supertiles import uniform_tilings as all_tilings
 
-from tiling_dicts.uniform_tiling_supertiles import uniform_tilings as all_tilings
-
-
-
-import CFOClassGenerator
+from _libs import CFOClassGenerator
 
 
 def determine_n(tiling,net,polyname):#,startcase,startface,startorientation):
@@ -36,7 +24,7 @@ def determine_n(tiling,net,polyname):#,startcase,startface,startorientation):
     # borders = CFOClassGenerator.explore_borders(tiling,net)
     N = sum(len(net[face])==len(tiling[cell]) and (face,o)==canon_fo(polyname,face,o)
             for face in net for cell in tiling for o in range(len(net[face])))
-    classes = CFOClassGenerator.explore_inside(tiling,net,polyname,canon_fo)
+    classes = CFOClassGenerator.explore_inside(tiling, net, polyname, canon_fo)
     N2 = len(classes)
     # print(classes)
     # print("N=",N)
@@ -57,7 +45,7 @@ def determine_n(tiling,net,polyname):#,startcase,startface,startorientation):
 def sqrdist(tupl):
     return (tupl[0]*tupl[0])+(tupl[1]*tupl[1])
 
-from SupertileCoordinatesGenerator import generate_supertile_coordinate_helpers
+from _libs.SupertileCoordinatesGenerator import generate_supertile_coordinate_helpers
 
 from math import copysign
 
@@ -259,7 +247,7 @@ def is_roller(tiling,tilingname,net,polyname):
                             coordinates.add((int(x),int(y)))
                 print("Filled coordinates:",coordinates)
                 return coordinates
-            from GeometryFunctions import ptAngle,ptAdd
+            from _libs.GeometryFunctions import ptAngle,ptAdd
             def remove_outsiders(points,vec1,vec2):
                 pc = (0,0)
                 if(ptAngle(vec1,pc,vec2)>0):
@@ -386,7 +374,7 @@ def is_roller(tiling,tilingname,net,polyname):
             else:
                 is_quasi_roller = True
                 for coord,states in explored_states.items():
-                    if not(CFOClassGenerator.has_all_compatible_tiles(states, classes, tiling,net)):
+                    if not(CFOClassGenerator.has_all_compatible_tiles(states, classes, tiling, net)):
                         is_quasi_roller = False
                 stability[groupindex]=is_quasi_roller
                 print(tilingname,polyname,"%i/%i"%(groupindex+1,len(groups)),"is not a roller in -%i:%i"%(N,N))
@@ -499,10 +487,10 @@ if __name__ == "__main__":
     quasirollers = list()
     rollersdata = dict()
     all_results = dict()
-    from symmetry_classes.poly_symmetries import poly_symmetries
-    import symmetry_classes.symmetry_functions
+    from _resources.symmetry_classes.poly_symmetries import poly_symmetries
+    import _resources.symmetry_classes.symmetry_functions
     def canon_fo(polyname, face, orientation):
-        return symmetry_classes.symmetry_functions.canon_fo(polyname, face, orientation, poly_symmetries)
+        return _resources.symmetry_classes.symmetry_functions.canon_fo(polyname, face, orientation, poly_symmetries)
 
 
     # for tilingname, polyname in [["3^6","j8"]]:

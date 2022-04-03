@@ -7,9 +7,14 @@ venv/
 exploration_results*
 .zip
 *Imgur Album*
-tiling_dicts/3-isogonal
-*polyhedron_images*
+_resources/tiling_dicts/3-isogonal
+_resources/polyhedron_images
+*poly_dicts*
+*tiling_dicts*
 .gal
 Showing off
 .latex_output
 *_backup
+_output
+_results
+exploration_results_allnight

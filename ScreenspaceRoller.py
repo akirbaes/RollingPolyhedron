@@ -1,17 +1,15 @@
+"""Rolls in the screen space and fills it (rectangle) and can produce images"""
 import os
 from datetime import datetime
 from time import time
-from symmetry_classes.tiling_symmetries import canon_co
-from GeometryFunctions import *
-from GenPngScreenspaceRoller import draw_answer, draw_background, draw_polygon, wait_for_input, refresh, draw_tiling, \
+from _resources.symmetry_classes.tiling_symmetries import canon_co
+from _libs.GeometryFunctions import *
+from _libs.GenPngScreenspaceRoller import draw_answer, draw_background, draw_polygon, refresh, draw_tiling, \
     map_screenspace
-from tiling_dicts.combine_uniform_tilings import uniform_tilings
-from poly_dicts.prism_nets import prism_nets
-from poly_dicts.plato_archi_nets import plato_archi_nets
-from poly_dicts.johnson_nets import johnson_nets
-from symmetry_classes.poly_symmetries import poly_symmetries
-import symmetry_classes.symmetry_functions
-from symmetry_classes.poly_symmetries import canon_fo
+from _resources.uniform_tiling_supertiles import uniform_tilings
+from _resources.regular_faced_polyhedron_nets import all_nets
+from _resources.symmetry_classes.poly_symmetries import poly_symmetries
+from _resources.symmetry_classes.poly_symmetries import canon_fo
 """Roll a shape in a space with a given tiling and starting position
 """
 LOAD_PROGRESS = True
@@ -67,16 +65,13 @@ progressfile = "exploration_results/PROGRESS_CHECKPOINT.txt"
 skip_pairs = []
 resume_counter = -1
 
-# all_tilings = {**platonic_tilings, **archimedean_tilings, **biisogonal_tilings, **triisogonal_vertex_homogeneous}
 all_tilings = {**uniform_tilings}
-# all_tilings = {**triisogonal_vertex_homogeneous}
-all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
 
 if(TESSELLATION_POLYHEDRON):
-    from poly_dicts.TessellationPolyhedronAndTilings import tessellation_polyhedrons, net_tessellations
+    from _resources.TessellationPolyhedronAndTilings import tessellation_polyhedrons, net_tessellations
     all_tilings=net_tessellations
     all_nets=tessellation_polyhedrons
-    from symmetry_classes.TessPolySymmetries import TessPoly as poly_symmetries
+    from _resources.symmetry_classes.TessPolySymmetries import TessPoly as poly_symmetries
 #
 # winning_pairs = {('(3^6;3^2x4x3x4)', 'j89'), ('(3^6)', 'j84'), ('(3^6)', 'j89'), ('(3^2x4x3x4)', 'j31'), ('(3^6;3^3x4^2)2', 'j87'), ('(3^6;3^3x4^2)2', 'j89'), ('(3^6)', 'j87'), ('(3x4x6x4)', 'j54'), ('(3^6;3^3x4^2)2', 'j50'), ('(3^6)', 'j13'), ('(3^6;3^2x4x3x4)', 'j87'), ('(3^6;3^2x4x3x4)', 'j50'), ('(3^6)', 'j51'), ('(3^6)', 'j50'), ('(3^6)', 'j11'), ('(3^6;3^3x4^2)1', 'j90'), ('3^2x4x3x4', 'j26'), ('(3^3x4^2)', 'j28'), ('(3^6;3^3x4^2)1', 'j14'), ('(3^6;3^4x6)1', 'j22'), ('(3^6;3^3x4^2)1', 'j10'), ('(3^6;3^4x6)2', 'hexagonal_antiprism'),  ('(3^6;3^3x4^2)1', 'j88'), ('(3^6)', 'octahedron'), ('(3^6;3^3x4^2)2', 'j86'), ('(3^3x4^2)', 'j27'), ('(3x4x6x4)', 'j56'), ('(3^6;3^2x6^2)', 'truncated_tetrahedron'), ('(3^6)', 'j86'), ('(4^4)', 'j8'), ('3^4x6;3^2x6^2', 'hexagonal_antiprism'), ('3^6;3^2x4x3x4', 'j86'), ('(3^3x4^2;3^2x4x3x4)1', 'j1'), ('(3^6;3^3x4^2)1', 'j16'), ('(3^6;3^3x4^2)1', 'j89'), ('3^3x4^2', 'square_antiprism'), ('4^4', 'j37'), ('3^2x4x3x4', 'j29'), ('(3^6;3^3x4^2)2', 'j90'), ('(3^6;3^3x4^2)1', 'j87'), ('3^6', 'j62'), ('3^6', 'j90'), ('(3^3x4^2;3^2x4x3x4)2', 'j26'), ('(3^6;3^3x4^2)2', 'j10'), ('3^6;3^2x4x3x4', 'j10'), ('3^6;3^2x4x3x4', 'j90'), ('4^4', 'cube'), ('(3^3x4^2;3^2x4x3x4)1', 'j27'), ('3^6', 'j10'), ('(3^6;3^3x4^2)1', 'j50'), ('3^3x4^2', 'j30'), ('(3^6;3^3x4^2)2', 'j85'), ('(3^6;3^3x4^2)2', 'j88'), ('3^6', 'j85'), ('3^6', 'j17'), ('3^2x4x3x4', 'j1'), ('3x6x3x6', 'j65'), ('3^6;3^2x4x3x4', 'j1'), ('3^6', 'j88'), ('3^6;3^2x4x3x4', 'j85'), ('3^6', 'tetrahedron'), ('(3^6;3^3x4^2)1', 'j15'), ('(3^6;3^4x6)1', 'hexagonal_antiprism'), ('3^6', 'icosahedron'), ('3^6', 'j12'), ('3^4x6', 'hexagonal_antiprism'), ('(3^6;3^3x4^2)1', 'j86')}
 #TODO: rewrite the "winning pair" thing to import the Proof generated dict
@@ -120,6 +115,13 @@ all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change th
 #all_nets_names = ["snub_cube"]
 #all_nets_names=["j89"]
 # all_nets_names=["hexagonal_antiprism"]
+
+def outputfolder(*parts):
+    print(parts)
+    name = os.sep.join(parts)+os.sep
+    try:os.mkdir(name)
+    except:pass
+    return name
 
 import sys
 import argparse
@@ -279,13 +281,16 @@ def drawdir(p1,p2,color=(128,0,0)):
     #draw_polygon(temp,color,,3)
     drawtemp(points,color,3)
 
-import CFOClassGenerator
+
+from _libs import CFOClassGenerator
+
+
 def determine_n(tiling,net,polyname):#,startcase,startface,startorientation):
     # classes = CFOClassGenerator.explore_inside(tiling,net,polyname,canon_fo)
     # borders = CFOClassGenerator.explore_borders(tiling,net)
     N = sum(len(net[face])==len(tiling[cell]) and (face,o)==canon_fo(polyname,face,o)
             for face in net for cell in tiling for o in range(len(net[face])))
-    classes = CFOClassGenerator.explore_inside(tiling,net,polyname,canon_fo)
+    classes = CFOClassGenerator.explore_inside(tiling, net, polyname, canon_fo)
     N2 = len(classes)
     # print(classes)
     # print("N=",N)
@@ -630,14 +635,12 @@ if __name__ == "__main__":
         print("Skip current=",args.skip_current)
         if (args.skip_current):
             skip_pairs.append((progress_tiling,progress_poly))
-    folder = "exploration_results"+os.sep
-    try:os.mkdir(folder)
-    except:pass
+    folder = outputfolder("_output","exploration_results")
+
     start_timestamp = make_timestamp()
     filename = folder+"exploration_logs"+start_timestamp+".txt"
-    try:os.mkdir(folder+"/partial_coverage")
-    except:pass
-    secondfilename = "exploration_results/partial_coverage/" + start_timestamp + ".txt"
+    secondfolder = outputfolder("_output","exploration_results","partial_coverage")
+    secondfilename = secondfolder + start_timestamp + ".txt"
     # file = open(filename,"w")
     # file.close()
     counter = 0
@@ -703,6 +706,8 @@ if __name__ == "__main__":
             if(skip_pair==False):
                 print("(%i)%sExploring the tiling %s with the polyhedron %s" % (
                 counter, make_timestamp(), tilingname, polyname), flush=True)
+
+            exploration_results = outputfolder("_output", "exploration_results")
             # Filter out repetitive faces and orientations to the bare essentials
             #if(polyname!="snub_dodecahedron" and )
             #else:
@@ -826,13 +831,14 @@ if __name__ == "__main__":
                         outputfile.write(out+ "\n")
                         outputfile.close()
                         print(out,flush=True)
+
                         if(result and DRAW_ANSWER):
-                            filename="exploration_results/"+str(TEMPORARY_GLOBAL_COUNTER).zfill(2)+" "+polyname+" rolls the "+tilingname+" tiling"+'.png'
+                            filename=exploration_results+str(TEMPORARY_GLOBAL_COUNTER).zfill(2)+" "+polyname+" rolls the "+tilingname+" tiling"+'.png'
                             TEMPORARY_GLOBAL_COUNTER+=1
                             draw_answer(filename, tilingname, polyname, visits, mapping, net, p1, p2, face, orientation, area2[2], area2[3], unused)
                         successful_pairs.add((tilingname,polyname))
 
-                        outputfile = open("exploration_results/rollers.txt","a")
+                        outputfile = open(exploration_results+"rollers.txt","a")
                         if(CHECK_UNUSED_FACES):
                             outputfile.write("%s %s %i %i %i %s\n"%(tilingname,polyname,case,face,orientation,
                                                                     str(unused).replace(" ","")))
@@ -842,8 +848,7 @@ if __name__ == "__main__":
                     if(PREVIEW):
                         refresh()
                         if(visits and TAKE_PICTURES and (result>=PICTURE_TRESHOLD)):
-                            try:os.mkdir("exploration_results/%s_coverage/"%keyword)
-                            except:pass
+                            coveragetypefolder = outputfolder("_output","exploration_results","%s_coverage"%keyword)
 
                             if(BIGGEST_PICTURE):
                                 # input(str(len(visits))+str(biggest_picture))
@@ -854,18 +859,17 @@ if __name__ == "__main__":
                                 if(visits_count>biggest_picture):
                                     # pygame.image.save(screen,".image_output/bigpics/"+polyname+"[on]"+tilingname+'.png')
                                     biggest_picture=visits_count
-                                    pygame.image.save(screen,".image_output/bigpics/"+polyname+"[on]"+tilingname+'.png')
+                                    picturesfolder = outputfolder("_output","bigpics")
+                                    pygame.image.save(screen,picturesfolder+polyname+"[on]"+tilingname+'.png')
 
                             else:
                                 draw_tiling(p1, p2, screen, case, 0, tiling, 1, [(0,255,0),(192,192,192)])
-                                pygame.image.save(screen,"exploration_results/%s_coverage/"%keyword
+                                pygame.image.save(screen,coveragetypefolder
                                                   +tilingname+"@"+polyname+"@"+keyword
                                                   +"@(%i,%i,%i)"%(case,face,orientation)+'.png')
                     if(PREVIEW):
                         screen.fill((255,255,255))
-                    try:os.mkdir("exploration_results")
-                    except:pass
-                    with open("exploration_results/PROGRESS_CHECKPOINT.txt","w") as progress_output:
+                    with open(exploration_results+"PROGRESS_CHECKPOINT.txt","w") as progress_output:
                         progress_output.write("%s\n%s\n%i"%(tilingname,polyname,counter))
 
                     if (ROLL_ONLY_ONCE and result >= PICTURE_TRESHOLD):

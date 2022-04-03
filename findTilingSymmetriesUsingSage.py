@@ -5,7 +5,7 @@ from copy import deepcopy
 # sage -python findTilingSymmetriesUsingSage.py
 SAVEGRAPHES = False
 
-from tiling_dicts.uniform_tilings import uniform_tilings as all_tilings
+from _resources.tiling_dicts import uniform_tilings as all_tilings
 
 MAX_ANTENNAE_AMOUNT = 12
 #None for all

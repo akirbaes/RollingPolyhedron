@@ -2,12 +2,11 @@
 import os
 import traceback
 
-import DrawingFunctions as Draw
-from GeometryFunctions import *
-from PolyAndTessNets import *
+from _libs import DrawingFunctions as Draw
+from _libs.GeometryFunctions import *
 # from time import sleep
 import pprint
-from poly_dicts.TessellationPolyhedronAndTilings import tessellation_polyhedrons, net_tessellations, tesspoly_order
+from _resources.TessellationPolyhedronAndTilings import tessellation_polyhedrons, net_tessellations, tesspoly_order
 for k in tesspoly_order:
     p=len(net_tessellations[k])
     for face,neighbours in net_tessellations[k].items():
@@ -875,9 +874,9 @@ def explore_rotations(tile, poly,polyname):
             ordered[index][index2] = ma[clas][clas2]
 
     print_matrix(ordered)
-    try:os.mkdir("CFO_ajdacency_matrixes/")
+    try:os.mkdir(".archives/CFO_ajdacency_matrixes/")
     except:pass
-    try:os.mkdir("CFO_ajdacency_matrixes/tessellation_polyhedron/")
+    try:os.mkdir(".archives/CFO_ajdacency_matrixes/tessellation_polyhedron/")
     except:pass
 
     Draw.turn_into_image(ordered,"CFO_ajdacency_matrixes/tessellation_polyhedron/"+polyname+".png")

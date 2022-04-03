@@ -5,7 +5,7 @@ from copy import deepcopy
 # sage -python findPolySymmetriesUsingSage.py
 SAVEGRAPHES = False
 
-from poly_dicts.TessellationPolyhedronAndTilings import tessellation_polyhedrons
+from _resources.TessellationPolyhedronAndTilings import tessellation_polyhedrons
 
 MAX_ANTENNAE_AMOUNT = 3
 #None for all

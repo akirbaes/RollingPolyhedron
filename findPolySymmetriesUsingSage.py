@@ -5,9 +5,9 @@ from copy import deepcopy
 # sage -python findPolySymmetriesUsingSage.py
 SAVEGRAPHES = False
 
-from poly_dicts.johnson_nets import johnson_nets
-from poly_dicts.plato_archi_nets import plato_archi_nets
-from poly_dicts.prism_nets import prism_nets
+from _resources.poly_dicts.johnson_nets import johnson_nets
+from _resources.poly_dicts.plato_archi_nets import plato_archi_nets
+from _resources.poly_dicts.prism_nets import prism_nets
 
 MAX_ANTENNAE_AMOUNT = 3
 #None for all
