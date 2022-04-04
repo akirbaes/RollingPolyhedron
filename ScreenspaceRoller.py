@@ -12,6 +12,8 @@ from _resources.symmetry_classes.poly_symmetries import poly_symmetries
 from _resources.symmetry_classes.poly_symmetries import canon_fo
 """Roll a shape in a space with a given tiling and starting position
 """
+OUTPUT_SVG = True
+
 LOAD_PROGRESS = True
 
 PREVIEW = True
@@ -119,7 +121,7 @@ all_nets_names = list(all_nets.keys()) #if you want to limit to a few, change th
 def outputfolder(*parts):
     print(parts)
     name = os.sep.join(parts)+os.sep
-    try:os.mkdir(name)
+    try:os.makedirs(name,exist_ok=True)
     except:pass
     return name
 
@@ -267,7 +269,9 @@ def map_nspace(tiling,startcell,area,p1,p2,precision,N):
                 visits.append((nextcell, pa, pb, tdistance, ndistance))
     return visited_areas
 
-
+def draw_filled_result_svg(nspace,visited):
+    #if(
+    return
 
 def drawtemp(points,color,outline=0):
     temp.fill((255, 255, 255, 0))
