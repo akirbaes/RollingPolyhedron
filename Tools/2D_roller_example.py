@@ -1,4 +1,6 @@
 """Roll a shape in a space with a given tiling and starting position"""
+import sys
+sys.path.append("..")
 import pygame
 from _resources.uniform_tiling_supertiles import uniform_tilings
 from _resources.regular_faced_polyhedron_nets import all_nets

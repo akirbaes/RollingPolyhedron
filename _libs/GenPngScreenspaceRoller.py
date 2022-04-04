@@ -1,3 +1,5 @@
+import sys
+sys.path.append("..")
 import pygame
 from _libs.GeometryFunctions import xgon, centerpoint, floatcenterpoint
 from _libs.RollyPoint import RollyPoint
