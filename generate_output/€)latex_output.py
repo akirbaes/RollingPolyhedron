@@ -342,89 +342,6 @@ def output_table(all_nets,all_tilings,rollersdata):
 \end{center}""")
         f.write("\n")
 
-def output_htmlmatrix(all_nets, all_tilings, rollersdata):
-    print("Output htmlmatrix of",len(all_nets),"*",len(all_tilings))
-    characters = "  ◙◘#↔×• "#"█■▒▩▩↔x*?" #━ "█■▒▩▩↔x*❌"◙○◘•
-    """.SPR {background-color: red; color: red;}
-.PR {background-color: brown; color: brown;}
-.SQPR {background-color: DarkBlue; color: #0080FF;}
-.QPR {background-color: DarkBlue; color: blue;}
-.HPR {background-color: DarkBlue; color: BlueViolet;}
-.br {background-color: Green; color: GhostWhite;}
-.ar { color: Green;}
-.x {color: Green;}"""
-    output = """<!DOCTYPE html>
-<html>
-<head>
-<style>
-tr.tilingnames td {writing-mode: vertical-rl;vertical-align: baseline;transform: rotate(-180deg);}
-body {
-  font-family: 'Courier New', monospace;
-  font-size: 8px;
-  horizontal-align: right;
-}
-img { display: block; }
-tr:hover { background: yellow; }
-tr.tilingnames:hover {background: white;  }
-td, tr, img  { padding: 0px; margin: 0px; border: none; }
-table { border-collapse: collapse; }
-</style>
-</head>
-"""
-    #border-collapse:collapse;
-
-    values = ["SPR","PR","SQPR","QPR","HPR","br","ar","x","_"]
-    descriptions = ["Stable Plane Roller", "Other Plane Roller", "Stable Quasi-Plane Roller", "Other Quasi-Plane Roller", "Hollow-Plane Roller", "Band Roller", "Area Roller", "Area Roller (cannot escape starting tile)", "Incompatible"]
-
-    output += '<table >\n'
-    for i in range(len(values)):
-        output+='  <tr><td><img src=%s.png></td><td>%s<td></tr>\n'%(values[i],descriptions[i])
-    output += '</table >\n'
-
-
-    output += '<table >\n  <tr class="tilingnames">\n    <td/>\n'
-    for tiling in all_tilings:
-        shortile = tiling.split(" ")[0]
-        output+='    <td><a href="t/%s.png">%s</a></td>\n'%(shortile,shortile) #?page=
-    output+= '</tr>'
-
-    for net in all_nets:
-        shortnet = net
-        # shortnet = shortnet.replace("triangular_","▲-")
-        # shortnet = shortnet.replace("square_","■-")
-        # shortnet = shortnet.replace("pentagonal_","⬟-")
-        # shortnet = shortnet.replace("hexagonal_","⬣-")
-        # shortnet = shortnet.replace("octagonal_","⯃-")
-        # shortnet = shortnet.replace("dodecagonal_","12-")
-        # shortnet = shortnet.replace("decagonal_","10-")
-        shortnet = shortnet.replace("triangular_","3-")
-        shortnet = shortnet.replace("square_","4-")
-        shortnet = shortnet.replace("pentagonal_","5-")
-        shortnet = shortnet.replace("hexagonal_","6-")
-        shortnet = shortnet.replace("octagonal_","8-")
-        shortnet = shortnet.replace("dodecagonal_","12-")
-        shortnet = shortnet.replace("decagonal_","10-")
-        output+= '  <tr>\n    <td><a href="p/%s.png">%s</a></td>\n'%(net,shortnet)
-
-        for tiling in all_tilings:
-            data = rollersdata[(tiling,net)]
-            # outchar = characters[values.index(data)]
-
-            shortile = tiling.split(" ")[0]
-
-            image = "<img src=%s.png>"%(data.replace(" ","_"))
-            outchar = '<a href="r.php?p=%s&amp;t=%s&amp;r=%s">%s</a></td>\n' % (net,shortile, data.replace(" ","_"), image)  # ?page=
-            # output+='    <td class="%s">%s</td>'%(data,outchar)
-            output+='    <td>%s</td>'%(outchar)
-
-        output+= '</tr>'
-    output+="\n</table>\n</html>"
-
-    with open("../.html_output/index.html", "w", encoding="utf-8") as f:
-        f.write(output)
-
-
-
 def output_rollingpairs(all_nets,all_tilings,rollersdata):
     all_plane_roller_pairs = []
     for (tile,net),value in rollersdata.items():
@@ -650,7 +567,6 @@ if __name__ == "__main__":
 
     output_counters_table(all_nets,all_tilings,rollersdata)
     output_whitematrix(all_nets,all_tilings,rollersdata)
-    output_htmlmatrix(all_nets,all_tilings,rollersdata)
     output_rollingpairs(all_nets,all_tilings,rollersdata)
     write_rollable_polyhedron_list(all_nets,all_tilings,rollersdata)
 
