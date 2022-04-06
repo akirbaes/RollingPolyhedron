@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-sys.path.append("../..")
+sys.path.append("..")
 import os
 import pickle
 
@@ -151,12 +151,13 @@ table { border-collapse: collapse; }
     values = ["SPR","PR","SQPR","QPR","HPR","br","ar","x","_"]
     descriptions = ["Stable Plane Roller", "Other Plane Roller", "Stable Quasi-Plane Roller", "Other Quasi-Plane Roller", "Hollow-Plane Roller", "Band Roller", "Area Roller", "Area Roller (cannot escape starting tile)", "Incompatible"]
 
+    #Legend
     output += '<table >\n'
     for i in range(len(values)):
         output+='  <tr><td><img src=%s.png></td><td>%s<td></tr>\n'%(values[i],descriptions[i])
     output += '</table >\n'
 
-
+    #Tilings head
     output += '<table >\n  <tr class="tilingnames">\n    <td/>\n'
     for tiling in all_tilings:
         shortile = tiling.split(" ")[0]
@@ -187,15 +188,16 @@ table { border-collapse: collapse; }
 
             shortile = tiling.split(" ")[0]
 
-            image = "<img src=%s.png>"%(data.replace(" ","_"))
-            outchar = '<a href="r.php?p=%s&amp;t=%s&amp;r=%s">%s</a></td>\n' % (net,shortile, data.replace(" ","_"), image)  # ?page=
+            image = "<img src=./%s.png>"%(data.replace(" ","_"))
+            outchar = '<a class="tooltip" href="r.php?p=%s&amp;t=%s&amp;r=%s">%s</a></td>\n' % (net,shortile, data.replace(" ","_"), image)  # ?page=
             # output+='    <td class="%s">%s</td>'%(data,outchar)
             output+='    <td>%s</td>'%(outchar)
 
         output+= '</tr>'
     output+="\n</table>\n</html>"
 
-    with open("../.html_output/index.html", "w", encoding="utf-8") as f:
+    htmloutput = outputfolder("html_output")+"index.html"
+    with open(htmloutput, "w", encoding="utf-8") as f:
         f.write(output)
 
 
@@ -210,7 +212,7 @@ def output_rollingpairs(all_nets,all_tilings,rollersdata):
 
 
 def write_tilings_list():
-    tilings = uniform1, uniform2, uniform3
+    tilings = all_tilings
     tiling_markers = list()
     for tiling in tilings:
         tiling_markers.append(list(tiling)[0])
@@ -279,8 +281,8 @@ def write_rollable_polyhedron_list(all_nets,all_tilings,rollersdata):
 import pprint
 
 if __name__ == "__main__":
-    write_tilings_list()
-    write_polyherons_list()
+    #write_tilings_list()
+    #write_polyherons_list()
 
     with open('../_results/rollersdata.pickle', 'rb') as handle:
         rollersdata,all_tilings,all_nets = pickle.load(handle)
@@ -292,22 +294,25 @@ if __name__ == "__main__":
     print(len(all_nets),"polyhedron nets")
     print(len(all_tilings), "tessellation tilings")
 
-    # new_object = dict()
-    # print(rollingresults)
-    # json_object=pprint.pformat(rollingresults,indent=2)
-    # print(json_object)
-    # json_object = json.dumps(rollingresults, indent=4)
-    # with open("rolling_results.json", "w") as f:
-    #     f.write(json_object)
-    # exit()
-    # folder = outputfolder("htmlpage")+"polymatrix.html"
-    with open("polyurls.txt", "w", encoding="utf-8") as f:
-        f.write("$polyurls = [\n")
-        for poly, url in polyurls.items():
-            f.write('    "%s" => "%s",\n' % (poly, url))
-        f.write("];")
+    # # # # # new_object = dict()
+    # # # # # print(rollingresults)
+    # # # # # json_object=pprint.pformat(rollingresults,indent=2)
+    # # # # # print(json_object)
+    # # # # # json_object = json.dumps(rollingresults, indent=4)
+    # # # # # with open("rolling_results.json", "w") as f:
+    # # # # #     f.write(json_object)
+    # # # # # exit()
+    # # # # # folder = outputfolder("htmlpage")+"polymatrix.html"
+    # with open("polyurls.txt", "w", encoding="utf-8") as f:
+        # f.write("$polyurls = [\n")
+        # for poly, url in polyurls.items():
+            # f.write('    "%s" => "%s",\n' % (poly, url))
+        # f.write("];")
 
     output_htmlmatrix(all_nets,all_tilings,rollersdata)
+    
+    
+    
     # output_rollingpairs(all_nets,all_tilings,rollersdata)
     # write_rollable_polyhedron_list(all_nets,all_tilings,rollersdata)
 
