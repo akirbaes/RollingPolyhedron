@@ -4,15 +4,8 @@ sys.path.append("..")
 import os
 import pickle
 
-from _resources.uniform_tiling_supertiles import uniform_tilings
-
-all_tilings  = {**uniform_tilings}
-print(len(all_tilings))
-from _resources.poly_dicts.plato_archi_nets import plato_archi_nets
-from _resources.poly_dicts.johnson_nets import johnson_nets
-from _resources.poly_dicts.prism_nets import prism_nets
-all_nets = {**plato_archi_nets, **johnson_nets, **prism_nets}
-all_nets_dict = {**plato_archi_nets, **johnson_nets, **prism_nets}
+from _resources.uniform_tiling_supertiles import uniform_tilings as all_tilings
+from _resources.regular_faced_polyhedron_nets import all_nets
 
 from _libs.DrawingFunctions import turn_into_image
 
@@ -37,7 +30,7 @@ johnsonurls = [
 ]
 
 def outputfolder(*parts):
-    print(parts)
+    # print(parts)
     name = os.sep.join(parts) + os.sep
     os.makedirs(name, exist_ok=True)
     return name
@@ -45,7 +38,7 @@ def outputfolder(*parts):
 
 
 polyurls = {
-    polyname:"https://en.wikipedia.org/wiki/%s"%(polyname[:-2] if polyname.endswith("_c") else polyname) for polyname in list(plato_archi_nets)+list(prism_nets)
+    polyname:"https://en.wikipedia.org/wiki/%s"%(polyname[:-2] if polyname.endswith("_c") else polyname) for polyname in all_nets
 }
 
 # "cube": "https://en.wikipedia.org/wiki/Cube",
@@ -212,37 +205,23 @@ def output_rollingpairs(all_nets,all_tilings,rollersdata):
 
 
 def write_tilings_list():
-    tilings = all_tilings
-    tiling_markers = list()
-    for tiling in tilings:
-        tiling_markers.append(list(tiling)[0])
-        tiling_markers.append(list(tiling)[-1])
-    with open("../.latex_output/tilingnames.txt", "w") as f:
-        for tilingname in all_tilings:
-            if(tilingname in tiling_markers):
-                f.write(".")
-            else:
-                f.write("|")
-            f.write(tilingname+"\n")
-
+    s="[%s]"%(",".join('"%s"'%name for name in all_tilings))
+    with open(outputfolder("html_output")+"tilingnames.txt","w") as f:
+        f.write(s)
+    return s
 
 def write_polyherons_list():
-    nets = plato_archi_nets, johnson_nets, prism_nets
-    net_markers=list()
-    for net in nets:
-        net_markers.append(list(net)[0])
-        net_markers.append(list(net)[-1])
+    s="[%s]"%(",".join('"%s"'%name for name in all_nets))
+    with open(outputfolder("html_output")+"polynames.txt","w") as f:
+        f.write(s)
+    return s
 
-    net_markers.append("truncated_tetrahedron")
-    net_markers.append("icosahedron")
-
-    with open("../.latex_output/polynames.txt", "w") as f:
-        for polyname in all_nets:
-            f.write(polyname)
-            if(polyname in net_markers):
-                f.write("."+"\n")
-            else:
-                f.write("|"+"\n")
+def write_result_type_list(rollingresults):
+    imagenames = ["SPR","PR","SQPR","QPR","HPR","br","ar","x"," "]
+    s="".join(str(imagenames.index(rollingresults[tiling,net])) for net in all_nets for tiling in all_tilings)
+    with open(outputfolder("html_output")+"combi_ids.txt","w") as f:
+        f.write(s)
+    return s
 
 
 # def output_usedfaces(rollersdata,all_nets,all_tilings):
@@ -281,8 +260,8 @@ def write_rollable_polyhedron_list(all_nets,all_tilings,rollersdata):
 import pprint
 
 if __name__ == "__main__":
-    #write_tilings_list()
-    #write_polyherons_list()
+    write_tilings_list()
+    write_polyherons_list()
 
     with open('../_results/rollersdata.pickle', 'rb') as handle:
         rollersdata,all_tilings,all_nets = pickle.load(handle)
@@ -291,11 +270,12 @@ if __name__ == "__main__":
     with open("../_results/rolling_results.pickle", "rb") as handle:
         rollingresults = pickle.load(handle)
 
-    print(len(all_nets),"polyhedron nets")
-    print(len(all_tilings), "tessellation tilings")
+    write_result_type_list(rollersdata)
+    # print(len(all_nets),"polyhedron nets")
+    # print(len(all_tilings), "tessellation tilings")
 
     # # # # # new_object = dict()
-    # # # # # print(rollingresults)
+    print(rollersdata)
     # # # # # json_object=pprint.pformat(rollingresults,indent=2)
     # # # # # print(json_object)
     # # # # # json_object = json.dumps(rollingresults, indent=4)
