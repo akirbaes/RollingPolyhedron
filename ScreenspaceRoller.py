@@ -145,6 +145,9 @@ def outputfolder(*parts):
         pass
     return name
 
+def picklethis(oject, name):
+    pass #[TODO]
+
 progressfile = outputfolder("_results")+"PROGRESS_CHECKPOINT.txt"
 
 import sys
