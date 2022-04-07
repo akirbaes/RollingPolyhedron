@@ -61,7 +61,7 @@ for (let poly of polynames) {
     <!-- newCell.textContent = poly+' on '+tiling; -->
 	let resulttype = imagenames[parseInt(comboindex[counter])];
 	let splittiling = tiling.split(" ")[0];
-    newCell.innerHTML = '<a class="tooltip" href="https://akirabaes.com/polyrolly/resulttable/r.php?p='+poly+'&amp;t='+splittiling+'&amp;r='+resulttype+'"><img src=./'+resulttype+'.png><span><img src="https://akirabaes.com/polyrolly/resulttable/smallpics/'+poly+'[on]'+tiling+'.png" loading="lazy"><h3>'+poly+' on '+tiling+'</h3>'+'<img src="./'+resulttype+'.png">'+descriptions[parseInt(comboindex[counter])]+'</span></a>';
+    newCell.innerHTML = '<a class="tooltip" href="https://akirabaes.com/polyrolly/resulttable/r.php?p='+poly+'&amp;t='+splittiling+'&amp;r='+resulttype+'"><img src=./'+resulttype+'.png><span><img loading="lazy" src="https://akirabaes.com/polyrolly/resulttable/smallpics/'+poly+'[on]'+tiling+'.png"><h3>'+poly+' on '+tiling+'</h3>'+'<img src="./'+resulttype+'.png">'+descriptions[parseInt(comboindex[counter])]+'</span></a>';
 	counter+=1;
   }
 }
