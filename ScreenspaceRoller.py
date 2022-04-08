@@ -16,11 +16,25 @@ from _resources.symmetry_classes.poly_symmetries import canon_fo
 
 """Roll a shape in a space with a given tiling and starting position
 """
-OUTPUT_SVG = True
+PREVIEW = False
+SHOWCASE = 0
+OUTPUT_SVG = 0
+TAKE_PICTURES = 0
+MAKEPICKLE = 0
+
+######################################
+SCREENSPACE = 1
+NSPACE = 2
+EXPLORATION_SPACE = SCREENSPACE
+
+TESSELLATION_POLYHEDRON = False
+
+
+PAUSE_AT_BEGINNING = 0  # 3000
+QUIT_PREVIEW_EARLY = False
 
 LOAD_PROGRESS = True
 
-PREVIEW = False
 COLOR_GRADATION = False  # True
 PREVIEWPERIODICITY = 0  # 20
 # SLOW=False
@@ -30,6 +44,7 @@ SKIP_NOTFULL = False
 PREVIEW_TILINGNAME = False
 PREVIEW_POLYNAME = False
 
+SAVE_PICKLE = True
 TAKE_PICTURES = True
 DRAW_ANSWER = False
 BIGGEST_PICTURE = True
@@ -39,23 +54,35 @@ ROLL_ONLY_ONCE = False  # True
 TIME_LIMIT = -1  # 3.5
 WAIT_AT_END = False  # 0.5
 
-SCREENSPACE = 1
-NSPACE = 2
-EXPLORATION_SPACE = SCREENSPACE
 
 CHECK_UNUSED_FACES = False  # Will disable symmetry optimisations
 CHECK_ALL_CELLS = True  # Only checking rollers: will go everywhere eventually
 # CHECK_ALL_FACEROT = False
 
-PAUSE_AT_BEGINNING = 0  # 3000
-QUIT_PREVIEW_EARLY = False
 
 LIMIT_TO_ROLLING_PAIRS = False
 LIMIT_TO_SHOWCASE = False  # True
 INSERT_FILL = False  # insert new areas to explore at the beginning. Only checking rollers
 
-TESSELLATION_POLYHEDRON = False
 
+if SHOWCASE:
+    PREVIEW = True
+    PREVIEWPERIODICITY = 20
+    PAUSE_AT_BEGINNING = 3000
+    QUIT_PREVIEW_EARLY = False
+    TIME_LIMIT = 3.5
+    WAIT_AT_END = 0.5
+    ROLL_ONLY_ONCE = True
+
+if TAKE_PICTURES:
+    PICTURE_TRESHOLD = 0.03
+
+if OUTPUT_SVG:
+    PICTURE_TRESHOLD = 0
+
+if MAKEPICKLE:
+        SAVE_PICKLE = True
+  
 # Modes
 # Roller : OPTIMISE_SYMMETRIES = True, CHECK_ALL_CELLS = False, SKIP_NOTFULL = True, CHECK_UNUSED_FACES = False, QUIT_PREVIEW_EARLY = True
 # Perfect Roller: OPTIMISE_SYMMETRIES = False, CHECK_ALL_CELLS = False, SKIP_NOTFULL = True, CHECK_UNUSED_FACES = True, QUIT_PREVIEW_EARLY = False
