@@ -1,6 +1,7 @@
 """Rolls in the screen space and fills it (rectangle) and can produce images"""
 import os
 from datetime import datetime
+from os.path import exists
 from time import time
 
 import svgwrite
@@ -13,11 +14,12 @@ from _resources.uniform_tiling_supertiles import uniform_tilings
 from _resources.regular_faced_polyhedron_nets import all_nets
 from _resources.symmetry_classes.poly_symmetries import poly_symmetries
 from _resources.symmetry_classes.poly_symmetries import canon_fo
+from _libs.FileManagementShortcuts import pickleThis, unpickleThis
 
 """Roll a shape in a space with a given tiling and starting position
 """
-OUTPUT_SVG = True
-
+OUTPUT_SVG = False
+TAKE_PICKLE = True
 LOAD_PROGRESS = True
 
 PREVIEW = False
@@ -30,7 +32,7 @@ SKIP_NOTFULL = False
 PREVIEW_TILINGNAME = False
 PREVIEW_POLYNAME = False
 
-TAKE_PICTURES = True
+TAKE_PICTURES = False
 DRAW_ANSWER = False
 BIGGEST_PICTURE = True
 
@@ -144,9 +146,6 @@ def outputfolder(*parts):
     except:
         pass
     return name
-
-def picklethis(oject, name):
-    pass #[TODO]
 
 progressfile = outputfolder("_results")+"PROGRESS_CHECKPOINT.txt"
 
@@ -971,6 +970,19 @@ if __name__ == "__main__":
                         outputfile.close()
                     if (PREVIEW):
                         refresh()
+                    if visits and TAKE_PICKLE:
+                        visits_count = len([1 for center, visitors in visits.items() if visitors])
+                        pickleFolder = outputfolder("_output","pickle")
+                        filename =  pickleFolder+polyname + "[on]" + tilingname + ".pickle"
+                        if exists(filename):
+                            previous_visit = unpickleThis(filename)
+                            previous_count = len([1 for center, visitors in previous_visit.items() if visitors])
+                            if(visits_count>previous_count):
+                                pickleThis(visits, filename)
+                        else:
+                            pickleThis(visits,filename)
+
+
                     if (visits and TAKE_PICTURES and (result >= PICTURE_TRESHOLD)):
                         coveragetypefolder = outputfolder("_output", "exploration_results", "%s_coverage" % keyword)
 
