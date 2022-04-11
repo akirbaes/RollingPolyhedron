@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 sys.path.append("..")
+sys.path.append("..\\..")
 import os
 import pickle
 
@@ -109,6 +110,14 @@ def find_quasiroller_withname(tilename,polyname):
                 return name
     raise FileNotFoundError(polyname+"@"+tilename)
 
+def output_polywikilink():
+    links = [polyurls[poly].replace("https://en.wikipedia.org/wiki/","") for poly in all_nets]
+    for i,poly in enumerate(all_nets):
+        if(links[i]==poly):
+            links[i]=0
+    with open("wikishort.txt","w") as out:
+        out.write(str(links))
+        
 
 def output_htmlmatrix(all_nets, all_tilings, rollersdata):
     print("Output htmlmatrix of",len(all_nets),"*",len(all_tilings))
@@ -290,6 +299,7 @@ if __name__ == "__main__":
         # f.write("];")
 
     output_htmlmatrix(all_nets,all_tilings,rollersdata)
+    output_polywikilink()
     
     
     
