@@ -2,7 +2,8 @@
 <html>
 <head>
 <style>
-tr.tilingnames td {writing-mode: vertical-rl;vertical-align: baseline;transform: rotate(-180deg);}
+tr.tilingnames td span{transform: rotate(90deg);}
+tr.tilingnames td{writing-mode: vertical-rl;vertical-align: baseline;transform: rotate(-180deg);}
 body {
   font-family: 'Courier New', monospace;
   font-size: 8px;
@@ -13,7 +14,7 @@ tr:hover { background: yellow; }
 tr.tilingnames:hover {background: white;  }
 td, tr, img  { padding: 0px; margin: 0px; border: none; }
 table { border-collapse: collapse; }
-
+.polycell {text-align: center;}
 .tooltip {
   text-decoration:none;
   position:relative;
@@ -48,10 +49,15 @@ table { border-collapse: collapse; }
   overflow:hidden;
   padding:8px;
 }
+img {  
+max-width: 200px;  
+height: auto;  
+}  
 </style>
 </head>
 <body>
-</head>
+<h1>Rolling polyhedron Results table</h1>
+<p><a href="https://akirabaes.com/polyrolly/">Back to HUB</a>
 <table >
   <tr><td><img src=SPR.png></td><td>Stable Plane Roller<td></tr>
   <tr><td><img src=PR.png></td><td>Other Plane Roller<td></tr>
@@ -77,8 +83,22 @@ var descriptions = ["Perfectly Stable Plane Roller", "Plane Roller", "Perfectly 
 
 var counter=0;
 let table = document.createElement('table');
+var tilingrow = table.insertRow();
+tilingrow.classList.add("tilingnames");
+tilingrow.insertCell();
+for (let tiling of tilingnames) {
+    let newCell = tilingrow.insertCell();
+	let splittiling = tiling.split(" ")[0];
+	newCell.innerHTML = '<td><a class="tooltip" href="t/'+splittiling+'.png"><span><img loading="lazy" src="t/'+splittiling+'.png">'+tiling+'</span>'+splittiling+'</a></td>'
+}
+
 for (let poly of polynames) {
   table.insertRow();
+    let polycell = table.rows[table.rows.length - 1].insertCell();
+	polycell.innerHTML=
+    '<td><a href="p/tetrahedron.png">tetrahedron</a></td>'
+	polycell.innerHTML = '<td><a class="tooltip polycell" href="p/'+poly+'.png"><span><img loading="lazy" src="p/'+poly+'.png">'+poly+'</span>'+poly+'</a></td>'
+  
 	for (let tiling of tilingnames) {
     let newCell = table.rows[table.rows.length - 1].insertCell();
     <!-- newCell.textContent = poly+' on '+tiling; -->
