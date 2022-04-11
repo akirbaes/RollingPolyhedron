@@ -2,8 +2,7 @@
 <html>
 <head>
 <style>
-tr.tilingnames td span{transform: rotate(90deg);}
-tr.tilingnames td{writing-mode: vertical-rl;vertical-align: baseline;transform: rotate(-180deg);}
+tr.tilingnames>td>span>a{writing-mode: vertical-rl;vertical-align: baseline;transform: rotate(-180deg);}
 body {
 	font-family: 'Courier New', monospace;
 	font-size: 8px;
@@ -41,14 +40,28 @@ table { border-collapse: collapse; }
 	left:0;
 	z-index:1000;
 	width:auto;
-	max-width:320px;
-	min-height:128px;
 	border:1px solid black;
 	margin-top:12px;
 	margin-left:32px;
 	overflow:hidden;
 	padding:8px;
 }
+
+tr.tilingnames .tooltip:hover span{
+	display:block;
+	position:absolute;
+	top:-200%;
+	left:-50%;
+	z-index:10000;
+	width:auto;
+	border:1px solid black;
+	margin-top:12px;
+	margin-left:32px;
+	overflow:hidden ;
+	padding:8px;
+}
+
+
 img {  
 max-width: 200px;  
 height: auto;  
@@ -60,9 +73,9 @@ height: auto;
 <h1>Rolling polyhedron Results table</h1>
 <p><a href="https://akirabaes.com/polyrolly/">Back to HUB</a>
 <table >
-  <tr><td><img src=SPR.png></td><td>Stable Plane Roller<td></tr>
+  <tr><td><img src=SPR.png></td><td>Perfectly Stable Plane Roller<td></tr>
   <tr><td><img src=PR.png></td><td>Other Plane Roller<td></tr>
-  <tr><td><img src=SQPR.png></td><td>Stable Quasi-Plane Roller<td></tr>
+  <tr><td><img src=SQPR.png></td><td>Perfectly Stable Quasi-Plane Roller<td></tr>
   <tr><td><img src=QPR.png></td><td>Other Quasi-Plane Roller<td></tr>
   <tr><td><img src=HPR.png></td><td>Hollow-Plane Roller<td></tr>
   <tr><td><img src=br.png></td><td>Band Roller<td></tr>
@@ -91,7 +104,7 @@ tilingrow.insertCell();
 for (let tiling of tilingnames) {
     let tilingTitleCell = tilingrow.insertCell();
 	let splittiling = tiling.split(" ")[0];
-	tilingTitleCell.innerHTML = '<td><a class="tooltip" href="t/'+splittiling+'.png">'+splittiling+'</a></td>'
+	tilingTitleCell.innerHTML = '<td><span class="tooltip"><a href="t/'+splittiling+'.png">'+splittiling+'</a></span></td>'
 	
 	tilingTitleCell.addEventListener('mouseover', function handleMouseOver() {
 		tilingTitleCell.firstChild.innerHTML+='<span><img src="t/'+splittiling+'.png">'+tiling+'</span>';
