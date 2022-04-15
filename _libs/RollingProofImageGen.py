@@ -2,7 +2,8 @@ import sys
 sys.path.append("..")
 import os
 from math import ceil
-
+import svgwrite
+from _libs.FileManagementShortcuts import outputfolder
 import pygame
 
 from _libs.GeometryFunctions import centerpoint
@@ -131,7 +132,7 @@ def generate_stability_image(tilingname,polyname,tiling,polyhedron,hexborders,ty
     pygame.image.save(surf,path+polyname+"@"+tilingname+" stability"+".png")
 
 
-def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,hexborders,symmetries,explored,type):
+def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,hexborders,symmetries,explored,type,stable_spots = []):
     print("Symmetries:",symmetries)
     p1 = RollyPoint(0, 0)
     EDGESIZE = 100
@@ -265,65 +266,103 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
     facefull_tiles = [coord_adapt(poly) for poly in facefull_tiles]
     faceorifull_tiles = [coord_adapt(poly) for poly in faceorifull_tiles]
     unused_tiles = [coord_adapt(poly) for poly in unused_tiles]
+    
+    if("pygame"):
+        pygame.init()
+        surf = pygame.Surface((final_width+20, final_height+20), pygame.SRCALPHA)
+        surf.fill((255,255,255))
+        for poly in filled_tiles:
+            # print("poly:",poly)
+            if(poly in faceorifull_tiles):
+                color = (255,0,0)
+            elif(poly in facefull_tiles):
+                color = (128,0,0)
+            else:
+                color = (128,128,128)
+            pygame.draw.polygon(surf,color,poly,width=0)
+        for poly in unused_tiles:
+            pygame.draw.polygon(surf,(16,16,48),poly,width=0)
+        for poly in drawn_tiles:
+            pygame.draw.lines(surf,(192,192,192),1,poly,width=int(6*ratio))
+        for line in drawn_supertiles:
+            pygame.draw.line(surf,(0,0,0),*line,width=int(8*ratio))
+        try:
+            for index,line in enumerate(symmetrylines):
+                b=(255,255,0,0)
+                pygame.draw.line(surf,(0,128,b[index]),*line,width=int(9*ratio))
+                pygame.draw.circle(surf,(0,128,b[index]),line[0],12*ratio*ratio)
+                pygame.draw.circle(surf,(0,128,b[index]),line[1],12*ratio*ratio)
+        except:
+            pass
+        if(width<height):
+            surf=pygame.transform.rotate(surf,90)
+        totalsurf = pygame.Surface((1000, surf.get_height()+100), pygame.SRCALPHA)
+        totalsurf.fill((255,255,255))
+        totalsurf.blit(surf,(0,100))
+        # surf.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
+        try:
+            polimage=pygame.image.load("polyhedron_images/"+polyname+".png")
+        except:
+            try:
+                polimage=pygame.image.load("polyhedron_images/"+polyname+".jpg")
+            except:
+                pass
 
-    pygame.init()
-    surf = pygame.Surface((final_width+20, final_height+20), pygame.SRCALPHA)
-    surf.fill((255,255,255))
-    for poly in filled_tiles:
-        # print("poly:",poly)
-        if(poly in faceorifull_tiles):
-            color = (255,0,0)
-        elif(poly in facefull_tiles):
-            color = (128,0,0)
-        else:
-            color = (128,128,128)
-        pygame.draw.polygon(surf,color,poly,width=0)
-    for poly in unused_tiles:
-        pygame.draw.polygon(surf,(16,16,48),poly,width=0)
-    for poly in drawn_tiles:
-        pygame.draw.lines(surf,(192,192,192),1,poly,width=int(6*ratio))
-    for line in drawn_supertiles:
-        pygame.draw.line(surf,(0,0,0),*line,width=int(8*ratio))
-    try:
-        for index,line in enumerate(symmetrylines):
-            b=(255,255,0,0)
-            pygame.draw.line(surf,(0,128,b[index]),*line,width=int(9*ratio))
-            pygame.draw.circle(surf,(0,128,b[index]),line[0],12*ratio*ratio)
-            pygame.draw.circle(surf,(0,128,b[index]),line[1],12*ratio*ratio)
-    except:
-        pass
-    if(width<height):
-        surf=pygame.transform.rotate(surf,90)
-    totalsurf = pygame.Surface((1000, surf.get_height()+100), pygame.SRCALPHA)
-    totalsurf.fill((255,255,255))
-    totalsurf.blit(surf,(0,100))
-    # surf.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
-    try:
-        polimage=pygame.image.load("polyhedron_images/"+polyname+".png")
-    except:
-        polimage=pygame.image.load("polyhedron_images/"+polyname+".jpg")
+        try:
+            width,height = polimage.get_width(),polimage.get_height()
+            newwidth=int(width/height*100)
+            polimage=pygame.transform.scale(polimage,(newwidth,100))
+            totalsurf.blit(polimage,(0,0))
+        except:
+            width,height = 50,50
+            newwidth=int(width/height*100)
 
-    width,height = polimage.get_width(),polimage.get_height()
-    newwidth=int(width/height*100)
-    polimage=pygame.transform.scale(polimage,(newwidth,100))
-
-    totalsurf.blit(polimage,(0,0))
-    # text = pygame.font.SysFont(None, 70).render(polyname+"    %i/%i"%(groups.index(group)+1,len(groups)), True, (0, 0, 0))
-    text = pygame.font.SysFont(None, 70).render(polyname+"    %s, %s"%(str(symmetries[0]),str(symmetries[1])), True, (0, 0, 0))
-    totalsurf.blit(text, (newwidth+4,2))
-    text = pygame.font.SysFont(None, 70).render(tilingname, True, (0, 0, 0))
-    totalsurf.blit(text, (newwidth+4,52))
-    # text = pygame.font.SysFont(None, 70).render(str(symmetries), True, (0, 0, 0))
-    # totalsurf.blit(text, (newwidth+4,102))
+        # text = pygame.font.SysFont(None, 70).render(polyname+"    %i/%i"%(groups.index(group)+1,len(groups)), True, (0, 0, 0))
+        text = pygame.font.SysFont(None, 70).render(polyname+"    %s, %s"%(str(symmetries[0]),str(symmetries[1])), True, (0, 0, 0))
+        totalsurf.blit(text, (newwidth+4,2))
+        text = pygame.font.SysFont(None, 70).render(tilingname, True, (0, 0, 0))
+        totalsurf.blit(text, (newwidth+4,52))
+        # text = pygame.font.SysFont(None, 70).render(str(symmetries), True, (0, 0, 0))
+        # totalsurf.blit(text, (newwidth+4,102))
 
 
-    text = pygame.font.SysFont(None, 20).render("polyhedron render via Wikipedia", True, (128, 128, 128))
-    totalsurf.blit(text, (1000-text.get_width()-2,52))
+        text = pygame.font.SysFont(None, 20).render("polyhedron render via Wikipedia", True, (128, 128, 128))
+        totalsurf.blit(text, (1000-text.get_width()-2,52))
 
-    path = "_proofimages/"+type+"/"
-    try:os.mkdir("_proofimages/")
-    except:pass
-    try:os.mkdir(path)
-    except:pass
-    # pygame.image.save(totalsurf,path+polyname+"@"+tilingname+" %i"%(groups.index(group)+1)+".png")
-    pygame.image.save(totalsurf,path+polyname+"@"+tilingname+".png")
+        path = "_proofimages/"+type+"/"
+        try:os.mkdir("_proofimages/")
+        except:pass
+        try:os.mkdir(path)
+        except:pass
+        # pygame.image.save(totalsurf,path+polyname+"@"+tilingname+" %i"%(groups.index(group)+1)+".png")
+        pygame.image.save(totalsurf,path+polyname+"@"+tilingname+".png")
+    if("svg"):
+        filename = outputfolder("_results","svg")+polyname+"@"+tilingname
+        svg = svgwrite.Drawing(filename+'.svg', profile='tiny',height=final_width+20, width=final_height+20)
+        
+        for poly in filled_tiles:
+            # print("poly:",poly)
+            if(poly in faceorifull_tiles):
+                color = "rgb(255,0,0)"
+            elif(poly in facefull_tiles):
+                color = "rgb(128,0,0)"
+            else:
+                color = "rgb(128,128,128)"
+            svg.add(svg.polygon(poly, fill=color))
+        for poly in unused_tiles:
+            xx,yy=centerpoint(poly)
+            svg.add(svg.text.TSpan("X",x=xx,y=yy))
+        for poly in drawn_tiles:
+            svg.add(svg.line(*line, stroke="black", stroke_width=2))
+        for line in drawn_supertiles:
+            svg.add(svg.line(*line, stroke="black", stroke_width=4))
+        try:
+            for index,line in enumerate(symmetrylines):
+                b=(255,255,0,0)
+                svg.add(svg.line(*line, stroke="rgb(0,128,288)", stroke_width=int(9*ratio)))
+                svg.add(svg.circle(center=line[0], stroke="rgb(0,128,288)",r=12*ratio*ratio))
+                svg.add(svg.circle(center=line[1], stroke="rgb(0,128,288)",r=12*ratio*ratio))
+        except:
+            pass
+        svg.save()
+        
