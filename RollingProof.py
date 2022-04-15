@@ -1,4 +1,4 @@
-import pickle
+from _libs.FileManagementShortcuts import outputfolder, pickleThis, unpickleThis
 import time
 from datetime import datetime
 import json
@@ -450,6 +450,10 @@ def is_roller(tiling,tilingname,net,polyname):
             stable_spots = {pos:[counter == maxfo[cell] for cell,counter in enumerate(celldata)] for pos,celldata in fill_area.items()}
             stable_spots = {pos:[cell_stability[cell]==maxfo[cell] and maxfo[cell]!=0 for cell in range(len(tiling))] for pos in fill_area}
             type=("roller","quasi-roller")[bool(incompatible)]
+            
+            pickleThis((tilingname, polyname, tiling, net, borders, type, stable_spots),
+                outputfolder("_results","condensed")+polyname+"[on]"+tilingname+".pickle")
+            
             if(GENERATE_STAB):
                 generate_stability_image(tilingname, polyname, tiling, net, borders, type, stable_spots)
 
