@@ -8,8 +8,8 @@ import sympy
 from _libs.RollingProofImageGen import generate_stability_image, generate_image
 
 GENERATE_PROOF = True
-GENERATE_STAB = True
-UPDATE_RESULTS = True
+GENERATE_STAB = False
+UPDATE_RESULTS = False
 DUPLICATE_IMAGES = False
 
 from _resources.symmetry_classes.symmetry_functions import canon_fo
@@ -451,7 +451,7 @@ def is_roller(tiling,tilingname,net,polyname):
             stable_spots = {pos:[cell_stability[cell]==maxfo[cell] and maxfo[cell]!=0 for cell in range(len(tiling))] for pos in fill_area}
             type=("roller","quasi-roller")[bool(incompatible)]
             
-            pickleThis((tilingname, polyname, tiling, net, borders, type, stable_spots),
+            pickleThis((tilingname, polyname, tiling, net, borders, type, fill_area),
                 outputfolder("_results","condensed")+polyname+"[on]"+tilingname+".pickle")
             
             if(GENERATE_STAB):
