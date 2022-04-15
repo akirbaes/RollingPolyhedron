@@ -5,6 +5,7 @@ import pickle
 from _resources.uniform_tiling_supertiles import uniform_tilings as all_tilings
 from _resources.regular_faced_polyhedron_nets import all_nets
 
+from _libs.SupertileCoordinatesGenerator import supertile_center, yield_insides, yield_borders
 
 
 def draw_lines_svg(svg,lineslist):
