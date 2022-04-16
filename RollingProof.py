@@ -247,7 +247,7 @@ def is_roller(tiling,tilingname,net,polyname):
                             coordinates.add((int(x),int(y)))
                 print("Filled coordinates:",coordinates)
                 return coordinates
-            from _libs.GeometryFunctions import ptAngle,ptAdd
+            from _libs.GeometryFunctions import ptAngle,ptAdd, ptSub, distance
             def remove_outsiders(points,vec1,vec2):
                 pc = (0,0)
                 if(ptAngle(vec1,pc,vec2)>0):
@@ -264,6 +264,24 @@ def is_roller(tiling,tilingname,net,polyname):
                             to_remove.add(point)
                             break
                 return points-to_remove
+
+            def trim_points(points,vec1,vec2):
+                pc = (0,0)
+                to_remove = set()
+                pointslist = tuple(points)
+                for index,pt in enumerate(pointslist):
+
+                    symmetries = tuple(f(pt,v) for f in (ptAdd,ptSub) for v in (vec1,vec2)) + tuple(f1(f2(pt,vec1),vec2) for f1 in (ptAdd,ptSub) for f2 in (ptAdd,ptSub))
+                    # symmetries = tuple(f1(f2(pt,v1),v2) for f1 in (ptAdd,ptSub) for f2 in (ptAdd,ptSub) for v1,v2 in ((vec1,vec2),(vec1,(0,0)),(0,0),vec2))
+                    #symmetries = ptAdd(pt,vec1), ptSub(pt,vec1), ptAdd(pt,vec2), ptSub(pt,vec2)
+                    for pt2 in pointslist[index:]:
+                        if(pt2 in symmetries):
+                            if(distance(pc,pt) <= distance(pc,pt2)):
+                                to_remove.add(pt2)
+                            else:
+                                to_remove.add(pt)
+                return points-to_remove
+
 
 
             def fill_parallelogram(vec1, vec2):
@@ -326,6 +344,7 @@ def is_roller(tiling,tilingname,net,polyname):
             def explore_parallelogram(vec1,vec2, rules, to_explore):
                 points = fill_parallelogram(vec1, vec2)
                 points = remove_outsiders(points,vec1,vec2)
+                points = trim_points(points,vec1,vec2)
                 print("Points to fill:",points)
                 explored_states = {point:set() for point in points}
                 startingpoint = to_explore[0]

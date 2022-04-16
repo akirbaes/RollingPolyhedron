@@ -6,7 +6,7 @@ import svgwrite
 from _libs.FileManagementShortcuts import outputfolder
 import pygame
 
-from _libs.GeometryFunctions import centerpoint
+from _libs.GeometryFunctions import centerpoint, distance, psign, ptAdd
 from _libs.RollyPoint import RollyPoint
 from _libs.SupertileCoordinatesGenerator import supertile_center, yield_insides, yield_borders
 
@@ -165,8 +165,11 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
     dy = neighbour_pos[(0,1)]
     dy = [dy[0]-cx,dy[1]-cy]
     symmetrylines = [[None,None],[None,None]]
-
-
+    s1,s2 = symmetries
+    def rebase(vec,x,y):
+        return (vec[0]*x[0]+vec[1]*y[0],vec[0]*x[1]+vec[1]*y[1])
+    symmetrylines = ( ((0,0),rebase(s1,dx,dy)),((0,0),rebase(s2,dx,dy)) )
+    print("Fixed symmetry lines:",symmetrylines)
     drawn_tiles = list()
     drawn_supertiles = list()
     filled_tiles = list()
@@ -197,12 +200,13 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
             polygon = [(x0 + x, y0 + y) for (x, y) in cells_pos[c1]]
             center = centerpoint(polygon)
             if c1 == startcell and coordinates == (0, 0):
-                symmetrylines[0][0] = center
-                symmetrylines[1][0] = center
-            if c1 == startcell and list(coordinates) == list(symmetries[0]):
-                symmetrylines[0][1] = center
-            if c1 == startcell and list(coordinates) == list(symmetries[1]):
-                symmetrylines[1][1] = center
+                symmetrylines = tuple(tuple(ptAdd(point, center) for point in line) for line in symmetrylines)
+            #     symmetrylines[0][0] = center
+            #     symmetrylines[1][0] = center
+            # if c1 == startcell and list(coordinates) == list(symmetries[0]):
+            #     symmetrylines[0][1] = center
+            # if c1 == startcell and list(coordinates) == list(symmetries[1]):
+            #     symmetrylines[1][1] = center
 
             drawn_tiles.append(polygon)
 
@@ -241,32 +245,33 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
     width = max_x-min_x
     height = max_y-min_y
     print("Width=",width)
-    if(width>height):
-        final_width = 980
-        ratio = final_width/width
-        final_height = int((max_y-min_y)*ratio)
-    else:
-        final_height = 980
-        ratio = final_height/height
-        final_width = int((max_x-min_x)*ratio)
-    ratio = ratio**0.5
+    # if(width>height):
+    #     final_width = 980
+    #     ratio = final_width/width
+    #     final_height = int((max_y-min_y)*ratio)
+    # else:
+    #     final_height = 980
+    #     ratio = final_height/height
+    #     final_width = int((max_x-min_x)*ratio)
+    final_width,final_height = width,height
+    ratio = 1
+    # ratio = ratio**0.5
     def coord_adapt(shape):
         print(shape)
         return [((x-min_x)*final_width/width+10, (y-min_y)*final_width/width+10) for (x,y) in shape]
 
     drawn_supertiles = [coord_adapt(segment) for segment in drawn_supertiles]
-    # print("b",symmetrylines)
-    try:
-        symmetrylines = [coord_adapt(line) for line in symmetrylines]
-    except:
-        pass
-    # print("a",symmetrylines)
+    print("supertiles",drawn_supertiles)
+    print("symmetries",symmetrylines)
+    symmetrylines = [coord_adapt(line) for line in symmetrylines]
+    print("symmetries",symmetrylines)
     drawn_tiles = [coord_adapt(poly) for poly in drawn_tiles]
     filled_tiles = [coord_adapt(poly) for poly in filled_tiles]
     facefull_tiles = [coord_adapt(poly) for poly in facefull_tiles]
     faceorifull_tiles = [coord_adapt(poly) for poly in faceorifull_tiles]
     unused_tiles = [coord_adapt(poly) for poly in unused_tiles]
-    
+
+    print("tiles",drawn_tiles)
     if("pygame"):
         pygame.init()
         surf = pygame.Surface((final_width+20, final_height+20), pygame.SRCALPHA)
@@ -338,7 +343,7 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
         pygame.image.save(totalsurf,path+polyname+"@"+tilingname+".png")
     if("svg"):
         filename = outputfolder("_results","svg")+polyname+"@"+tilingname
-        svg = svgwrite.Drawing(filename+'.svg', profile='tiny',height=final_width+20, width=final_height+20)
+        svg = svgwrite.Drawing(filename+'.svg', profile='tiny',height=final_width+40, width=final_height+40)
         
         for poly in filled_tiles:
             # print("poly:",poly)
@@ -351,17 +356,40 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
             svg.add(svg.polygon(poly, fill=color))
         for poly in unused_tiles:
             xx,yy=centerpoint(poly)
-            svg.add(svg.text.TSpan("X",x=xx,y=yy))
-        for poly in drawn_tiles:
-            svg.add(svg.line(*line, stroke="black", stroke_width=2))
+            svg.add(svg.line((xx-15,yy-15),(xx+15,yy+15), stroke="black", stroke_width=2))
+            svg.add(svg.line((xx+15,yy-15),(xx-15,yy+15), stroke="black", stroke_width=2))
+        for line in drawn_tiles:
+            print("tile line:",line)
+            svg.add(svg.polygon(line, fill="none",stroke="black", stroke_width=2))
+        # for line in drawn_supertiles:
+        #     print("supertile line:",line)
+        #     svg.add(svg.polyline(line, stroke="green", stroke_width=16))
+        drawn_supertiles = list(set(tuple(liste) for liste in drawn_supertiles))
+        print("supertile:", drawn_supertiles)
+
         for line in drawn_supertiles:
-            svg.add(svg.line(*line, stroke="black", stroke_width=4))
+            print("tile line:",line)
+            svg.add(svg.polygon(line, fill="none",stroke="black", stroke_width=8))
+
+        # supertile_border_segments = list(set((point for line in drawn_supertiles for point in line)))
+        # svg.add(svg.polygon(supertile_border_segments, fill="none",stroke="green", stroke_width=8))
+        #TODO: take the center and reorder them to make a polygon
+
+        # supertile = list(drawn_supertiles.pop(0))
+        # while(drawn_supertiles):
+        #     for index,line in enumerate(drawn_supertiles):
+        #         if(distance(line[0], supertile[-1])<5):
+        #             print(distance(line[0], supertile[-1]),line[0], supertile[-1])
+        #             drawn_supertiles.pop(index)
+        #             supertile.append(line[1])
+
+
         try:
             for index,line in enumerate(symmetrylines):
                 b=(255,255,0,0)
                 svg.add(svg.line(*line, stroke="rgb(0,128,288)", stroke_width=int(9*ratio)))
-                svg.add(svg.circle(center=line[0], stroke="rgb(0,128,288)",r=12*ratio*ratio))
-                svg.add(svg.circle(center=line[1], stroke="rgb(0,128,288)",r=12*ratio*ratio))
+                svg.add(svg.circle(center=line[0], fill="rgb(0,128,288)",r=12*ratio*ratio))
+                svg.add(svg.circle(center=line[1], fill="rgb(0,128,288)",r=12*ratio*ratio))
         except:
             pass
         svg.save()
