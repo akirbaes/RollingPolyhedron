@@ -67,9 +67,7 @@ def is_roller(tiling,tilingname,net,polyname):
     borders=generate_supertile_coordinate_helpers(tiling,tilingname)
     #print(borders)
     classes, transformations, groups = CFOClassGenerator.generate_CFO_classes(tiling, net, polyname, tilingname, None)
-    # print("Classes:",classes)
-    # print("Transformations:",transformations)
-    # print("Groups:",groups)
+    # print("Classes:%s\nTransformations:%s\nGroups:%s",%(classes,transformations,groups)
     """Turn class transformation into integers"""
     if transformations!=0:
         cts = set()
@@ -82,30 +80,27 @@ def is_roller(tiling,tilingname,net,polyname):
                 axiscoords = borders[rotation]
                 startid = CFOClassGenerator.cfo_class_index(classes, cfo)
                 endid = CFOClassGenerator.cfo_class_index(classes, endcfo)
-                # if(startid==endid):
-                #     print(startid,endid)
-                #     print("So those are in")
-                #     exit()
                 cts.add((startid,endid,axiscoords))
                 ctsd.setdefault(startid,set())
                 ctsd[startid].add((endid,axiscoords))
-        print("ctsd",ctsd)
+        # print("Class Transformations with Directions:",ctsd)
 
         tiling_sides = set(len(n) for n in tiling.values())
         poly_sides = set(len(n) for n in net.values())
         incompatible = len(tiling_sides-poly_sides)
         all_data = [dict() for x in groups]
         stability = [False]*len(groups)
-        has_image = False
+
         """For every group, explore the transformations up to N supertiles away to build symmetry vectors"""
         for groupindex,group in enumerate(groups):
             # print(groupindex,group)
             startingstate = group[0]
 
-            if startingstate not in ctsd:
+            if startingstate not in ctsd: #Doesn't leave, doesn't move
+                explored={((startingstate,0,0))}
                 continue
             N=len(group)
-            print("Group %i/%i"%(groupindex,len(groups)),"N=",N)
+            # print("Group %i/%i"%(groupindex,len(groups)),"N=",N)
 
             symmetries = []
             min_symmetries = []
@@ -136,10 +131,8 @@ def is_roller(tiling,tilingname,net,polyname):
                             elif((len(min_symmetries)>0 or sqrdist((nx,ny))<=max(sqrdist(sym) for sym in min_symmetries)) and [nx,ny] not in min_symmetries):
                                 min_symmetries+=[[nx,ny]]
                                 #print(symmetries)
-
                                 matrix = numpy.array(min_symmetries)
                                 #print("Made",symmetries)
-                                # lambdas, V = numpy.linalg.eig(matrix.T)
                                 _, inds = sympy.Matrix(matrix).T.rref()
                                 while((len(inds)<len(min_symmetries))):
                                     #print("Syms",symmetries)
@@ -155,9 +148,6 @@ def is_roller(tiling,tilingname,net,polyname):
                                             break
                                     matrix = numpy.array(min_symmetries)
                                     _, inds = sympy.Matrix(matrix).T.rref()
-                                #print(symmetries)
-
-                            #symmetries.add((x+dx,y+dy))
                         if (next_st,x+dx,y+dy) not in explored and -N<=x+dx<=N and -N<=y+dy<=N:
                             to_explore.insert(0,(next_st,x+dx,y+dy,s+1))
 
@@ -165,7 +155,6 @@ def is_roller(tiling,tilingname,net,polyname):
                         print("Break early found minimal symmetry")
                         to_explore = []
                         break
-            # print("Symmetries:",symmetries)
             print("Min Symmetries:",min_symmetries)
             all_data[groupindex]["symmetry_vectors"]=min_symmetries
             if(len(min_symmetries)<=1):
@@ -175,12 +164,14 @@ def is_roller(tiling,tilingname,net,polyname):
                 else:
                     all_data[groupindex]["type"]="area"
                 continue
-            """mx = min(x for (x,y) in min_symmetries+[(0,0)])
-            my = min(y for (x,y) in min_symmetries+[(0,0)])
-            Mx = max(x for (x,y) in min_symmetries+[(0,0)])
-            My = max(y for (x,y) in min_symmetries+[(0,0)])
-            N = max(max(abs(x),abs(y)) for (x,y) in min_symmetries)+1
-            coordinates = {(i, j): set() for i in range(mx, Mx+1, 1) for j in range(my, My+1, 1)}"""
+            #TODO remove
+            # Naïve fill:
+            # mx = min(x for (x,y) in min_symmetries+[(0,0)])
+            # my = min(y for (x,y) in min_symmetries+[(0,0)])
+            # Mx = max(x for (x,y) in min_symmetries+[(0,0)])
+            # My = max(y for (x,y) in min_symmetries+[(0,0)])
+            # N = max(max(abs(x),abs(y)) for (x,y) in min_symmetries)+1
+            # coordinates = {(i, j): set() for i in range(mx, Mx+1, 1) for j in range(my, My+1, 1)}
             filled_supertiles = set()
             to_explore = [(startingstate,0,0)]
             explored = set()
@@ -190,7 +181,7 @@ def is_roller(tiling,tilingname,net,polyname):
                 borderm = max(border1, border2)
                 return borders<=value<=borderm
 
-            def lines_to_fill(points, y):
+            def lines_to_fill(points, y): #TODO Remove
                 xes = []
                 for i in range(4):
                     segment = points[i], points[(i+1)%4]
@@ -222,7 +213,7 @@ def is_roller(tiling,tilingname,net,polyname):
                 while start<end:
                     yield(start)
                     start+=step
-            def fill_parallelogram_opt(vec1, vec2):
+            def fill_parallelogram_opt(vec1, vec2): #TODO remove
                 #http://alienryderflex.com/polygon_fill/
                 points = (0.5,0.5),(vec1[0]+0.5,vec1[1]+0.5),(vec1[0]+vec2[0]+0.5,vec1[1]+vec2[1]+0.5), (vec2[0]+0.5,vec2[1]+0.5)
                 points = (0,0),vec1,(vec1[0]+vec2[0],vec1[1]+vec2[1]), vec2
@@ -270,7 +261,6 @@ def is_roller(tiling,tilingname,net,polyname):
                 to_remove = set()
                 pointslist = tuple(points)
                 for index,pt in enumerate(pointslist):
-
                     symmetries = tuple(f(pt,v) for f in (ptAdd,ptSub) for v in (vec1,vec2)) + tuple(f1(f2(pt,vec1),vec2) for f1 in (ptAdd,ptSub) for f2 in (ptAdd,ptSub))
                     # symmetries = tuple(f1(f2(pt,v1),v2) for f1 in (ptAdd,ptSub) for f2 in (ptAdd,ptSub) for v1,v2 in ((vec1,vec2),(vec1,(0,0)),(0,0),vec2))
                     #symmetries = ptAdd(pt,vec1), ptSub(pt,vec1), ptAdd(pt,vec2), ptSub(pt,vec2)
