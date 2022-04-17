@@ -9,6 +9,7 @@ import pygame
 from _libs.GeometryFunctions import centerpoint, distance, psign, ptAdd, ptSub
 from _libs.RollyPoint import RollyPoint
 from _libs.SupertileCoordinatesGenerator import supertile_center, yield_insides, yield_borders
+from _resources.symmetry_classes.poly_symmetries import canon_fo, canon_face
 
 
 def generate_stability_image(tilingname,polyname,tiling,polyhedron,hexborders,type,stable_spots):
@@ -177,7 +178,7 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
     EDGESIZE = 100
     p2 = RollyPoint(0 + EDGESIZE, 0)
     startcell = list(classes[group[0]])[0][0]
-    cx,cy = supertile_center(tiling, startcell, p1, p2, precision=0.1)
+    cx,cy = supertile_center(tiling, startcell, p1, p2, precision=7)
 
     faces_withsides = [[] for x in range(13)]
     for face,neigh in polyhedron.items():
@@ -185,7 +186,7 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
 
     #1: determine the shape and position of every cell IRT the supertile center
     cells_pos = dict()
-    for cell, pa, pb, cgon, ccenter in yield_insides(tiling,startcell,p1,p2,precision=0.1):
+    for cell, pa, pb, cgon, ccenter in yield_insides(tiling,startcell,p1,p2,precision=7):
         cells_pos[cell]=[(x-cx,y-cy) for (x,y) in cgon]
 
     neighbour_pos = dict()
@@ -193,9 +194,9 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
     # 2: determine the position of neighbouring supertiles in order to create the coords
     # and the borders of the supertile IRT the supertile center
     neighbour_points_set = set()
-    for cell, nextcellid, cgon, nextcgon, pa, pb in yield_borders(tiling, startcell, p1, p2, precision=0.1):
+    for cell, nextcellid, cgon, nextcgon, pa, pb in yield_borders(tiling, startcell, p1, p2, precision=7):
         nextcell, nextid = nextcellid
-        neigh = supertile_center(tiling, nextcell, pa, pb, precision=0.1)
+        neigh = supertile_center(tiling, nextcell, pa, pb, precision=7)
         neighcoord = hexborders[(cell,nextcellid)]
         neighbour_pos[neighcoord]=neigh
         supertile_border_segments.append([(x-cx,y-cy) for (x,y) in nextcgon[0:2]])
@@ -230,11 +231,19 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
     facefull_tiles = list()
     faceorifull_tiles = list()
     unused_tiles = list()
+    compatible_stable_tiles = list()
+    used_stable_tiles = list()
 
     min_x=0
     min_y=0
     max_x=0
     max_y=0
+    used_fo = set((f,o) for explored_classes in explored.keys() for classid in explored_classes for (c,f,o) in classes[classid])
+    used_faces = set(f for (f,o) in used_fo)
+    used_faces_withsides = [[] for x in range(13)]
+    for face in used_faces:
+        neigh = polyhedron[face]
+        used_faces_withsides[len(neigh)].append(face)
 
     for coordinates,eclasses in explored.items():
         hcoordx,hcoordy = coordinates
@@ -283,6 +292,18 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
             # print("Faces with",len(polygon),"sides:",faces_withsides[len(polygon)])
             if len(faces_withsides[len(polygon)])==0:
                 unused_tiles.append(polygon)
+            else:
+                # canon_reached_fo = set(canon_fo(polyname,f,o) for (f,o) in reached_fo)
+                # if all((canon_fo(polyname,f,o) in canon_reached_fo) for f in faces_withsides[len(polygon)] for o in range(len(polygon))):
+                #     compatible_stable_tiles.append((polygon))
+                # if all((canon_fo(polyname,f,o) in canon_reached_fo) for f in used_faces_withsides[len(polygon)] for o in range(len(polygon))):
+                #     used_stable_tiles.append((polygon))
+                canon_reached_faces = set(canon_face(polyname,f) for (f,o) in reached_fo)
+                if all((canon_face(polyname,f) in canon_reached_faces) for f in faces_withsides[len(polygon)]):
+                    compatible_stable_tiles.append((polygon))
+                if all((canon_face(polyname,f) in canon_reached_faces) for f in used_faces_withsides[len(polygon)]):
+                    used_stable_tiles.append((polygon))
+
         # if(polyname=="cube"):
         #     input("cube fo |%s|"%str(reached_fo))
         for segment in supertile_border_segments:
@@ -298,6 +319,8 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
             min_y = min(min_y,min(y for (x,y) in segment))
             max_x = max(max_x,max(x for (x,y) in segment))
             max_y = max(max_y,max(y for (x,y) in segment))
+
+
 
     # print(supertile_border_segments)
     # print(explored)
@@ -333,6 +356,8 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
     facefull_tiles = [coord_adapt(poly) for poly in facefull_tiles]
     faceorifull_tiles = [coord_adapt(poly) for poly in faceorifull_tiles]
     unused_tiles = [coord_adapt(poly) for poly in unused_tiles]
+    compatible_stable_tiles = [coord_adapt(poly) for poly in compatible_stable_tiles]
+    used_stable_tiles = [coord_adapt(poly) for poly in used_stable_tiles]
 
     print("tiles",drawn_tiles)
     if("pygame"):
@@ -425,12 +450,12 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
         #     print("supertile line:",line)
         #     svg.add(svg.polyline(line, stroke="green", stroke_width=16))
         drawn_supertiles = list(set(tuple(liste) for liste in drawn_supertiles))
-        print("supertile:", drawn_supertiles)
+        # print("supertile:", drawn_supertiles)
 
         color = "rgb(128,0,0)","rgb(0,128,0)","rgb(0,0,128)"
         counter = 0
         for line in drawn_supertiles:
-            print("tile line:",line)
+            # print("tile line:",line)
             svg.add(svg.polygon(line, fill="none",stroke="black", stroke_width=8))
             counter=(counter+1)%3
         for poly in drawn_tiles:
@@ -453,13 +478,21 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
         #             drawn_supertiles.pop(index)
         #             supertile.append(line[1])
 
+        for poly in compatible_stable_tiles:
+            svg.add(svg.circle(center=centerpoint(poly), fill="black", r=16))
+        if not all(poly in compatible_stable_tiles for poly in used_stable_tiles):
+            input(polyname+" "+tilingname+" has conditional stability on\n    "+str(used_stable_tiles))
+        for poly in used_stable_tiles:
+            if(poly not in compatible_stable_tiles):
+                p,w = ptSub(centerpoint(poly),(16,16)),(32,32)
+                svg.add(svg.rect(p,w, fill="black"))
         #scour removes this color: "rgb(0,128,288)"
         try:
             for index,line in enumerate(symmetrylines):
-                svg.add(svg.line(*line, stroke="royalblue", stroke_width=int(9*ratio)))
-                svg.add(svg.circle(center=line[1], fill="royalblue",r=12*ratio*ratio))
+                svg.add(svg.line(*line, stroke="royalblue", stroke_width=int(9)))
+                svg.add(svg.circle(center=line[1], fill="royalblue",r=12))
 
-            svg.add(svg.circle(center=symmetrylines[0][0], fill="royalblue", r=12 * ratio * ratio))
+            svg.add(svg.circle(center=symmetrylines[0][0], fill="royalblue", r=12))
         except:
             pass
         svg.save()

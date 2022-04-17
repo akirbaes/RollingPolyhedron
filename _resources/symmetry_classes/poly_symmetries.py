@@ -8086,5 +8086,22 @@ def canon_fo(polyname,face,orientation):
                 #print("Found a symmetry!")
                 return min(sym)
     except:
-        print("No symmetry info for this poly")
+        print("No symmetry info for "+polyname)
     return face, orientation
+    
+def canon_face(polyname, face):
+    try:
+        symmetries = poly_symmetries[polyname]
+        for sym in symmetries:
+            for f,o in sym:
+                if face==f:
+                    return min(sym)[0]
+    except:
+        print("No symmetry info for "+polyname)
+    return face
+    
+"""
+if __name__ == "__main__":
+    for poly,symmetries in poly_symmetries.items():
+        for face,___ in symmetries:
+            if(canon_fo(poly,face,ori) for orientation in """
