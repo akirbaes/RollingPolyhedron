@@ -67,7 +67,10 @@ def is_roller(tiling,tilingname,net,polyname):
     borders=generate_supertile_coordinate_helpers(tiling,tilingname)
     #print(borders)
     classes, transformations, groups = CFOClassGenerator.generate_CFO_classes(tiling, net, polyname, tilingname, None)
-    # print("Classes:%s\nTransformations:%s\nGroups:%s",%(classes,transformations,groups)
+    # print("Classes of connected inside states:",classes)
+    # print("Transformations between states:",transformations)
+    # print("Connected classes Groups:",groups)
+    exploreds = []
     """Turn class transformation into integers"""
     if transformations!=0:
         cts = set()
@@ -89,8 +92,8 @@ def is_roller(tiling,tilingname,net,polyname):
         poly_sides = set(len(n) for n in net.values())
         incompatible = len(tiling_sides-poly_sides)
         all_data = [dict() for x in groups]
-        stability = [False]*len(groups)
-
+        planeroller = [False]*len(groups)
+        has_image = False
         """For every group, explore the transformations up to N supertiles away to build symmetry vectors"""
         for groupindex,group in enumerate(groups):
             # print(groupindex,group)
@@ -159,6 +162,9 @@ def is_roller(tiling,tilingname,net,polyname):
             all_data[groupindex]["symmetry_vectors"]=min_symmetries
             if(len(min_symmetries)<=1):
                 print("Not enough symmetries to cover the plane")
+                exploreds.append(explored)
+                #########<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Do some manipulations to get the output here?
+
                 if len(min_symmetries)==1:
                     all_data[groupindex]["type"]="band"
                 else:
@@ -377,7 +383,7 @@ def is_roller(tiling,tilingname,net,polyname):
                     is_roller = False
             if(is_roller):
                 print(tilingname,polyname,"%i/%i"%(groupindex+1,len(groups)),"is a roller in -%i:%i"%(N,N))
-                stability[groupindex]=True
+                planeroller[groupindex]=True
                 type = "roller"
                 all_data[groupindex]["type"]= type
             else:
@@ -385,7 +391,7 @@ def is_roller(tiling,tilingname,net,polyname):
                 for coord,states in explored_states.items():
                     if not(CFOClassGenerator.has_all_compatible_tiles(states, classes, tiling, net)):
                         is_quasi_roller = False
-                stability[groupindex]=is_quasi_roller
+                planeroller[groupindex]=is_quasi_roller
                 print(tilingname,polyname,"%i/%i"%(groupindex+1,len(groups)),"is not a roller in -%i:%i"%(N,N))
                 if(is_quasi_roller):
                     type="quasi_roller"
@@ -398,16 +404,16 @@ def is_roller(tiling,tilingname,net,polyname):
                     CFOClassGenerator.prettyprint_012(graph)
                     #input()
             if(GENERATE_PROOF):
-                if not any(stability[:groupindex]) or DUPLICATE_IMAGES:
+                if not any(planeroller[:groupindex]) or DUPLICATE_IMAGES:
                     generate_image(tiling, net, tilingname, polyname, classes, group, groups, borders, min_symmetries, explored_states, type)
         """Done with all the groups"""
-        is_stable = not False in stability
+        is_plane = not False in planeroller
         results = dict()
         results["all_data"]=all_data
-        results["stability"]=is_stable
-        if True in stability and not incompatible:
+        results["planeroller"]=is_plane
+        if True in planeroller and not incompatible:
             results["type"]="roller"
-        elif True in stability and incompatible:
+        elif True in planeroller and incompatible:
             results["type"]="quasi_roller"
         elif "hollow" in (result["type"] for result in all_data if "type" in result.keys()):
             results["type"]="hollow"
@@ -433,7 +439,7 @@ def is_roller(tiling,tilingname,net,polyname):
         #   if every representative is roller, then the tile is stable
 
         #[pos][c] is stable if it is equal to maxfo[c]
-        if True in stability:
+        if True in planeroller:
             min_size_area = \
             min((len(res["exploration"]), index) for index, res in enumerate(all_data) if "exploration" in res.keys())[
                 1]
@@ -444,14 +450,14 @@ def is_roller(tiling,tilingname,net,polyname):
             for index,group in enumerate(groups):
                 for clas in group:
                     for c,f,o in classes[clas]:
-                        cell_stability[c] += stability[index]
+                        cell_stability[c] += planeroller[index]
             for index, result in enumerate(all_data):
                 if "exploration" in result.keys():
                     for pos, group in result["exploration"].items():
                         for clas in group:
                             for c, f, o in classes[clas]:
                                 try:
-                                    fill_area[pos][c] += stability[index]
+                                    fill_area[pos][c] += planeroller[index]
                                 except KeyError:
                                     pass
 
@@ -471,6 +477,33 @@ def is_roller(tiling,tilingname,net,polyname):
             results["CFO_classes"]=classes
             results["CFO_class_groups"]=groups
             results["class_to_supertile_coordinates"]=ctsd
+        elif results["type"]=="hollow":
+            pass
+            #find a common pattern (or largest) in all patterns
+        elif results["type"]=="band":
+            #take a slice from one vector
+            pass
+
+        elif results["type"]=="area":
+            #check every reached tile in the exploratory phase
+            reachable_areas = []
+            reached_states = []
+            for explored_areas in exploreds:
+                reachable_areas.append(set((c,x,y) for (c,f,o) in classes[st] for (st,x,y) in explored_areas))
+                reached_states.append(set((c,f,o,x,y) for (c,f,o) in classes[st] for (st,x,y) in explored_areas))
+            i=0;
+            merged_states = []
+            while reachable_areas:
+                ra = reachable_areas.pop(0)
+                rs = reached_states.pop(0)
+                while ra in reachable_areas:
+                    index = reachable_areas.index(ra)
+                    reachable_areas.pop(index)
+                    rs.add(reached_states.pop(index))
+                merged_states.append(rs)
+
+
+
         return results
     else:
         if(classes):
