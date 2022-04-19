@@ -493,6 +493,7 @@ def is_roller(tiling,tilingname,net,polyname):
                 reached_states.append(set((c,f,o,x,y) for (c,f,o) in classes[st] for (st,x,y) in explored_areas))
             i=0;
             merged_states = []
+            merged_areas = []
             while reachable_areas:
                 ra = reachable_areas.pop(0)
                 rs = reached_states.pop(0)
@@ -501,6 +502,21 @@ def is_roller(tiling,tilingname,net,polyname):
                     reachable_areas.pop(index)
                     rs.add(reached_states.pop(index))
                 merged_states.append(rs)
+                merged_areas.append(ra)
+            merged_states_per_tile = dict()
+            for c,x,y in merged_areas:
+                for _c,f,o,_x,_y in merged_states:
+                    if c==_c and x==_x and y==_y:
+                        merged_states_per_tile.get((c,x,y),[]).append(f,o)
+            faces_withsides = [[] for x in range(13)]
+            for face,neigh in net.items():
+                faces_withsides[len(neigh)].append(face)
+            stable_tiles = set()
+            for (c,x,y), states in merged_states_per_tile.items():
+                sides = len(tiling[c])
+                if len(set(states))==len(faces_withsides[sides]*sides):
+                    stable_tiles.add((c,x,y))
+
 
 
 
