@@ -516,7 +516,7 @@ def is_roller(tiling,tilingname,net,polyname):
                 sides = len(tiling[c])
                 if len(set(states))==len(faces_withsides[sides]*sides):
                     stable_tiles.add((c,x,y))
-
+            #TODO the same with only one connected group for face-completeness
 
 
 
