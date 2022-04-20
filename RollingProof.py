@@ -7,7 +7,7 @@ import sympy
 
 from _libs.RollingProofImageGen import generate_stability_image, generate_image
 
-GENERATE_PROOF = True
+GENERATE_PROOF = False
 GENERATE_STAB = False
 UPDATE_RESULTS = False
 DUPLICATE_IMAGES = False
@@ -163,7 +163,7 @@ def is_roller(tiling,tilingname,net,polyname):
             if(len(min_symmetries)<=1):
                 print("Not enough symmetries to cover the plane")
                 exploreds.append(explored)
-                #########<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Do some manipulations to get the output here?
+                #########<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Do some manipulations here?
 
                 if len(min_symmetries)==1:
                     all_data[groupindex]["type"]="band"
@@ -517,7 +517,8 @@ def is_roller(tiling,tilingname,net,polyname):
                 if len(set(states))==len(faces_withsides[sides]*sides):
                     stable_tiles.add((c,x,y))
             #TODO the same with only one connected group for face-completeness
-
+            if(stable_tiles):
+                input("Found stable tiles for area %s[on]%s\n"%(polyname,tilingname)+str(stable_tiles))
 
 
         return results
