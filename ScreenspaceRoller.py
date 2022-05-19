@@ -248,8 +248,8 @@ def make_timestamp():
 
 def cell_match(tiling, previous_case, newcaseid):
     """tiling = dict
-previous_case = int
-newcaseid = tuple"""
+    previous_case = int
+    newcaseid = tuple"""
     current_case, id = newcaseid
     # Match mirror id first
     for index, pc in enumerate(tiling[current_case]):

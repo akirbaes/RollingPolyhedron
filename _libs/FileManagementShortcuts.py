@@ -1,8 +1,9 @@
 import os
 import pickle
 
-def outputfolder(*parts):
-    print(parts)
+def outputfolder(*parts,verbose=False):
+    if(verbose):
+        print(parts)
     name = os.sep.join(parts) + os.sep
     try:
         os.makedirs(name, exist_ok=True)
