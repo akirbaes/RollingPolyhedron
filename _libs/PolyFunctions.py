@@ -1,3 +1,5 @@
+"""Draw flat polygonal faces"""
+
 from math import atan2
 from _libs.GeometryFunctions import *
 from _libs.GeometryFunctions import RollyPoint

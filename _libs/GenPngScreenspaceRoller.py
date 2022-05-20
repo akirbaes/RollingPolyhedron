@@ -1,3 +1,5 @@
+"""Generate image for screenspace (rectangular area) exploration"""
+
 import sys
 sys.path.append("..")
 import pygame

@@ -1,3 +1,6 @@
+"""Regroup rolling states (cfo) in equivalence classes per supertile
+then explore their connections"""
+
 # from symmetry_classes.poly_symmetries import poly_symmetries
 # import symmetry_classes.symmetry_functions
 # def canon_fo(polyname,face,orientation):

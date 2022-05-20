@@ -1,3 +1,5 @@
+"""Helper functions to manipulate supertiles and the polygons inside"""
+
 from statistics import mean
 
 from _libs.GeometryFunctions import xgon, roundedcenter

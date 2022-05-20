@@ -1,3 +1,4 @@
+"""Generate image for rolling proof (minimal explored area)"""
 import sys
 sys.path.append("..")
 import os
