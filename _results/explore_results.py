@@ -31,7 +31,7 @@ rollingres = {
                         'exploration':{
                             (x,y):{roll_class}
                         },
-                        "symmetry_vectors":[],
+                        "symmetry_vectors (0 to 2)":[xy],
                         "type":str
                     }
                 ],
