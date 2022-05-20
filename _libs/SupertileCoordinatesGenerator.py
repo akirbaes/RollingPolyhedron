@@ -47,7 +47,7 @@ def yield_borders(tiling, startcell, p1, p2, precision=7):
                 visits.append((nextcell, pa, pb))
 
 
-"""
+"""#TODO remove
 def yield_outsides(tiling,startcell,p1,p2,precision=7):
     visited_areas = list()
     visits = [(startcell, p1, p2)]
@@ -196,3 +196,6 @@ def generate_supertile_coordinate_helpers(tiling, tilingname):
 
         neighbours[bordercells] = new_coords
     return neighbours
+
+#TODO: map screenspace that generates a dict that maps cell,(x,y) to a polygon
+#Based on GenPngScreenspaceRoller's map screenspace
