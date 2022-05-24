@@ -431,7 +431,8 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
         # pygame.image.save(totalsurf,path+polyname+"@"+tilingname+" %i"%(groups.index(group)+1)+".png")
         pygame.image.save(totalsurf,path+polyname+"@"+tilingname+".png")
     if("svg"):
-        filename = outputfolder("_results","svg")+polyname+"@"+tilingname+'.svg'
+        tilingshortname = tilingname.split()[0]
+        filename = outputfolder("_results","svg")+polyname+"@"+tilingshortname+'.svg'
         svg = svgwrite.Drawing(filename, profile='tiny',height=final_width+20, width=final_height+20)
         
         for poly in filled_tiles:
