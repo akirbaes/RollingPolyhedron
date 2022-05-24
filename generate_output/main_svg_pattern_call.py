@@ -1,6 +1,11 @@
 import pickle
 import pprint
 import sys
+
+from _libs import CFOClassGenerator
+from _libs.SupertileCoordinatesGenerator import generate_supertile_coordinate_helpers
+from _libs.RollingProofImageGen import generate_image
+
 sys.path.append("../..")
 from _resources.regular_faced_polyhedron_nets import all_nets
 from _resources.uniform_tiling_supertiles import uniform_tilings as all_tilings
@@ -45,20 +50,59 @@ rollingres = {
 
 pprint.pprint(rollingres)
 
-from _libs.RollingProofImageGen import generate_image
+def determine_stable_spots(all_data):
+    min_size_area = \
+        min((len(res["exploration"]), index) for index, res in enumerate(all_data) if
+            "exploration" in res.keys())[
+            1]
+    fill_area = {pos: [0 for cell in tiling] for pos in all_data[min_size_area]["exploration"]}
+    maxfo = [sum(len(n) for n in net.values() if len(n) == len(neigh)) for tile, neigh in
+             sorted(tiling.items())]
+    cell_stability = [0 for cell in tiling]
+    for index, group in enumerate(groups):
+        for clas in group:
+            for c, f, o in classes[clas]:
+                cell_stability[c] += all_data[index] in ("quasi_roller","roller")
+    for index, result in enumerate(all_data):
+        if "exploration" in result.keys():
+            for pos, group in result["exploration"].items():
+                for clas in group:
+                    for c, f, o in classes[clas]:
+                        try:
+                            fill_area[pos][c] += all_data[index] in ("quasi_roller","roller")
+                        except KeyError:
+                            pass
+
+    stable_spots = {pos: [counter == maxfo[cell] for cell, counter in enumerate(celldata)] for pos, celldata in
+                    fill_area.items()}
+    stable_spots = {
+        pos: [cell_stability[cell] == maxfo[cell] and maxfo[cell] != 0 for cell in range(len(tiling))] for pos
+        in fill_area}
 #def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,hexborders,symmetries,explored,type,stable_spots = []):
+
 if __name__ == "__main__":
-    print("Test")
-    print(tiling)
     for (tilingname,polyname),data in rollingresults.items():
+        tiling = all_tilings[tilingname]
+        net = all_nets[polyname]
+        if not data: continue
+        if data.get("CFO_class_groups",None)==None: continue
         borders = generate_supertile_coordinate_helpers(tiling, tilingname)
         classes, transformations, groups = CFOClassGenerator.generate_CFO_classes(tiling, net, polyname, tilingname, None)
 
         connected_classes = data["CFO_class_groups"]
         equivalent_states = data["CFO_classes"]
-        for connected_data in data["all_data"]:
-            explored_tiles = connected_data["exploration"]
-            symmetry_vectors = connected_data["symmetry_vectors"]
+
         adjacent_classes = data["class_to_supertile_coordinates"]
 
+        stable_spots = determine_stable_spots(data["all_data"])
 
+        for group_index,connected_data in enumerate(data["all_data"]):
+            if not connected_data: continue
+            type = connected_data["type"]
+            if type not in ("quasi_roller","roller"): continue
+            explored_tiles = connected_data["exploration"]
+            symmetry_vectors = connected_data["symmetry_vectors"]
+
+
+            generate_image(tiling, net, tilingname, polyname, classes, groups[group_index], groups, borders, symmetry_vectors,
+                       explored_tiles, type,group_index, stable_spots)

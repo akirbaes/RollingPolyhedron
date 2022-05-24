@@ -173,7 +173,7 @@ def scour_svg(filename):
     outputfile = open(filename.replace("svg"+os.sep,"svg"+os.sep+"_"), 'wb')
     start(scour_options, inputfile, outputfile)
 
-def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,hexborders,symmetries,explored,type,stable_spots = []):
+def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,hexborders,symmetries,explored,type,groupid,stable_spots = []):
     print("Symmetries:",symmetries)
     p1 = RollyPoint(0, 0)
     EDGESIZE = 100
@@ -239,7 +239,9 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
     min_y=0
     max_x=0
     max_y=0
-    used_fo = set((f,o) for explored_classes in explored.keys() for classid in explored_classes for (c,f,o) in classes[classid])
+    print("Explored classes:",list(explored.values()))
+    print("Existing classes:",classes)
+    used_fo = set((f,o) for explored_classes in explored.values() for classid in explored_classes for (c,f,o) in classes[classid])
     used_faces = set(f for (f,o) in used_fo)
     used_faces_withsides = [[] for x in range(13)]
     for face in used_faces:
@@ -361,7 +363,7 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
     used_stable_tiles = [coord_adapt(poly) for poly in used_stable_tiles]
 
     print("tiles",drawn_tiles)
-    if("pygame"):
+    if(False and "pygame"):
         pygame.init()
         surf = pygame.Surface((final_width+20, final_height+20), pygame.SRCALPHA)
         surf.fill((255,255,255))
@@ -432,7 +434,9 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
         pygame.image.save(totalsurf,path+polyname+"@"+tilingname+".png")
     if("svg"):
         tilingshortname = tilingname.split()[0]
-        filename = outputfolder("_results","svg")+polyname+"@"+tilingshortname+'.svg'
+        filename = outputfolder("..","_results","svg")+polyname+"@"+tilingshortname+"€"+str(groupid)+'.svg'
+        filename = outputfolder("..","_results","svg")+polyname+"@"+tilingshortname+'.svg'
+        print("Saving to",filename)
         svg = svgwrite.Drawing(filename, profile='tiny',height=final_width+20, width=final_height+20)
         
         for poly in filled_tiles:
@@ -483,7 +487,8 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
         for poly in compatible_stable_tiles:
             svg.add(svg.circle(center=centerpoint(poly), fill="black", r=16))
         if not all(poly in compatible_stable_tiles for poly in used_stable_tiles):
-            input(polyname+" "+tilingname+" has conditional stability on\n    "+str(used_stable_tiles))
+            print(polyname+" "+tilingname+" has conditional stability on\n    "+str(used_stable_tiles))
+            # input(polyname+" "+tilingname+" has conditional stability on\n    "+str(used_stable_tiles))
         for poly in used_stable_tiles:
             if(poly not in compatible_stable_tiles):
                 p,w = ptSub(centerpoint(poly),(16,16)),(32,32)
@@ -498,6 +503,7 @@ def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,he
         except:
             pass
         svg.save()
+        print("Saved!")
         # scour_svg(filename)
         #Scour is less good than SVGO
 
