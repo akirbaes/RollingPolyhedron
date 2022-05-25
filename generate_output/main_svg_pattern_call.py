@@ -2,7 +2,13 @@ import pickle
 import pprint
 import sys
 
+import svgwrite
+
 from _libs import CFOClassGenerator
+from _libs.FileManagementShortcuts import outputfolder
+from _libs.GenPngScreenspaceRoller import draw_polynet, draw_answer, convertToTuples
+from _libs.GeometryFunctions import xgon
+from _libs.RollyPoint import RollyPoint
 from _libs.SupertileCoordinatesGenerator import generate_supertile_coordinate_helpers
 from _libs.RollingProofImageGen import generate_image
 
@@ -79,7 +85,8 @@ def determine_stable_spots(all_data):
         pos: [cell_stability[cell] == maxfo[cell] and maxfo[cell] != 0 for cell in range(len(tiling))] for pos
         in fill_area}
 #def generate_image(tiling,polyhedron,tilingname,polyname,classes,group,groups,hexborders,symmetries,explored,type,stable_spots = []):
-
+#def draw_polynet(surf, surface2, polyhedron, startface, startorientation, p1, p2, tilingname, polyname, unusedfaces=None, svg=None):
+#def draw_answer(filename, tilingname, polyname, visits, grid, polyhedron, p1, p2, startface, startorientation, w, h, unusedfaces, svg=False):
 if __name__ == "__main__":
     for (tilingname,polyname),data in rollingresults.items():
         tiling = all_tilings[tilingname]
@@ -95,7 +102,7 @@ if __name__ == "__main__":
         adjacent_classes = data["class_to_supertile_coordinates"]
 
         stable_spots = determine_stable_spots(data["all_data"])
-
+        # input(classes)
         for group_index,connected_data in enumerate(data["all_data"]):
             if not connected_data: continue
             type = connected_data["type"]
@@ -106,3 +113,33 @@ if __name__ == "__main__":
 
             generate_image(tiling, net, tilingname, polyname, classes, groups[group_index], groups, borders, symmetry_vectors,
                        explored_tiles, type,group_index, stable_spots)
+            c,f,o = list(classes[groups[group_index][0]])[0]
+
+            area = (-200, -200, 1000, 1000)
+            area2 = (0, 0, 800, 800)
+            xx = (area[0] + area[2]) / 2
+            yy = (area[1] + area[3]) / 2
+            p1 = RollyPoint(xx, yy)
+            EDGESIZE = 50
+            p2 = RollyPoint(xx + EDGESIZE, yy)
+            precision = 7
+
+            faces = set(net.keys())
+            used_faces=set()
+            for explored_classes in explored_tiles.values():
+                for eclassid in explored_classes:
+                    for c,f,o in classes[eclassid]:
+                        used_faces.add(f)
+            unused_faces = faces-used_faces
+
+            tilingshortname = tilingname.split()[0]
+            filename = outputfolder("..","_results","svgnet")+polyname+"@"+tilingshortname
+
+            dwg = svgwrite.Drawing(filename + '.svg', profile='tiny', height=800, width=800)
+
+            face = xgon(len(net[f]), p1, p2)
+            dwg.add(dwg.polygon(convertToTuples(face), fill="blue"))
+
+            draw_polynet(None, None, net,f,o,p1,p2,tilingname,polyname,unusedfaces=unused_faces,svg=dwg)
+            # draw_answer(filename, tilingname, polyname, visits, grid, polyhedron, p1, p2, startface, startorientation,w, h, unusedfaces, svg=dwg)
+            dwg.save()

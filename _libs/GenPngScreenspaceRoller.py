@@ -150,20 +150,21 @@ def draw_polynet(surf, surface2, polyhedron, startface, startorientation, p1, p2
             color1 = (255, 0, 0)
             color2 = (128, 0, 0)
         if (face != startface):
-            pygame.draw.circle(surface2, color1, (x, y), int(textsize / 2))
-            surf.blit(surface2, (0, 0))
-            pygame.draw.polygon(surface2, color1, convertToTuples(face_poly), 0)
+            if(surf):
+                pygame.draw.circle(surface2, color1, (x, y), int(textsize / 2))
+                surf.blit(surface2, (0, 0))
+                pygame.draw.polygon(surface2, color1, convertToTuples(face_poly), 0)
+                surf.blit(surface2, (0, 0))
+                surface2.fill((0, 0, 0, 0))
             if (svg):
                 svg.add(svg.polygon(convertToTuples(face_poly), fill=svgwrite.rgb(*color1, '%')))
-            surf.blit(surface2, (0, 0))
-            surface2.fill((0, 0, 0, 0))
-        pygame.draw.polygon(surf, color2, convertToTuples(face_poly), 1)
+        if(surf):pygame.draw.polygon(surf, color2, convertToTuples(face_poly), 1)
         if (svg):
             print("DFaces:", face_poly)
             svg.add(
                 svg.polyline(convertToTuples(face_poly) + convertToTuples(face_poly)[0:1], stroke="black", fill="none"))
         text = pygame.font.SysFont(None, textsize).render(str(face), True, (0, 0, 0))
-        surf.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
+        if(surf):surf.blit(text, (x - text.get_width() / 2, y - text.get_height() / 2))
 
         for x, y in face_poly:
             x = int(x)
